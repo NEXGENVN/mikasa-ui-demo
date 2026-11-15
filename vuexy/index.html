@@ -3791,6 +3791,100 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
   }
 &lt;/style&gt;
+&lt;style&gt;
+  #mikasa-vuexy-app .vx-original-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 14px;
+    text-align: center;
+  }
+  #mikasa-vuexy-app .vx-original-hero.complete {
+    background: var(--vx-green-soft);
+  }
+  #mikasa-vuexy-app .vx-original-hero h1 {
+    font-size: 22px;
+  }
+  #mikasa-vuexy-app .vx-original-summary {
+    padding: 2px 14px;
+  }
+  #mikasa-vuexy-app .vx-original-row {
+    padding: 11px 0;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid var(--vx-line);
+  }
+  #mikasa-vuexy-app .vx-original-row:last-child {
+    border-bottom: 0;
+  }
+  #mikasa-vuexy-app .vx-original-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: var(--vx-inset);
+    color: var(--vx-muted);
+    flex-shrink: 0;
+  }
+  #mikasa-vuexy-app .vx-original-label {
+    color: var(--vx-muted);
+    font-size: 11px;
+  }
+  #mikasa-vuexy-app .vx-original-row strong {
+    font-size: 13px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+  #mikasa-vuexy-app .vx-original-recorded {
+    padding: 8px 14px;
+  }
+  #mikasa-vuexy-app .vx-original-data {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 0;
+    border-top: 1px solid var(--vx-line);
+    font-size: 12px;
+  }
+  #mikasa-vuexy-app .vx-original-data &gt; span {
+    color: var(--vx-muted);
+    flex: 0 0 42%;
+  }
+  #mikasa-vuexy-app .vx-original-data strong {
+    font-weight: 500;
+    text-align: right;
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+  #mikasa-vuexy-app .vx-original-notice {
+    margin-top: 14px;
+    border-radius: 5px;
+    background: var(--vx-brand-soft);
+    color: var(--vx-brand);
+    padding: 10px;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    font-size: 11px;
+  }
+  #mikasa-vuexy-app .vx-original-code {
+    display: block;
+    overflow-wrap: anywhere;
+    font:
+      11px/1.6 ui-monospace,
+      Consolas,
+      monospace;
+    color: var(--vx-muted);
+    margin-top: 10px;
+  }
+  #mikasa-vuexy-app .vx-original-timeline h3 {
+    font-size: 13px;
+  }
+&lt;/style&gt;
 &lt;script&gt;
   (() =&gt; {
     const root = document.getElementById(&quot;mikasa-vuexy-app&quot;);
@@ -3809,8 +3903,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       confirm: &quot;Xác nhận gửi&quot;,
       sending: &quot;Theo dõi gửi tin&quot;,
       mixed: &quot;Theo dõi gửi tin&quot;,
-      waiting: &quot;Gửi tin thành công&quot;,
-      complete: &quot;Kết quả gửi tin&quot;,
+      waiting: &quot;Đang gửi tin&quot;,
+      complete: &quot;Chi tiết tin nhắn&quot;,
       oa: &quot;Chi tiết OA&quot;,
       history: &quot;Lịch sử&quot;,
       profile: &quot;Tài khoản&quot;,
@@ -3824,7 +3918,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       oa: 0,
       parent: &quot;complete&quot;,
       appearance: &quot;both&quot;,
-      reveal: true,
+      reveal: false,
       filter: &quot;all&quot;,
       search: &quot;&quot;,
       notice: &quot;&quot;,
@@ -3860,7 +3954,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       `&lt;button class=&quot;${cl} cursor-interaction&quot; type=&quot;button&quot; data-action=&quot;${action}&quot;&gt;${glyph ? icon(glyph) : &quot;&quot;}${text}&lt;/button&gt;`;
     const oaName = (i) =&gt; (i === 0 ? &quot;OA chính&quot; : `OA phụ ${i}`);
     const oaId = (i) =&gt; `90000000000000000${i + 1}`;
-    const tracking = (i) =&gt; `ba4a26d${i}-92c4-4ab8-8d20-00000000000${i + 1}`;
+    const tracking = (i) =&gt;
+      `00000000-0000-4000-8000-${String(i + 1).padStart(12, &quot;0&quot;)}`;
     const maskedPhone = () =&gt;
       `${state.phone.slice(0, 3)} •••• ${state.phone.slice(-3)}`;
     const statusBar = () =&gt;
@@ -3910,16 +4005,69 @@ html&gt;body{padding:0}&lt;/style&gt;
           [&quot;waiting&quot;, &quot;complete&quot;].includes(phase)
         )
           status = &quot;failed&quot;;
-        const seen = status === &quot;sent&quot; &amp;&amp; [0, 2].includes(i);
-        const ready =
-          status === &quot;sent&quot; &amp;&amp; phase === &quot;complete&quot; &amp;&amp; i &lt; Math.min(4, state.n);
+        const ready = status === &quot;sent&quot; &amp;&amp; phase === &quot;complete&quot;;
+        // Same sanitized records as apps/mobile/lib/dev/oa_demo_data.dart.
+        // Optional provider fields are absent unless the fixture supplies them.
+        const raw = {
+          id: tracking(i),
+          oaId: oaId(i),
+          position: i + 1,
+          product: {
+            id: &quot;00000000-0000-4000-8000-000000000100&quot;,
+            code: &quot;demo-order&quot;,
+            name: &quot;Thông báo đơn hàng&quot;,
+          },
+          phone: state.phone,
+          status:
+            status === &quot;failed&quot; ? &quot;failed&quot; : ready ? &quot;completed&quot; : &quot;processing&quot;,
+          externalStatus:
+            status === &quot;failed&quot;
+              ? &quot;failed&quot;
+              : ready
+                ? &quot;result_received&quot;
+                : status === &quot;pending&quot;
+                  ? &quot;queued&quot;
+                  : &quot;awaiting_result&quot;,
+          deliveryAccepted: status === &quot;sent&quot;,
+          failureCode: status === &quot;failed&quot; ? &quot;-118&quot; : null,
+          failureMessage:
+            status === &quot;failed&quot;
+              ? &quot;Tài khoản Zalo của người nhận không tồn tại hoặc đã bị vô hiệu hóa.&quot;
+              : null,
+          createdAt: Date.parse(&quot;2026-11-15T14:32:00-08:00&quot;),
+          updatedAt: Date.parse(&quot;2026-11-15T14:32:01-08:00&quot;),
+          result: {
+            phone: state.phone,
+            status:
+              status === &quot;failed&quot;
+                ? &quot;Gửi thất bại&quot;
+                : ready
+                  ? &quot;Đã nhận&quot;
+                  : status === &quot;pending&quot;
+                    ? &quot;Đang gửi&quot;
+                    : &quot;Đã gửi&quot;,
+            ...(ready
+              ? {
+                  ipv4: `203.0.113.${i + 1}`,
+                  ipv6: `2001:db8::${i + 1}`,
+                  port: &quot;54112&quot;,
+                  isp: &quot;Nhà mạng Demo&quot;,
+                  user_id: &quot;900000000000000000&quot;,
+                  timezone: &quot;America/Los_Angeles&quot;,
+                  time: &quot;14:32:10 15/11/2026&quot;,
+                }
+              : {}),
+          },
+        };
+        const seen = providerValue(raw.result.opened_at) !== &quot;Chưa có dữ liệu&quot;;
         return {
           i,
           status,
           seen,
           ready,
-          v4: ready &amp;&amp; i !== 2 ? `203.0.113.${18 + i}` : null,
-          v6: ready &amp;&amp; i % 2 === 0 ? `2001:db8:7a1::${18 + i}` : null,
+          v4: raw.result.ipv4 || null,
+          v6: raw.result.ipv6 || null,
+          raw,
         };
       });
     }
@@ -3940,7 +4088,7 @@ html&gt;body{padding:0}&lt;/style&gt;
             ? r.status === &quot;sent&quot; &amp;&amp; !r.seen
             : true,
       );
-      return `&lt;div class=&quot;vx-oa-list&quot;&gt;${filtered.length ? filtered.map((r) =&gt; `&lt;button class=&quot;vx-oa-row cursor-interaction&quot; type=&quot;button&quot; data-oa=&quot;${r.i}&quot; aria-label=&quot;Chi tiết ${oaName(r.i)}&quot;&gt;&lt;span class=&quot;vx-oa-avatar ${r.i === 0 ? &quot;main&quot; : &quot;&quot;}&quot;&gt;${r.i === 0 ? &quot;M&quot; : `0${r.i + 1}`}&lt;/span&gt;&lt;span class=&quot;vx-vstack&quot;&gt;&lt;span class=&quot;vx-oa-meta&quot;&gt;&lt;strong class=&quot;vx-small&quot;&gt;${oaName(r.i)}&lt;/strong&gt;${badge(r.status === &quot;sent&quot; ? (r.ready ? &quot;Có kết quả&quot; : &quot;Đã gửi&quot;) : r.status === &quot;pending&quot; ? &quot;Đang gửi&quot; : &quot;Thất bại&quot;, r.status === &quot;sent&quot; ? &quot;good&quot; : r.status === &quot;pending&quot; ? &quot;warn&quot; : &quot;bad&quot;)}&lt;/span&gt;&lt;span class=&quot;vx-oa-meta&quot;&gt;${r.status === &quot;sent&quot; ? `&lt;span class=&quot;vx-oa-read ${r.seen ? &quot;seen&quot; : &quot;&quot;}&quot;&gt;${icon(r.seen ? &quot;eye&quot; : &quot;eye-off&quot;)}${r.seen ? &quot;Đã xem · 14:32&quot; : &quot;Chưa ghi nhận xem&quot;}&lt;/span&gt;` : `&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;${r.status === &quot;pending&quot; ? &quot;Đang xử lý cặp V4/V6&quot; : &quot;Cần kiểm tra bộ mẫu&quot;}&lt;/span&gt;`}${icon(&quot;chevron-right&quot;)}&lt;/span&gt;&lt;/span&gt;&lt;/button&gt;`).join(&quot;&quot;) : &#x27;&lt;div class=&quot;vx-surface vx-panel&quot;&gt;&lt;p class=&quot;vx-copy&quot;&gt;Chưa có OA phù hợp.&lt;/p&gt;&lt;/div&gt;&#x27;}&lt;/div&gt;`;
+      return `&lt;div class=&quot;vx-oa-list&quot;&gt;${filtered.length ? filtered.map((r) =&gt; `&lt;button class=&quot;vx-oa-row cursor-interaction&quot; type=&quot;button&quot; data-oa=&quot;${r.i}&quot; aria-label=&quot;Chi tiết ${oaName(r.i)}&quot;&gt;&lt;span class=&quot;vx-oa-avatar ${r.i === 0 ? &quot;main&quot; : &quot;&quot;}&quot;&gt;${r.i === 0 ? &quot;M&quot; : `0${r.i + 1}`}&lt;/span&gt;&lt;span class=&quot;vx-vstack&quot;&gt;&lt;span class=&quot;vx-oa-meta&quot;&gt;&lt;strong class=&quot;vx-small&quot;&gt;${oaName(r.i)}&lt;/strong&gt;${badge(r.status === &quot;sent&quot; ? (r.ready ? &quot;Hoàn thành&quot; : &quot;Đã gửi&quot;) : r.status === &quot;pending&quot; ? &quot;Đang gửi&quot; : &quot;Thất bại&quot;, r.status === &quot;sent&quot; ? &quot;good&quot; : r.status === &quot;pending&quot; ? &quot;warn&quot; : &quot;bad&quot;)}&lt;/span&gt;&lt;span class=&quot;vx-oa-meta&quot;&gt;${r.status === &quot;sent&quot; ? `&lt;span class=&quot;vx-oa-read ${r.seen ? &quot;seen&quot; : &quot;&quot;}&quot;&gt;${icon(r.seen ? &quot;eye&quot; : &quot;eye-off&quot;)}${r.seen ? `Đã xem · ${esc(providerTime(r.raw.result.opened_at))}` : &quot;Chưa ghi nhận xem&quot;}&lt;/span&gt;` : `&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;${r.status === &quot;pending&quot; ? &quot;Đang xử lý cặp V4/V6&quot; : esc(providerValue(r.raw.failureMessage))}&lt;/span&gt;`}${icon(&quot;chevron-right&quot;)}&lt;/span&gt;&lt;/span&gt;&lt;/button&gt;`).join(&quot;&quot;) : &#x27;&lt;div class=&quot;vx-surface vx-panel&quot;&gt;&lt;p class=&quot;vx-copy&quot;&gt;Chưa có OA phù hợp.&lt;/p&gt;&lt;/div&gt;&#x27;}&lt;/div&gt;`;
     }
     function oaSection(rs) {
       const c = counts(rs);
@@ -4014,121 +4162,202 @@ html&gt;body{padding:0}&lt;/style&gt;
     function confirm() {
       return `&lt;main class=&quot;vx-main&quot;&gt;&lt;div class=&quot;vx-page-intro&quot;&gt;&lt;span class=&quot;vx-stat-avatar&quot;&gt;${icon(&quot;clipboard-check&quot;)}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;h1&gt;Kiểm tra &amp;amp; gửi&lt;/h1&gt;&lt;p class=&quot;vx-copy&quot;&gt;Xác nhận thông tin lượt gửi&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;section class=&quot;vx-surface vx-receipt&quot;&gt;&lt;div class=&quot;vx-receipt-title&quot;&gt;&lt;span class=&quot;vx-stat-avatar&quot;&gt;${icon(&quot;user-round&quot;)}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;NGƯỜI NHẬN&lt;/span&gt;&lt;h2&gt;${esc(state.phone)}&lt;/h2&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;vx-rule&quot;&gt;&lt;/div&gt;&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;Số OA gửi đồng thời&lt;/span&gt;&lt;strong&gt;${state.n} OA&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;Tin trên mỗi OA&lt;/span&gt;&lt;strong&gt;1 V4 + 1 V6&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;vx-rule&quot;&gt;&lt;/div&gt;${Array.from({ length: state.n }, (_, i) =&gt; `&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;${oaName(i)}&lt;/span&gt;&lt;strong&gt;${badge(&quot;Sẵn sàng&quot;, &quot;good&quot;, &quot;check&quot;)}&lt;/strong&gt;&lt;/div&gt;`).join(&quot;&quot;)}&lt;div class=&quot;vx-rule&quot;&gt;&lt;/div&gt;&lt;div class=&quot;vx-receipt-total&quot;&gt;&lt;span class=&quot;vx-small&quot;&gt;Tổng cộng&lt;/span&gt;&lt;strong&gt;${state.n * 2} tin ZNS&lt;/strong&gt;&lt;/div&gt;&lt;/section&gt;&lt;div class=&quot;vx-notice&quot;&gt;${icon(&quot;info&quot;)}&lt;span&gt;Mỗi OA được theo dõi riêng. Dữ liệu nhận về sẽ tự bổ sung vào kết quả.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;submit&quot;, `Gửi ${state.n * 2} tin qua ${state.n} OA`, &quot;vx-primary&quot;, &quot;send&quot;)}${button(&quot;edit&quot;, &quot;Quay lại chỉnh sửa&quot;, &quot;vx-secondary&quot;)}&lt;/div&gt;&lt;/main&gt;`;
     }
-    function resultCard(rs, detail = false) {
-      const available = rs.filter((r) =&gt; r.ready);
-      const r = available.find((r) =&gt; r.i === state.source) || available[0];
-      if (!r) return &quot;&quot;;
-      const ip = (value) =&gt; (state.reveal ? esc(value) : &quot;••• ••• •••&quot;);
-      return `&lt;section class=&quot;vx-surface vx-result&quot;&gt;&lt;div class=&quot;vx-between&quot;&gt;&lt;div class=&quot;vx-result-heading&quot;&gt;&lt;span class=&quot;vx-stat-avatar info&quot;&gt;${icon(&quot;network&quot;)}&lt;/span&gt;&lt;h3&gt;Thông tin kết nối&lt;/h3&gt;&lt;/div&gt;&lt;button class=&quot;vx-icon-button cursor-interaction&quot; type=&quot;button&quot; data-action=&quot;reveal&quot; aria-label=&quot;${state.reveal ? &quot;Ẩn địa chỉ IP&quot; : &quot;Hiện địa chỉ IP&quot;}&quot;&gt;${icon(state.reveal ? &quot;eye&quot; : &quot;eye-off&quot;)}&lt;/button&gt;&lt;/div&gt;${!detail ? `&lt;select class=&quot;vx-select&quot; data-field=&quot;source&quot; aria-label=&quot;Kết quả của OA&quot;&gt;${available.map((x) =&gt; `&lt;option value=&quot;${x.i}&quot;${x.i === r.i ? &quot; selected&quot; : &quot;&quot;}&gt;${oaName(x.i)}${x.seen ? &quot; · Đã xem&quot; : &quot; · Chưa ghi nhận xem&quot;}&lt;/option&gt;`).join(&quot;&quot;)}&lt;/select&gt;` : &quot;&quot;}
-      ${r.v4 ? `&lt;div class=&quot;vx-ip&quot;&gt;&lt;span&gt;IPv4&lt;/span&gt;&lt;strong&gt;${ip(r.v4)}&lt;/strong&gt;&lt;/div&gt;` : &quot;&quot;}${r.v6 ? `&lt;div class=&quot;vx-ip v6&quot;&gt;&lt;span&gt;IPv6&lt;/span&gt;&lt;strong&gt;${ip(r.v6)}&lt;/strong&gt;&lt;/div&gt;` : &quot;&quot;}
-      &lt;div class=&quot;vx-grid-two&quot;&gt;&lt;div class=&quot;vx-vstack vx-port-tile&quot;&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;Cổng Port&lt;/span&gt;&lt;strong&gt;54112&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;vx-vstack vx-port-tile&quot;&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;Thời gian ghi nhận&lt;/span&gt;&lt;strong class=&quot;vx-small&quot;&gt;14:32:08&lt;/strong&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;15/11/2026 · GMT+7&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
-      &lt;div class=&quot;vx-result-identity&quot;&gt;&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;Số điện thoại&lt;/span&gt;&lt;strong&gt;${esc(state.phone)}&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;User ID&lt;/span&gt;&lt;strong&gt;100000000000000001&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;Nhà mạng / ISP&lt;/span&gt;&lt;strong&gt;Nhà mạng mô phỏng&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;Múi giờ&lt;/span&gt;&lt;strong&gt;Asia/Bangkok&lt;/strong&gt;&lt;/div&gt;&lt;/div&gt;
-      &lt;details class=&quot;vx-metadata&quot;&gt;&lt;summary class=&quot;cursor-interaction&quot;&gt;Mã theo dõi&lt;/summary&gt;&lt;div class=&quot;vx-result-tracking&quot;&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;Tracking ID · ${oaName(r.i)}&lt;/span&gt;&lt;code&gt;${tracking(r.i)}&lt;/code&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;OA ID&lt;/span&gt;&lt;code&gt;${oaId(r.i)}&lt;/code&gt;&lt;/div&gt;&lt;/details&gt;
-    &lt;/section&gt;`;
+    function providerValue(value) {
+      if (value === null || value === undefined) return &quot;Chưa có dữ liệu&quot;;
+      if (
+        typeof value !== &quot;string&quot; &amp;&amp;
+        !(typeof value === &quot;number&quot; &amp;&amp; Number.isFinite(value))
+      )
+        return &quot;Chưa có dữ liệu&quot;;
+      const text = String(value).trim();
+      return !text ||
+        [&quot;n/a&quot;, &quot;na&quot;, &quot;null&quot;, &quot;none&quot;, &quot;-&quot;].includes(text.toLowerCase())
+        ? &quot;Chưa có dữ liệu&quot;
+        : text;
     }
-    function delivery(screen) {
-      const rs = records(screen),
-        s = counts(rs);
-      if (screen === &quot;complete&quot;)
-        return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;section class=&quot;vx-complete-hero&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;div class=&quot;vx-row&quot;&gt;&lt;span class=&quot;vx-status-mark good&quot;&gt;${icon(&quot;check-check&quot;)}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;h1&gt;Hoàn thành&lt;/h1&gt;&lt;span class=&quot;vx-small vx-muted&quot;&gt;${maskedPhone()} · Hôm nay, 14:32&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;p class=&quot;vx-copy&quot;&gt;${s.ready}/${state.n} OA có dữ liệu${s.failed ? ` · ${s.failed} OA gửi lỗi` : s.ready &lt; s.sent ? &quot; · Tiếp tục cập nhật OA còn lại&quot; : &quot;&quot;}.&lt;/p&gt;&lt;div class=&quot;vx-compact-stats&quot;&gt;&lt;span&gt;${icon(&quot;check-check&quot;)}${s.sent} đã gửi&lt;/span&gt;&lt;span&gt;${icon(&quot;eye&quot;)}${s.seen} đã xem&lt;/span&gt;${s.failed ? `&lt;span&gt;${icon(&quot;circle-x&quot;)}${s.failed} lỗi&lt;/span&gt;` : &quot;&quot;}&lt;/div&gt;&lt;/section&gt;${resultCard(rs)}&lt;details class=&quot;vx-surface vx-result-oa&quot;&gt;&lt;summary class=&quot;cursor-interaction&quot;&gt;Trạng thái ${state.n} OA · ${s.sent - s.seen} chưa ghi nhận xem&lt;/summary&gt;${oaRows(rs)}&lt;/details&gt;&lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;new&quot;, &quot;Tạo lượt gửi mới&quot;, &quot;vx-primary&quot;, &quot;send&quot;)}${button(&quot;history&quot;, &quot;Xem trong lịch sử&quot;, &quot;vx-text-button&quot;)}&lt;/div&gt;&lt;/main&gt;`;
-      const config = {
-        sending: {
-          title: &quot;Đang gửi tin&quot;,
-          copy: `Đang kết nối ${state.n} OA. Bạn có thể rời màn hình này.`,
-          glyph: &quot;send&quot;,
-          tone: &quot;&quot;,
-          badge: &quot;Đang xử lý&quot;,
-        },
-        mixed: {
-          title: `Đã gửi qua ${s.sent} OA`,
-          copy: `${s.pending ? `${s.pending} OA đang xử lý` : &quot;Đã xử lý xong&quot;}${s.failed ? ` · ${s.failed} OA gửi thất bại` : &quot;&quot;}`,
-          glyph: &quot;layers-2&quot;,
-          tone: &quot;warn&quot;,
-          badge:
-            s.pending || s.failed
-              ? &quot;Gửi thành công một phần&quot;
-              : &quot;Đang chờ dữ liệu&quot;,
-        },
-        waiting: {
-          title: s.failed
-            ? &quot;Đã gửi qua &quot; + s.sent + &quot; OA&quot;
-            : &quot;Đã gửi thành công&quot;,
-          copy: `${s.sent} OA đã gửi tin${s.failed ? ` · ${s.failed} OA gửi lỗi` : &quot;&quot;}. Thông tin kết nối sẽ bổ sung khi có dữ liệu.`,
-          glyph: &quot;check&quot;,
-          tone: &quot;good&quot;,
-          badge: &quot;Đang chờ dữ liệu&quot;,
-        },
-        complete: {
-          title: &quot;Đã có kết quả&quot;,
-          copy: `${s.ready}/${state.n} OA có dữ liệu${s.failed ? ` · ${s.failed} OA gửi lỗi` : s.ready &lt; s.sent ? &quot; · Vẫn cập nhật OA còn lại&quot; : &quot;&quot;}.`,
-          glyph: &quot;check-check&quot;,
-          tone: &quot;good&quot;,
-          badge: &quot;Hoàn thành&quot;,
-        },
-      }[screen];
-      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;div class=&quot;vx-row&quot;&gt;&lt;span class=&quot;vx-small vx-muted&quot;&gt;${maskedPhone()}&lt;/span&gt;&lt;span class=&quot;vx-muted&quot;&gt;·&lt;/span&gt;&lt;span class=&quot;vx-small vx-muted&quot;&gt;Hôm nay, 14:32&lt;/span&gt;&lt;/div&gt;
-      &lt;div class=&quot;vx-status-head&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;vx-status-mark ${config.tone}&quot;&gt;${icon(config.glyph)}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;h1&gt;${config.title}&lt;/h1&gt;&lt;p class=&quot;vx-copy&quot;&gt;${config.copy}&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;
-      &lt;div&gt;${badge(config.badge, screen === &quot;complete&quot; ? &quot;good&quot; : screen === &quot;waiting&quot; ? &quot;warn&quot; : screen === &quot;mixed&quot; ? &quot;brand&quot; : &quot;&quot;)}&lt;/div&gt;
-      &lt;div class=&quot;vx-path&quot; aria-label=&quot;Tiến trình&quot;&gt;&lt;div class=&quot;${s.sent ? &quot;done&quot; : &quot;active&quot;}&quot;&gt;&lt;span class=&quot;vx-step-dot&quot;&gt;1&lt;/span&gt;&lt;span&gt;Gửi tin&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;${s.ready ? &quot;done&quot; : s.sent ? &quot;active&quot; : &quot;&quot;}&quot;&gt;&lt;span class=&quot;vx-step-dot&quot;&gt;2&lt;/span&gt;&lt;span&gt;Chờ dữ liệu&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;${s.ready ? &quot;done&quot; : &quot;&quot;}&quot;&gt;&lt;span class=&quot;vx-step-dot&quot;&gt;3&lt;/span&gt;&lt;span&gt;Kết quả&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
-      &lt;section class=&quot;vx-surface&quot;&gt;&lt;div class=&quot;vx-counts&quot;&gt;&lt;div&gt;&lt;strong&gt;${s.sent}&lt;/strong&gt;&lt;span&gt;Đã gửi&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;${s.pending}&lt;/strong&gt;&lt;span&gt;Đang gửi&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;${s.failed}&lt;/strong&gt;&lt;span&gt;Thất bại&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;vx-meter&quot; aria-label=&quot;${s.sent} đã gửi, ${s.pending} đang gửi, ${s.failed} thất bại&quot;&gt;${rs.map((r) =&gt; `&lt;span class=&quot;${r.status}&quot;&gt;&lt;/span&gt;`).join(&quot;&quot;)}&lt;/div&gt;&lt;div class=&quot;vx-read-summary&quot;&gt;&lt;span class=&quot;vx-muted&quot;&gt;Lượt xem&lt;/span&gt;&lt;strong&gt;${s.seen} đã xem · ${s.sent - s.seen} chưa ghi nhận&lt;/strong&gt;&lt;/div&gt;&lt;/section&gt;
-      ${screen === &quot;complete&quot; ? resultCard(rs) : &quot;&quot;}
-      ${oaSection(rs)}
-      ${screen === &quot;waiting&quot; ? `&lt;div class=&quot;vx-tip&quot;&gt;${icon(&quot;refresh-cw&quot;)}&lt;span&gt;Tự kiểm tra mỗi 30 giây. Có IPv4 hoặc IPv6 sẽ chuyển sang Hoàn thành.&lt;/span&gt;&lt;/div&gt;` : &quot;&quot;}
-      &lt;p class=&quot;vx-tracking-note&quot;&gt;“Chưa ghi nhận” nghĩa là chưa có xác nhận xem từ nhà cung cấp.&lt;/p&gt;
-      &lt;div class=&quot;vx-bottom-action&quot;&gt;${screen === &quot;waiting&quot; ? button(&quot;refresh&quot;, &quot;Kiểm tra kết quả&quot;, &quot;vx-secondary&quot;, &quot;refresh-cw&quot;) : screen === &quot;complete&quot; ? button(&quot;new&quot;, &quot;Gửi tin mới&quot;, &quot;vx-primary&quot;, &quot;send&quot;) : button(&quot;home&quot;, &quot;Về Tổng quan&quot;, &quot;vx-secondary&quot;, &quot;arrow-left&quot;)}${screen === &quot;complete&quot; ? button(&quot;history&quot;, &quot;Xem lịch sử&quot;, &quot;vx-text-button&quot;) : &quot;&quot;}&lt;/div&gt;
-    &lt;/main&gt;`;
+    function isReadyResult(raw) {
+      return (
+        raw?.status === &quot;completed&quot; &amp;&amp;
+        (raw.externalStatus === &quot;result_received&quot; ||
+          raw.externalStatus == null) &amp;&amp;
+        [raw.result?.ipv4, raw.result?.ipv6].some(
+          (value) =&gt; providerValue(value) !== &quot;Chưa có dữ liệu&quot;,
+        )
+      );
     }
-    function oaDetail() {
-      const rs = records(&quot;oa&quot;),
-        r = rs.find((x) =&gt; x.i === state.oa) || rs[0];
-      const failed = r.status === &quot;failed&quot;,
-        pending = r.status === &quot;pending&quot;;
-      return `&lt;main class=&quot;vx-main&quot;&gt;&lt;div class=&quot;vx-row&quot;&gt;&lt;span class=&quot;vx-oa-avatar main&quot; style=&quot;width:48px;height:48px;font-size:16px&quot;&gt;${r.i === 0 ? &quot;M&quot; : `0${r.i + 1}`}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;h1&gt;${oaName(r.i)}&lt;/h1&gt;&lt;span class=&quot;vx-small vx-muted&quot;&gt;Gửi đến ${maskedPhone()}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
-      &lt;div&gt;${badge(failed ? &quot;Gửi thất bại&quot; : pending ? &quot;Đang gửi&quot; : r.ready ? &quot;Có kết quả&quot; : &quot;Đã gửi&quot;, failed ? &quot;bad&quot; : pending ? &quot;warn&quot; : &quot;good&quot;, failed ? &quot;circle-x&quot; : pending ? &quot;clock-3&quot; : &quot;check&quot;)}&lt;/div&gt;
-      ${failed ? `&lt;div class=&quot;vx-notice bad&quot; role=&quot;alert&quot;&gt;${icon(&quot;circle-alert&quot;)}&lt;span&gt;Mẫu tin thiếu thông tin thanh toán. Hãy kiểm tra cấu hình mẫu trên trang quản trị.&lt;/span&gt;&lt;/div&gt;` : &quot;&quot;}
-      &lt;section class=&quot;vx-surface vx-panel&quot;&gt;&lt;h3 style=&quot;margin-bottom:16px&quot;&gt;Tiến trình&lt;/h3&gt;&lt;div class=&quot;vx-timeline&quot;&gt;${[
+    function requestTime(value) {
+      if (typeof value !== &quot;number&quot; || !Number.isFinite(value))
+        return &quot;Chưa có dữ liệu&quot;;
+      const parts = new Intl.DateTimeFormat(&quot;vi-VN&quot;, {
+        timeZone: &quot;America/Los_Angeles&quot;,
+        year: &quot;numeric&quot;,
+        month: &quot;2-digit&quot;,
+        day: &quot;2-digit&quot;,
+        hour: &quot;2-digit&quot;,
+        minute: &quot;2-digit&quot;,
+        hourCycle: &quot;h23&quot;,
+      }).formatToParts(value);
+      const part = (name) =&gt; parts.find((p) =&gt; p.type === name)?.value;
+      return `${part(&quot;day&quot;)}/${part(&quot;month&quot;)}/${part(&quot;year&quot;)} · ${part(&quot;hour&quot;)}:${part(&quot;minute&quot;)}`;
+    }
+    function providerTime(value) {
+      if (typeof value === &quot;number&quot; &amp;&amp; Number.isFinite(value)) {
+        const parts = new Intl.DateTimeFormat(&quot;vi-VN&quot;, {
+          timeZone: &quot;America/Los_Angeles&quot;,
+          year: &quot;numeric&quot;,
+          month: &quot;2-digit&quot;,
+          day: &quot;2-digit&quot;,
+          hour: &quot;2-digit&quot;,
+          minute: &quot;2-digit&quot;,
+          second: &quot;2-digit&quot;,
+          fractionalSecondDigits: 3,
+          hourCycle: &quot;h23&quot;,
+        }).formatToParts(value);
+        const part = (name) =&gt; parts.find((p) =&gt; p.type === name)?.value;
+        return `${part(&quot;day&quot;)}/${part(&quot;month&quot;)}/${part(&quot;year&quot;)} - ${part(&quot;hour&quot;)}:${part(&quot;minute&quot;)}:${part(&quot;second&quot;)}.${part(&quot;fractionalSecond&quot;)}`;
+      }
+      return providerValue(value);
+    }
+    function messageCode(raw) {
+      if (!raw?.id || typeof raw.createdAt !== &quot;number&quot;)
+        return &quot;Chưa có dữ liệu&quot;;
+      if (/^MKS-\d{8}-\d{4}$/.test(raw.id)) return raw.id;
+      const date = requestTime(raw.createdAt)
+        .split(&quot; · &quot;)[0]
+        .split(&quot;/&quot;)
+        .reverse()
+        .join(&quot;&quot;);
+      let hash = 0;
+      for (const char of raw.id)
+        hash = (hash * 31 + char.charCodeAt(0)) &amp; 0x7fffffff;
+      return `MKS-${date}-${String(hash % 10000).padStart(4, &quot;0&quot;)}`;
+    }
+    function originalPhone(value, completed) {
+      const text = providerValue(value);
+      if (text === &quot;Chưa có dữ liệu&quot;) return text;
+      const digits = text.replace(/\D/g, &quot;&quot;);
+      if (!completed)
+        return digits.length &lt; 6 ? text : `+84 ••• ${digits.slice(-4)}`;
+      const subscriber = digits.startsWith(&quot;84&quot;)
+        ? digits.slice(2)
+        : digits.startsWith(&quot;0&quot;)
+          ? digits.slice(1)
+          : digits;
+      return subscriber ? &quot;+84 &quot; + subscriber.match(/.{1,3}/g).join(&quot; &quot;) : text;
+    }
+    function originalRow(label, value, glyph = &quot;file-text&quot;) {
+      return `&lt;div class=&quot;vx-original-row&quot;&gt;&lt;span class=&quot;vx-original-icon&quot;&gt;${icon(glyph)}&lt;/span&gt;&lt;span class=&quot;vx-vstack&quot;&gt;&lt;span class=&quot;vx-original-label&quot;&gt;${esc(label)}&lt;/span&gt;&lt;strong&gt;${esc(value)}&lt;/strong&gt;&lt;/span&gt;&lt;/div&gt;`;
+    }
+    function summaryCard(raw, completed) {
+      const result = raw.result || {};
+      const rows = [
+        [&quot;Số điện thoại&quot;, originalPhone(result.phone, completed), &quot;phone&quot;],
+        [&quot;Mẫu ZNS&quot;, providerValue(raw.product?.name), &quot;file-text&quot;],
+        [&quot;Thời gian gửi&quot;, requestTime(raw.createdAt), &quot;calendar&quot;],
+      ];
+      if (completed)
+        rows.push(
+          [&quot;Lần cuối hoạt động&quot;, providerTime(result.last_online), &quot;eye&quot;],
+          [
+            &quot;Ngày hoạt động&quot;,
+            providerValue(result.offline_days),
+            &quot;calendar-days&quot;,
+          ],
+        );
+      else rows.push([&quot;Mã tin&quot;, messageCode(raw), &quot;ticket&quot;]);
+      return `&lt;section class=&quot;vx-surface vx-original-summary&quot; aria-label=&quot;Thông tin tin nhắn&quot;&gt;${rows.map(([label, value, glyph]) =&gt; originalRow(label, value, glyph)).join(&quot;&quot;)}&lt;/section&gt;`;
+    }
+    function recordedInformation(raw) {
+      const result = raw.result || {};
+      function ip(value, isV6) {
+        const text = providerValue(value);
+        if (text === &quot;Chưa có dữ liệu&quot; || state.reveal) return text;
+        const separator = isV6 ? &quot;:&quot; : &quot;.&quot;;
+        return (
+          text.split(separator).slice(0, 2).join(separator) +
+          separator +
+          &quot;•••••&quot;
+        );
+      }
+      const rows = [
+        [&quot;IPv4&quot;, ip(result.ipv4, false)],
+        [&quot;IPv6&quot;, ip(result.ipv6, true)],
+        [&quot;Port&quot;, providerValue(result.port)],
+        [&quot;Nhà mạng&quot;, providerValue(result.isp)],
+        [&quot;Thời gian đối tượng mở tin&quot;, providerTime(result.opened_at)],
+      ];
+      return `&lt;section class=&quot;vx-surface vx-original-recorded&quot; aria-label=&quot;Thông tin ghi nhận&quot;&gt;&lt;div class=&quot;vx-between&quot;&gt;&lt;h2&gt;Thông tin ghi nhận&lt;/h2&gt;&lt;button class=&quot;vx-icon-button cursor-interaction&quot; type=&quot;button&quot; data-action=&quot;reveal&quot; aria-label=&quot;${state.reveal ? &quot;Ẩn địa chỉ kết nối&quot; : &quot;Hiện địa chỉ kết nối&quot;}&quot;&gt;${icon(state.reveal ? &quot;eye&quot; : &quot;eye-off&quot;)}&lt;/button&gt;&lt;/div&gt;${rows.map(([label, value]) =&gt; `&lt;div class=&quot;vx-original-data&quot;&gt;&lt;span&gt;${esc(label)}&lt;/span&gt;&lt;strong&gt;${esc(value)}&lt;/strong&gt;&lt;/div&gt;`).join(&quot;&quot;)}&lt;/section&gt;`;
+    }
+    function requestTimeline(raw, completed) {
+      const opened = raw.result?.opened_at;
+      const accepted = raw.deliveryAccepted === true;
+      const steps = [
         {
-          title: failed
-            ? &quot;Gửi không thành công&quot;
-            : pending
-              ? &quot;Đang gửi yêu cầu&quot;
-              : &quot;Đã gửi tin&quot;,
-          sub: pending
-            ? &quot;Đang xử lý&quot;
-            : failed
-              ? &quot;14:32:01 · Cần kiểm tra mẫu&quot;
-              : &quot;14:32:01 · Zalo nhận yêu cầu&quot;,
-          done: !pending &amp;&amp; !failed,
-          g: failed ? &quot;x&quot; : pending ? &quot;clock-3&quot; : &quot;check&quot;,
+          title: &quot;Đã tiếp nhận&quot;,
+          detail: requestTime(raw.createdAt),
+          done: raw.createdAt != null,
+        },
+        {
+          title: accepted ? &quot;Đã gửi tới Zalo&quot; : &quot;Đang gửi tới Zalo&quot;,
+          detail: accepted
+            ? requestTime(raw.updatedAt)
+            : &quot;Hệ thống đang xử lý.&quot;,
+          done: accepted,
         },
         {
           title:
-            !pending &amp;&amp; !failed
-              ? &quot;Đã tới thiết bị&quot;
-              : &quot;Chờ xác nhận tới thiết bị&quot;,
-          sub: !pending &amp;&amp; !failed ? &quot;14:32:05&quot; : &quot;Chưa có xác nhận&quot;,
-          done: !pending &amp;&amp; !failed,
-          g: &quot;check-check&quot;,
+            providerValue(opened) !== &quot;Chưa có dữ liệu&quot;
+              ? &quot;Đã mở tin&quot;
+              : &quot;Chờ mở tin&quot;,
+          detail:
+            providerValue(opened) !== &quot;Chưa có dữ liệu&quot;
+              ? providerTime(opened)
+              : completed
+                ? &quot;Chưa có dữ liệu&quot;
+                : &quot;Đang chờ người nhận mở tin.&quot;,
+          done: providerValue(opened) !== &quot;Chưa có dữ liệu&quot;,
         },
-        {
-          title: r.seen ? &quot;Đã xem&quot; : &quot;Chưa ghi nhận xem&quot;,
-          sub: r.seen
-            ? &quot;14:32:08 · Có xác nhận lượt xem&quot;
-            : &quot;Chưa có thời điểm xem được xác nhận&quot;,
-          done: r.seen,
-          g: r.seen ? &quot;eye&quot; : &quot;eye-off&quot;,
-        },
-      ]
-        .map(
-          (x) =&gt;
-            `&lt;div class=&quot;vx-timeline-step&quot;&gt;&lt;span class=&quot;vx-timeline-dot ${x.done ? &quot;good&quot; : &quot;&quot;}&quot;&gt;${icon(x.g)}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;h3 class=&quot;vx-small&quot;&gt;${x.title}&lt;/h3&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;${x.sub}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;`,
-        )
-        .join(&quot;&quot;)}&lt;/div&gt;&lt;/section&gt;
-      ${r.ready ? resultCard([r], true) : !failed &amp;&amp; !pending ? `&lt;div class=&quot;vx-notice&quot;&gt;${icon(&quot;clock-3&quot;)}&lt;span&gt;Đã gửi thành công. Đang chờ dữ liệu; thông tin có sẽ tự bổ sung.&lt;/span&gt;&lt;/div&gt;` : &quot;&quot;}
-      &lt;section&gt;&lt;div class=&quot;vx-section-heading&quot;&gt;&lt;h3&gt;Hai tin của OA này&lt;/h3&gt;&lt;/div&gt;&lt;div class=&quot;vx-message-pair&quot;&gt;${[&quot;V4&quot;, &quot;V6&quot;].map((v) =&gt; `&lt;div class=&quot;vx-message&quot;&gt;&lt;strong class=&quot;vx-small&quot;&gt;Tin ${v}&lt;/strong&gt;&lt;span class=&quot;vx-inline-status ${failed ? &quot;bad&quot; : &quot;&quot;}&quot;&gt;${icon(failed ? &quot;circle-x&quot; : pending ? &quot;clock-3&quot; : &quot;check-check&quot;)}${failed ? &quot;Gửi thất bại&quot; : pending ? &quot;Đang gửi&quot; : &quot;Đã gửi&quot;}&lt;/span&gt;&lt;/div&gt;`).join(&quot;&quot;)}&lt;/div&gt;&lt;/section&gt;
-      &lt;details class=&quot;vx-metadata&quot;&gt;&lt;summary class=&quot;cursor-interaction&quot;&gt;Mã kỹ thuật&lt;/summary&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;Tracking ID dùng chung V4/V6 của OA này&lt;/span&gt;&lt;code&gt;${tracking(r.i)}&lt;/code&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;OA ID&lt;/span&gt;&lt;code&gt;${oaId(r.i)}&lt;/code&gt;${!pending &amp;&amp; !failed ? `&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;Message ID · V4&lt;/span&gt;&lt;code&gt;demo-v4-message-${r.i + 1}&lt;/code&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;Message ID · V6&lt;/span&gt;&lt;code&gt;demo-v6-message-${r.i + 1}&lt;/code&gt;` : &quot;&quot;}${failed ? &quot;&lt;code&gt;Zalo: -1122 · payment_status&lt;/code&gt;&quot; : &quot;&quot;}&lt;/details&gt;
-      &lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;next-oa&quot;, &quot;Xem OA tiếp theo&quot;, &quot;vx-secondary&quot;, &quot;arrow-right&quot;)}&lt;/div&gt;
-    &lt;/main&gt;`;
+      ];
+      return `&lt;section class=&quot;vx-surface vx-panel vx-original-timeline&quot; aria-label=&quot;Tiến trình tin nhắn&quot;&gt;&lt;div class=&quot;vx-timeline&quot;&gt;${steps.map((s) =&gt; `&lt;div class=&quot;vx-timeline-step&quot;&gt;&lt;span class=&quot;vx-timeline-dot ${s.done ? &quot;good&quot; : &quot;&quot;}&quot;&gt;${icon(s.done ? &quot;check&quot; : &quot;clock-3&quot;)}&lt;/span&gt;&lt;span class=&quot;vx-vstack&quot;&gt;&lt;h3&gt;${s.title}&lt;/h3&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;${esc(s.detail)}&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;`).join(&quot;&quot;)}&lt;/div&gt;${!completed ? `&lt;p class=&quot;vx-original-notice&quot;&gt;${icon(&quot;info&quot;)}Hệ thống sẽ tự động cập nhật khi có trạng thái mới.&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;`;
+    }
+    function originalOaPanel(rs) {
+      const c = counts(rs),
+        partial = c.sent &gt; 0 &amp;&amp; c.failed &gt; 0;
+      return `&lt;section&gt;&lt;div class=&quot;vx-section-heading&quot;&gt;&lt;h2&gt;${partial ? &quot;Gửi thành công một phần&quot; : `Kết quả gửi ${rs.length} OA`}&lt;/h2&gt;&lt;/div&gt;&lt;p class=&quot;vx-copy&quot; style=&quot;margin-bottom:10px&quot;&gt;${c.sent} thành công · ${c.failed} thất bại · ${c.pending} đang xử lý&lt;/p&gt;${oaRows(rs)}&lt;/section&gt;`;
+    }
+    function resultCard(rs, detail = false) {
+      const record = rs.find((r) =&gt; r.i === state.source) || rs[0];
+      return record ? recordedInformation(record.raw) : &quot;&quot;;
+    }
+    function delivery(screen) {
+      const rs = records(screen),
+        first = rs[0];
+      const raw = first.raw,
+        completed =
+          screen === &quot;complete&quot; &amp;&amp; rs.some((r) =&gt; isReadyResult(r.raw));
+      const sent = rs.some((r) =&gt; r.raw.deliveryAccepted);
+      const title = completed
+        ? &quot;Đã nhận đủ thông tin&quot;
+        : sent
+          ? &quot;Tin đã được gửi&quot;
+          : &quot;Đang gửi tin&quot;;
+      const opened = raw.result?.opened_at;
+      const subtitle = completed
+        ? providerValue(opened) !== &quot;Chưa có dữ liệu&quot;
+          ? &quot;Người nhận đã mở tin&quot;
+          : &quot;&quot;
+        : sent
+          ? &quot;Đang chờ người nhận mở tin.&quot;
+          : &quot;Hệ thống đang xử lý.&quot;;
+      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;section class=&quot;vx-original-hero vx-surface ${completed ? &quot;complete&quot; : &quot;&quot;}&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;vx-status-mark ${completed ? &quot;good&quot; : &quot;&quot;}&quot;&gt;${icon(completed ? &quot;check&quot; : sent ? &quot;clock-3&quot; : &quot;send&quot;)}&lt;/span&gt;${badge(completed ? &quot;Hoàn thành&quot; : sent ? &quot;Đã gửi&quot; : &quot;Đang gửi&quot;, completed ? &quot;good&quot; : &quot;brand&quot;)}&lt;h1&gt;${title}&lt;/h1&gt;${subtitle ? `&lt;p class=&quot;vx-copy&quot;&gt;${subtitle}&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;${summaryCard(raw, completed)}${originalOaPanel(rs)}${completed ? recordedInformation(raw) : &quot;&quot;}${requestTimeline(raw, completed)}&lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;history&quot;, &quot;Về lịch sử&quot;, &quot;vx-secondary&quot;, completed ? &quot;history&quot; : &quot;arrow-left&quot;)}&lt;/div&gt;&lt;/main&gt;`;
+    }
+    function oaDetail() {
+      const record =
+          records(&quot;oa&quot;).find((r) =&gt; r.i === state.oa) || records(&quot;oa&quot;)[0],
+        raw = record.raw;
+      const failed = raw.status === &quot;failed&quot;,
+        completed = isReadyResult(raw);
+      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;div class=&quot;vx-page-intro&quot;&gt;&lt;span class=&quot;vx-stat-avatar&quot;&gt;${icon(&quot;layers&quot;)}&lt;/span&gt;&lt;div class=&quot;vx-vstack&quot;&gt;&lt;h1&gt;${oaName(record.i)}&lt;/h1&gt;&lt;span class=&quot;vx-tiny vx-muted&quot;&gt;${esc(providerValue(raw.oaId))}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;${badge(failed ? &quot;Gửi thất bại&quot; : completed ? &quot;Hoàn thành&quot; : raw.deliveryAccepted ? &quot;Đã gửi · Chờ dữ liệu&quot; : &quot;Đang xử lý&quot;, failed ? &quot;bad&quot; : completed ? &quot;good&quot; : &quot;brand&quot;)}${summaryCard(raw, completed)}${failed ? `&lt;div class=&quot;vx-notice bad&quot; role=&quot;alert&quot;&gt;${icon(&quot;circle-alert&quot;)}&lt;span&gt;${esc(providerValue(raw.failureMessage))}&lt;/span&gt;&lt;/div&gt;` : completed ? recordedInformation(raw) : &quot;&quot;}&lt;section class=&quot;vx-surface vx-panel&quot;&gt;&lt;h3&gt;Mã theo dõi&lt;/h3&gt;&lt;code class=&quot;vx-original-code&quot;&gt;${esc(providerValue(raw.id))}&lt;/code&gt;${raw.failureCode ? `&lt;div class=&quot;vx-data-row&quot;&gt;&lt;span&gt;Mã lỗi ZNS&lt;/span&gt;&lt;strong&gt;${esc(raw.failureCode)}&lt;/strong&gt;&lt;/div&gt;` : &quot;&quot;}&lt;/section&gt;${!failed ? requestTimeline(raw, completed) : &quot;&quot;}&lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;next-oa&quot;, &quot;Xem OA tiếp theo&quot;, &quot;vx-secondary&quot;, &quot;arrow-right&quot;)}&lt;/div&gt;&lt;/main&gt;`;
     }
     function history() {
       const items = historyItems().filter(
