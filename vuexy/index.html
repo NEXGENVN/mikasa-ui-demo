@@ -3009,7 +3009,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     --vx-info-soft: light-dark(#def6fa, #244e61);
     --vx-elevation: light-dark(#2f2b3d16, #0f12202e);
     --vx-primary-shadow: light-dark(#7367f04d, #7367f033);
-    --vx-radius: 6px;
+    --vx-radius: 16px;
     font-family:
       &quot;Public Sans&quot;,
       ui-sans-serif,
@@ -3803,14 +3803,89 @@ html&gt;body{padding:0}&lt;/style&gt;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 18px 14px;
+    gap: 7px;
+    padding: 12px 14px 14px;
+    background: var(--vx-paper);
+    border: 1px solid var(--vx-line);
+    border-radius: 16px;
     text-align: center;
+  }
+  #mikasa-vuexy-app .vx-original-hero &gt; .vx-status-mark {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+  }
+  #mikasa-vuexy-app .vx-original-hero &gt; .vx-status-mark svg {
+    width: 27px !important;
+    height: 27px !important;
+    stroke-width: 2;
+  }
+  #mikasa-vuexy-app .vx-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 25px;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--vx-brand);
+    background: var(--vx-brand-soft);
+  }
+  #mikasa-vuexy-app .vx-status-dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  #mikasa-vuexy-app .vx-original-hero.sent .vx-status-pill {
+    color: var(--vx-info);
+    background: var(--vx-info-soft);
+  }
+  #mikasa-vuexy-app .vx-original-hero .vx-copy {
+    font-size: 14px;
+    line-height: 1.45;
   }
   #mikasa-vuexy-app .vx-original-hero.complete {
     background: var(--vx-green-soft);
+    border-color: transparent;
+    gap: 4px;
+    padding: 8px 14px 10px;
+  }
+  #mikasa-vuexy-app .vx-original-hero.complete &gt; .vx-status-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    color: var(--vx-green);
+    background: var(--vx-green-soft);
+  }
+  #mikasa-vuexy-app .vx-original-hero.complete .vx-status-pill {
+    color: var(--vx-green);
+    background: var(--vx-green-soft);
+    border-color: var(--vx-green-soft);
   }
   #mikasa-vuexy-app .vx-original-hero.failed {
+    background: transparent;
+    border-color: transparent;
+    padding: 12px 10px;
+    gap: 4px;
+  }
+  #mikasa-vuexy-app .vx-original-hero.failed &gt; .vx-status-mark {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    color: var(--vx-red);
+    background: var(--vx-red-soft);
+  }
+  #mikasa-vuexy-app .vx-original-hero.failed &gt; .vx-status-mark svg {
+    width: 34px !important;
+    height: 34px !important;
+  }
+  #mikasa-vuexy-app .vx-original-hero.failed .vx-status-pill {
+    color: var(--vx-red);
     background: var(--vx-red-soft);
   }
   #mikasa-vuexy-app .vx-oa-choice-note {
@@ -4205,6 +4280,33 @@ html&gt;body{padding:0}&lt;/style&gt;
     background: var(--vx-line);
     margin-bottom: 4px;
   }
+  #mikasa-vuexy-app .vx-surface,
+  #mikasa-vuexy-app .vx-top,
+  #mikasa-vuexy-app .vx-primary,
+  #mikasa-vuexy-app .vx-secondary,
+  #mikasa-vuexy-app .vx-input,
+  #mikasa-vuexy-app .vx-count,
+  #mikasa-vuexy-app .vx-notice,
+  #mikasa-vuexy-app .vx-original-cta,
+  #mikasa-vuexy-app .vx-login-intro,
+  #mikasa-vuexy-app .vx-password-safety {
+    border-radius: var(--vx-radius);
+  }
+  #mikasa-vuexy-app .vx-stat-avatar,
+  #mikasa-vuexy-app .vx-oa-avatar,
+  #mikasa-vuexy-app .vx-original-icon,
+  #mikasa-vuexy-app .vx-status-mark {
+    border-radius: 50%;
+  }
+  #mikasa-vuexy-app .vx-badge,
+  #mikasa-vuexy-app .vx-filter button {
+    border-radius: 999px;
+  }
+  #mikasa-vuexy-app .vx-icon-button,
+  #mikasa-vuexy-app .vx-nav-symbol,
+  #mikasa-vuexy-app .vx-original-notice {
+    border-radius: 12px;
+  }
   @media (max-width: 370px) {
     #mikasa-vuexy-app .vx-original-dashboard-head h1 {
       font-size: 22px;
@@ -4277,8 +4379,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       oaFilter: &quot;all&quot;,
     };
     const design = [
-      { radius: 6, density: &quot;Tiêu chuẩn&quot;, technical: false },
-      { radius: 6, density: &quot;Tiêu chuẩn&quot;, technical: false },
+      { radius: 16, density: &quot;Tiêu chuẩn&quot;, technical: false },
+      { radius: 16, density: &quot;Tiêu chuẩn&quot;, technical: false },
     ];
     let timers = [];
     const stateOrigin = Math.random().toString(36).slice(2);
@@ -4700,17 +4802,12 @@ html&gt;body{padding:0}&lt;/style&gt;
       const record = rs.find((r) =&gt; r.i === state.source) || rs[0];
       return record ? recordedInformation(record.raw) : &quot;&quot;;
     }
-    function delivery(screen) {
-      const rs = records(screen),
-        selected = rs.find((r) =&gt; r.i === state.source) || rs[0];
-      const raw = selected.raw,
-        failed = raw.status === &quot;failed&quot;,
+    function statusHero(raw) {
+      const failed = raw.status === &quot;failed&quot;,
         completed = !failed &amp;&amp; isReadyResult(raw),
         sent = raw.deliveryAccepted === true;
       const title = failed
-        ? screen === &quot;failed&quot;
-          ? &quot;Không thể gửi tin&quot;
-          : &quot;Gửi thất bại&quot;
+        ? &quot;Không thể gửi tin&quot;
         : completed
           ? &quot;Đã nhận đủ thông tin&quot;
           : sent
@@ -4718,7 +4815,7 @@ html&gt;body{padding:0}&lt;/style&gt;
             : &quot;Đang gửi tin&quot;;
       const opened = raw.result?.opened_at;
       const subtitle = failed
-        ? &quot;&quot;
+        ? &quot;Yêu cầu gửi tin không thể hoàn tất.&quot;
         : completed
           ? providerValue(opened) !== &quot;Chưa có dữ liệu&quot;
             ? &quot;Người nhận đã mở tin&quot;
@@ -4726,6 +4823,36 @@ html&gt;body{padding:0}&lt;/style&gt;
           : sent
             ? &quot;Đang chờ người nhận mở tin.&quot;
             : &quot;Hệ thống đang xử lý.&quot;;
+      const kind = failed
+        ? &quot;failed&quot;
+        : completed
+          ? &quot;complete&quot;
+          : sent
+            ? &quot;sent&quot;
+            : &quot;processing&quot;;
+      const label = failed
+        ? &quot;Gửi thất bại&quot;
+        : completed
+          ? &quot;Hoàn thành&quot;
+          : sent
+            ? &quot;Đã gửi&quot;
+            : &quot;Đang gửi&quot;;
+      const glyph = failed
+        ? &quot;circle-x&quot;
+        : completed
+          ? &quot;circle-check&quot;
+          : sent
+            ? &quot;clock-3&quot;
+            : &quot;loader-circle&quot;;
+      return `&lt;section class=&quot;vx-original-hero ${kind}&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;vx-status-mark&quot;&gt;${icon(glyph)}&lt;/span&gt;&lt;span class=&quot;vx-status-pill&quot;&gt;&lt;span class=&quot;vx-status-dot&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;${label}&lt;/span&gt;&lt;h1&gt;${title}&lt;/h1&gt;${subtitle ? `&lt;p class=&quot;vx-copy&quot;&gt;${subtitle}&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;`;
+    }
+    function delivery(screen) {
+      const rs = records(screen),
+        selected = rs.find((r) =&gt; r.i === state.source) || rs[0];
+      const raw = selected.raw,
+        failed = raw.status === &quot;failed&quot;,
+        completed = !failed &amp;&amp; isReadyResult(raw),
+        sent = raw.deliveryAccepted === true;
       const failure = failed
         ? `&lt;div class=&quot;vx-notice bad&quot; role=&quot;alert&quot;&gt;${icon(&quot;circle-alert&quot;)}&lt;span&gt;${esc(providerValue(raw.failureMessage))}${raw.failureCode ? `&lt;br&gt;Mã lỗi ZNS: ${esc(raw.failureCode)}` : &quot;&quot;}&lt;/span&gt;&lt;/div&gt;`
         : &quot;&quot;;
@@ -4733,7 +4860,7 @@ html&gt;body{padding:0}&lt;/style&gt;
         screen === &quot;sending&quot;
           ? `&lt;section class=&quot;vx-surface vx-original-summary&quot;&gt;${originalRow(&quot;Mã tin&quot;, messageCode(raw), &quot;ticket&quot;)}&lt;/section&gt;`
           : summaryCard(raw, completed);
-      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;section class=&quot;vx-original-hero vx-surface ${failed ? &quot;failed&quot; : completed ? &quot;complete&quot; : &quot;&quot;}&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;vx-status-mark ${failed ? &quot;bad&quot; : completed ? &quot;good&quot; : &quot;&quot;}&quot;&gt;${icon(failed ? &quot;circle-x&quot; : completed ? &quot;check&quot; : sent ? &quot;clock-3&quot; : &quot;send&quot;)}&lt;/span&gt;${badge(failed ? &quot;Gửi thất bại&quot; : completed ? &quot;Hoàn thành&quot; : sent ? &quot;Đã gửi&quot; : &quot;Đang gửi&quot;, failed ? &quot;bad&quot; : completed ? &quot;good&quot; : &quot;brand&quot;)}&lt;h1&gt;${title}&lt;/h1&gt;${subtitle ? `&lt;p class=&quot;vx-copy&quot;&gt;${subtitle}&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;${originalOaPanel(rs)}${summary}${failure}${completed ? recordedInformation(raw) : &quot;&quot;}${!failed ? requestTimeline(raw, completed) : &quot;&quot;}${!failed &amp;&amp; sent &amp;&amp; !completed ? `&lt;div class=&quot;vx-tip&quot;&gt;${icon(&quot;clock-3&quot;)}&lt;span&gt;Chờ đủ dữ liệu · Tự cập nhật mỗi 30 giây&lt;/span&gt;&lt;/div&gt;` : &quot;&quot;}&lt;div class=&quot;vx-bottom-action&quot;&gt;${failed ? button(&quot;edit&quot;, &quot;Quay lại chỉnh sửa&quot;, &quot;vx-primary&quot;, &quot;arrow-left&quot;) : &quot;&quot;}${button(&quot;history&quot;, &quot;Về lịch sử&quot;, &quot;vx-secondary&quot;, completed ? &quot;history&quot; : &quot;arrow-left&quot;)}&lt;/div&gt;&lt;/main&gt;`;
+      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;${statusHero(raw)}${originalOaPanel(rs)}${summary}${failure}${completed ? recordedInformation(raw) : &quot;&quot;}${!failed ? requestTimeline(raw, completed) : &quot;&quot;}${!failed &amp;&amp; sent &amp;&amp; !completed ? `&lt;div class=&quot;vx-tip&quot;&gt;${icon(&quot;clock-3&quot;)}&lt;span&gt;Chờ đủ dữ liệu · Tự cập nhật mỗi 30 giây&lt;/span&gt;&lt;/div&gt;` : &quot;&quot;}&lt;div class=&quot;vx-bottom-action&quot;&gt;${failed ? button(&quot;edit&quot;, &quot;Quay lại chỉnh sửa&quot;, &quot;vx-primary&quot;, &quot;arrow-left&quot;) : &quot;&quot;}${button(&quot;history&quot;, &quot;Về lịch sử&quot;, &quot;vx-secondary&quot;, completed ? &quot;history&quot; : &quot;arrow-left&quot;)}&lt;/div&gt;&lt;/main&gt;`;
     }
     function oaDetail() {
       const record =
@@ -4901,7 +5028,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const ds = snapshot?.privateContent?.design;
       if (Array.isArray(ds))
         ds.slice(0, 2).forEach((d, i) =&gt; {
-          if (d.radius &gt;= 4 &amp;&amp; d.radius &lt;= 14) design[i].radius = d.radius;
+          if (d.radius &gt;= 12 &amp;&amp; d.radius &lt;= 24) design[i].radius = d.radius;
           if ([&quot;Gọn&quot;, &quot;Tiêu chuẩn&quot;].includes(d.density))
             design[i].density = d.density;
           if (typeof d.technical === &quot;boolean&quot;)
@@ -5216,8 +5343,8 @@ html&gt;body{padding:0}&lt;/style&gt;
         });
         t.addSlider(design[index], &quot;radius&quot;, {
           label: &quot;Bo góc&quot;,
-          min: 4,
-          max: 14,
+          min: 12,
+          max: 24,
           unit: &quot;px&quot;,
         });
         t.addSelect(design[index], &quot;density&quot;, {
