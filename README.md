@@ -7,6 +7,10 @@ Hai phương án duyệt độc lập:
 - [MIKASA gốc](https://nexgenvn.github.io/mikasa-ui-demo/)
 - [Vuexy Mobile](https://nexgenvn.github.io/mikasa-ui-demo/vuexy/) — lấy cảm hứng từ phong cách Vuexy, chuyển bố cục thành app mobile.
 
+Bản Vuexy khôi phục đúng thứ tự 12 màn gốc của ứng dụng: Đăng nhập, Tổng quan, Nhập thông tin, Xác nhận gửi, Đang xử lý, Lịch sử, Chi tiết đã gửi, Chi tiết hoàn thành, Chi tiết thất bại, Tài khoản, Đổi mật khẩu và Xác nhận đăng xuất. Hai tình huống bổ sung “Thành công một phần” và “Chi tiết từng OA” nằm trong nhóm riêng để giữ các thay đổi nhiều OA.
+
+Giữ chọn gửi 1–5 OA, một ô chọn kết quả OA với trạng thái của mỗi OA, tổng số thành công/thất bại/đang xử lý và kết quả riêng theo OA. Đăng xuất luôn có bước xác nhận hoặc hủy. Không đổi APK hoặc backend.
+
 - Chọn **Màn hình** để xem từng thiết kế.
 - Chọn **Giao diện** để so sánh sáng/tối hoặc xem riêng từng bộ.
 - Bấm **Thử luồng gửi** để nhập số mẫu, chọn số OA và xem các trạng thái gửi/kết quả.
