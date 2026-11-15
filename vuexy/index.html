@@ -3803,6 +3803,17 @@ html&gt;body{padding:0}&lt;/style&gt;
   #mikasa-vuexy-app .vx-original-hero.complete {
     background: var(--vx-green-soft);
   }
+  #mikasa-vuexy-app .vx-original-hero.failed {
+    background: var(--vx-red-soft);
+  }
+  #mikasa-vuexy-app .vx-oa-choice-note {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    color: var(--vx-muted);
+    font-size: 12px;
+  }
   #mikasa-vuexy-app .vx-original-hero h1 {
     font-size: 22px;
   }
@@ -4323,7 +4334,23 @@ html&gt;body{padding:0}&lt;/style&gt;
     function originalOaPanel(rs) {
       const c = counts(rs),
         partial = c.sent &gt; 0 &amp;&amp; c.failed &gt; 0;
-      return `&lt;section&gt;&lt;div class=&quot;vx-section-heading&quot;&gt;&lt;h2&gt;${partial ? &quot;Gửi thành công một phần&quot; : `Kết quả gửi ${rs.length} OA`}&lt;/h2&gt;&lt;/div&gt;&lt;p class=&quot;vx-copy&quot; style=&quot;margin-bottom:10px&quot;&gt;${c.sent} thành công · ${c.failed} thất bại · ${c.pending} đang xử lý&lt;/p&gt;${oaRows(rs)}&lt;/section&gt;`;
+      const selected = rs.find((r) =&gt; r.i === state.source) || rs[0];
+      const options = rs
+        .map((r) =&gt; {
+          const status =
+            r.raw.status === &quot;failed&quot;
+              ? &quot;Gửi thất bại&quot;
+              : isReadyResult(r.raw)
+                ? &quot;Hoàn thành&quot;
+                : r.raw.deliveryAccepted
+                  ? &quot;Chờ dữ liệu&quot;
+                  : &quot;Đang xử lý&quot;;
+          return `&lt;option value=&quot;${r.i}&quot;${r === selected ? &quot; selected&quot; : &quot;&quot;}&gt;${esc(oaName(r.i))} — ${status}&lt;/option&gt;`;
+        })
+        .join(&quot;&quot;);
+      const opened = selected?.raw.result?.opened_at;
+      const viewed = providerValue(opened) !== &quot;Chưa có dữ liệu&quot;;
+      return `&lt;section aria-label=&quot;Kết quả từng OA&quot;&gt;&lt;div class=&quot;vx-section-heading&quot;&gt;&lt;h2&gt;${partial ? &quot;Gửi thành công một phần&quot; : `Kết quả gửi ${rs.length} OA`}&lt;/h2&gt;&lt;/div&gt;&lt;p class=&quot;vx-copy&quot; style=&quot;margin-bottom:10px&quot;&gt;${c.sent} thành công · ${c.failed} thất bại · ${c.pending} đang xử lý&lt;/p&gt;&lt;div class=&quot;vx-field&quot;&gt;&lt;label for=&quot;OA-SOURCE&quot;&gt;Chọn OA xem kết quả&lt;/label&gt;&lt;select id=&quot;OA-SOURCE&quot; class=&quot;vx-input&quot; name=&quot;result-oa&quot; data-field=&quot;source&quot;&gt;${options}&lt;/select&gt;&lt;/div&gt;${selected?.raw.status !== &quot;failed&quot; ? `&lt;p class=&quot;vx-oa-choice-note&quot; role=&quot;status&quot;&gt;${icon(viewed ? &quot;eye&quot; : &quot;eye-off&quot;)}&lt;span&gt;${esc(oaName(selected.i))} · ${viewed ? `Đã xem · ${esc(providerTime(opened))}` : &quot;Chưa ghi nhận xem&quot;}&lt;/span&gt;&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;`;
     }
     function resultCard(rs, detail = false) {
       const record = rs.find((r) =&gt; r.i === state.source) || rs[0];
@@ -4331,25 +4358,32 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     function delivery(screen) {
       const rs = records(screen),
-        first = rs[0];
-      const raw = first.raw,
-        completed =
-          screen === &quot;complete&quot; &amp;&amp; rs.some((r) =&gt; isReadyResult(r.raw));
-      const sent = rs.some((r) =&gt; r.raw.deliveryAccepted);
-      const title = completed
-        ? &quot;Đã nhận đủ thông tin&quot;
-        : sent
-          ? &quot;Tin đã được gửi&quot;
-          : &quot;Đang gửi tin&quot;;
+        selected = rs.find((r) =&gt; r.i === state.source) || rs[0];
+      const raw = selected.raw,
+        failed = raw.status === &quot;failed&quot;,
+        completed = !failed &amp;&amp; isReadyResult(raw),
+        sent = raw.deliveryAccepted === true;
+      const title = failed
+        ? &quot;Gửi thất bại&quot;
+        : completed
+          ? &quot;Đã nhận đủ thông tin&quot;
+          : sent
+            ? &quot;Tin đã được gửi&quot;
+            : &quot;Đang gửi tin&quot;;
       const opened = raw.result?.opened_at;
-      const subtitle = completed
-        ? providerValue(opened) !== &quot;Chưa có dữ liệu&quot;
-          ? &quot;Người nhận đã mở tin&quot;
-          : &quot;&quot;
-        : sent
-          ? &quot;Đang chờ người nhận mở tin.&quot;
-          : &quot;Hệ thống đang xử lý.&quot;;
-      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;section class=&quot;vx-original-hero vx-surface ${completed ? &quot;complete&quot; : &quot;&quot;}&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;vx-status-mark ${completed ? &quot;good&quot; : &quot;&quot;}&quot;&gt;${icon(completed ? &quot;check&quot; : sent ? &quot;clock-3&quot; : &quot;send&quot;)}&lt;/span&gt;${badge(completed ? &quot;Hoàn thành&quot; : sent ? &quot;Đã gửi&quot; : &quot;Đang gửi&quot;, completed ? &quot;good&quot; : &quot;brand&quot;)}&lt;h1&gt;${title}&lt;/h1&gt;${subtitle ? `&lt;p class=&quot;vx-copy&quot;&gt;${subtitle}&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;${summaryCard(raw, completed)}${originalOaPanel(rs)}${completed ? recordedInformation(raw) : &quot;&quot;}${requestTimeline(raw, completed)}&lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;history&quot;, &quot;Về lịch sử&quot;, &quot;vx-secondary&quot;, completed ? &quot;history&quot; : &quot;arrow-left&quot;)}&lt;/div&gt;&lt;/main&gt;`;
+      const subtitle = failed
+        ? &quot;&quot;
+        : completed
+          ? providerValue(opened) !== &quot;Chưa có dữ liệu&quot;
+            ? &quot;Người nhận đã mở tin&quot;
+            : &quot;&quot;
+          : sent
+            ? &quot;Đang chờ người nhận mở tin.&quot;
+            : &quot;Hệ thống đang xử lý.&quot;;
+      const failure = failed
+        ? `&lt;div class=&quot;vx-notice bad&quot; role=&quot;alert&quot;&gt;${icon(&quot;circle-alert&quot;)}&lt;span&gt;${esc(providerValue(raw.failureMessage))}${raw.failureCode ? `&lt;br&gt;Mã lỗi ZNS: ${esc(raw.failureCode)}` : &quot;&quot;}&lt;/span&gt;&lt;/div&gt;`
+        : &quot;&quot;;
+      return `&lt;main class=&quot;vx-main vx-gap-sm&quot;&gt;&lt;section class=&quot;vx-original-hero vx-surface ${failed ? &quot;failed&quot; : completed ? &quot;complete&quot; : &quot;&quot;}&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;span class=&quot;vx-status-mark ${failed ? &quot;bad&quot; : completed ? &quot;good&quot; : &quot;&quot;}&quot;&gt;${icon(failed ? &quot;circle-x&quot; : completed ? &quot;check&quot; : sent ? &quot;clock-3&quot; : &quot;send&quot;)}&lt;/span&gt;${badge(failed ? &quot;Gửi thất bại&quot; : completed ? &quot;Hoàn thành&quot; : sent ? &quot;Đã gửi&quot; : &quot;Đang gửi&quot;, failed ? &quot;bad&quot; : completed ? &quot;good&quot; : &quot;brand&quot;)}&lt;h1&gt;${title}&lt;/h1&gt;${subtitle ? `&lt;p class=&quot;vx-copy&quot;&gt;${subtitle}&lt;/p&gt;` : &quot;&quot;}&lt;/section&gt;${originalOaPanel(rs)}${summaryCard(raw, completed)}${failure}${completed ? recordedInformation(raw) : &quot;&quot;}${!failed ? requestTimeline(raw, completed) : &quot;&quot;}&lt;div class=&quot;vx-bottom-action&quot;&gt;${button(&quot;history&quot;, &quot;Về lịch sử&quot;, &quot;vx-secondary&quot;, completed ? &quot;history&quot; : &quot;arrow-left&quot;)}&lt;/div&gt;&lt;/main&gt;`;
     }
     function oaDetail() {
       const record =
@@ -4434,7 +4468,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           design[index].density === &quot;Gọn&quot; ? &quot;14px&quot; : &quot;18px&quot;,
         );
         phone.innerHTML = markup(theme).replace(
-          /\b(id|for)=&quot;(PHONE|USERNAME|CURRENT|NEW-PASSWORD|CONFIRM-PASSWORD|LOGIN-PASSWORD)&quot;/g,
+          /\b(id|for)=&quot;(PHONE|USERNAME|CURRENT|NEW-PASSWORD|CONFIRM-PASSWORD|LOGIN-PASSWORD|OA-SOURCE)&quot;/g,
           (_, attr, id) =&gt; `${attr}=&quot;${theme}-${id}&quot;`,
         );
         if (design[index].technical)
@@ -4560,9 +4594,17 @@ html&gt;body{padding:0}&lt;/style&gt;
     root.addEventListener(&quot;change&quot;, (event) =&gt; {
       const field = event.target.dataset.field;
       if (field === &quot;source&quot;) {
-        state.source = Number(event.target.value);
+        const source = Number(event.target.value);
+        if (!Number.isInteger(source) || source &lt; 0 || source &gt;= state.n)
+          return;
+        const phoneId = event.target.closest(&quot;.vx-app&quot;)?.id;
+        state.source = source;
         render();
         persist();
+        if (phoneId)
+          root
+            .querySelector(`#${phoneId} [data-field=&quot;source&quot;]`)
+            ?.focus({ preventScroll: true });
       }
       if (field === &quot;phone&quot;) {
         state.phone = event.target.value;
