@@ -1,6 +1,6 @@
 # MIKASA Figma Preview Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Publish an interactive Web and App preview matching the supplied Mikasa Figma design on GitHub Pages.
 
@@ -29,35 +29,35 @@
 **Files:** `figma-preview/index.html`, `styles.css`, `assets/`, `core.mjs`, `core.test.mjs`.
 **Interfaces:** `createDemoState()`, `validatePhone(value)`, `createRequest(state,input)`, `filterMessages(messages,filters)`, `escapeHtml(value)`; asset registry from original Figma exports.
 
-- [ ] Create isolated working checkout and copy approved spec/plan.
-- [ ] Write and run failing tests for phone validation, OA bounds, filter results, escaped text and state transitions.
-- [ ] Download original assets; implement the shared state and tokens, header, preview screen selector and native dialog/toast primitives.
-- [ ] Run state tests and syntax checks.
+- [x] Create isolated working checkout and copy approved spec/plan.
+- [x] Write and run failing tests for phone validation, OA bounds, filter results, escaped text and state transitions.
+- [x] Download original assets; implement the shared state and tokens, header, preview screen selector and native dialog/toast primitives.
+- [x] Run state tests and syntax checks.
 
 ### Task 2: Web administration preview
 
 **Files:** `figma-preview/web.mjs`, `styles.css`.
 **Interfaces:** `renderWeb(state,route)` returns HTML; common `data-action` handlers mutate demo state and navigate.
 
-- [ ] Implement sidebar and login from Figma; implement dashboard, accounts/recovery, OA/GIF/messages, history/details, reports, security and role/settings screens.
-- [ ] Wire search, filters, pagination, create/edit dialogs, checkboxes, tabs and CSV export with sample data.
-- [ ] Verify desktop and portrait layouts, including zero-result filtering and escaped input.
+- [x] Implement sidebar and login from Figma; implement dashboard, accounts/recovery, OA/GIF/messages, history/details, reports, security and role/settings screens.
+- [x] Wire search, filters, pagination, create/edit dialogs, checkboxes, tabs and CSV export with sample data.
+- [x] Verify desktop and portrait layouts, including zero-result filtering and escaped input.
 
 ### Task 3: App preview
 
 **Files:** `figma-preview/mobile.mjs`, `app.mjs`, `styles.css`.
 **Interfaces:** `renderMobile(state,route)` returns HTML and shares request state with Web.
 
-- [ ] Implement login, overview, sending steps, history, details, account and settings screens from Figma.
-- [ ] Wire phone validation, 1–5 OA, scheduling, confirmation, progress and sample result changes; support back/cancel/logout.
-- [ ] Add error/empty/loading gallery, palette/typography page and reset action; use the supplied SVGs.
-- [ ] Exercise sending and history flows at 390px and test platform/theme switching.
+- [x] Implement login, overview, sending steps, history, details, account and settings screens from Figma.
+- [x] Wire phone validation, 1–5 OA, scheduling, confirmation, progress and sample result changes; support back/cancel/logout.
+- [x] Add error/empty/loading gallery, palette/typography page and reset action; use the supplied SVGs.
+- [x] Exercise sending and history flows at 390px and test platform/theme switching.
 
 ### Task 4: Validate and publish
 
 **Files:** `figma-preview/README.md`, repository documentation and preview files only.
 
-- [ ] Run Node tests, module syntax checks, asset/route inspection and `git diff --check`.
-- [ ] Browser-check key Web/App flows, dialogs, themes and responsive sizes; fix observed failures.
-- [ ] Request focused independent final review, address material issues, commit and push the preview files.
+- [x] Run Node tests, module syntax checks, asset/route inspection and `git diff --check`.
+- [x] Browser-check key Web/App flows, dialogs, themes and responsive sizes; fix observed failures.
+- [x] Request focused independent final review, address material issues, commit and push the preview files.
 - [ ] Wait for GitHub Pages success, verify live URL and return the published link.

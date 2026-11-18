@@ -13,3 +13,5 @@ dialog{border:1px solid var(--border);border-radius:16px;background:var(--surfac
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .phone-input>span{gap:4px}.phone-input>span img{width:18px;height:18px}.stepper li.active:before{background:var(--border)}.stepper li.active:has(+.active):before{background:var(--primary)}
+
+.bar{height:var(--bar-height,50%)}.type-example-title{margin:24px 0 16px}.type-example-heading{margin:16px 0}.reset-control{white-space:nowrap;margin-left:auto}@media(max-width:560px){.reset-control{font-size:10px;padding:4px 0;min-height:24px}}

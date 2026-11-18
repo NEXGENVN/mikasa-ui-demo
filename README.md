@@ -1,5 +1,7 @@
 # MIKASA — Demo duyệt giao diện
 
+Bản preview Figma Web & App mới: [Mở preview tương tác](https://nexgenvn.github.io/mikasa-ui-demo/figma-preview/), có sáng/tối, bảng màu và các luồng dữ liệu mẫu.
+
 Bộ thiết kế 12 màn hình mobile, có giao diện sáng và tối, cùng luồng tương tác gửi đồng thời qua 1–5 OA.
 
 Hai phương án duyệt độc lập:
