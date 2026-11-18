@@ -14,14 +14,15 @@ Tất cả dữ liệu là mô phỏng trong bộ nhớ trình duyệt. Không k
 - Figma: https://www.figma.com/design/2oHQaSkcqH2GoOidQMwrEs/Mikasa
 - SVG: https://drive.google.com/drive/folders/1hFvOE3yWOokpyOpSvXFh7JBtfJwNAjR3
 - Font Roboto qua Google Fonts; dự phòng Arial/system font khi offline.
-- Các địa chỉ IP minh họa dùng dải dành cho tài liệu `192.0.2.0/24` và `2001:db8::/32`.
+- App giữ các giá trị mẫu của frame Figma; yêu cầu được tạo mới dùng dữ liệu mô phỏng.
+- Bản sửa App ngày 18/11/2026 có 23 màn chính và các biến thể theo ngữ cảnh, được liên kết tới từng frame nguồn. Xem [bảng đối chiếu](FIGMA-MOBILE-AUDIT.md).
 
 ## Chạy và kiểm tra
 
 Phục vụ thư mục repository bằng HTTP server tĩnh, mở `/figma-preview/`.
 
 ```sh
-node --test figma-preview/core.test.mjs
+node --test figma-preview/*.test.mjs
 node --check figma-preview/app.mjs
 node --check figma-preview/web.mjs
 node --check figma-preview/mobile.mjs

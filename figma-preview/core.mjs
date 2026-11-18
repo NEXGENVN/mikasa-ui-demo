@@ -19,11 +19,12 @@ export function beginSubmission(state,input){
  if(!validatePhone(input.phone))throw new Error('Vui lòng nhập số điện thoại Việt Nam hợp lệ.');
  const oaCount=Number(input.oaCount);if(!Number.isInteger(oaCount)||oaCount<1||oaCount>5)throw new Error('Số OA phải từ 1 đến 5.');
  const snapshot=Object.freeze({phone:input.phone,oaCount,template:input.template,outcome:input.outcome,schedule:input.scheduled?input.schedule:''});
- const job={id:(state.submissionSequence=(state.submissionSequence||0)+1),input:snapshot,row:null};state.pendingSubmission=job;return job;
+ const messageId='MK'+String(Math.max(1000,...state.messages.map(m=>Number(m.id.replace('MK',''))||0))+1);
+ const job={id:(state.submissionSequence=(state.submissionSequence||0)+1),messageId,input:snapshot,row:null};state.pendingSubmission=job;return job;
 }
 export function finishSubmission(state,id){
  const job=state.pendingSubmission;if(!job||job.id!==id)return null;
- if(!job.row){const selected=state.selectedId;job.row=createRequest(state,job.input);state.selectedId=selected;}
+ if(!job.row){const selected=state.selectedId;job.row=createRequest(state,job.input);job.row.id=job.messageId;state.selectedId=selected;}
  return job.row;
 }
 export function addConfiguration(state,input){

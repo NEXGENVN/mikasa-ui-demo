@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon">
+<path id="Hour hand" d="M20.001 15H15" stroke-width="1.5" stroke-linecap="round" stroke="#0284C7"/>
+<path id="Vector" d="M27.501 15C27.501 21.9041 21.9041 27.501 15 27.501C8.09588 27.501 2.499 21.9041 2.499 15C2.499 8.09588 8.09588 2.499 15 2.499" stroke-width="1.5" stroke-linecap="round" stroke="#0284C7"/>
+<path id="Waiting dash 1" d="M18.75 2.499C19.3526 2.67719 19.9435 2.90692 20.5168 3.1823" stroke-width="1.5" stroke-linecap="round" stroke="#0284C7"/>
+<path id="Minute hand" d="M15 15V7.5" stroke-width="1.5" stroke-linecap="round" stroke="#0284C7"/>
+<path id="Waiting dash 2" d="M23.559 5.214C23.777 5.40587 23.989 5.60467 24.1947 5.80985C24.4004 6.01503 24.5997 6.22659 24.792 6.444" stroke-width="1.5" stroke-linecap="round" stroke="#0284C7"/>
+<path id="Waiting dash 3" d="M26.796 9.444C27.0808 10.0294 27.3179 10.6336 27.501 11.25" stroke-width="1.5" stroke-linecap="round" stroke="#0284C7"/>
+</g>
+</svg>
