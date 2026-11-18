@@ -1,0 +1,42 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="240" height="136" viewBox="0 0 240 136" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="H&#225;&#187;&#141;a ti&#225;&#186;&#191;t k&#225;&#186;&#191;t n&#225;&#187;&#145;i Mikasa">
+<mask id="stroke0_0_202" fill="white">
+<path d="M227 67C227 99.5848 179.094 126 120 126C60.9055 126 13 99.5848 13 67C13 34.4152 60.9055 8 120 8C179.094 8 227 34.4152 227 67Z"/>
+</mask>
+<ellipse id="V&#195;&#178;ng k&#225;&#186;&#191;t n&#225;&#187;&#145;i ngo&#195;&#160;i" cx="120" cy="67" rx="107" ry="59" stroke-width="2" stroke="#E8F0FF" mask="url(#stroke0_0_202)"/>
+<mask id="stroke1_0_202" fill="white">
+<path d="M197 67C197 91.3005 162.526 111 120 111C77.4741 111 43 91.3005 43 67C43 42.6995 77.4741 23 120 23C162.526 23 197 42.6995 197 67Z"/>
+</mask>
+<ellipse id="V&#195;&#178;ng k&#225;&#186;&#191;t n&#225;&#187;&#145;i trong" opacity="0.8" cx="120" cy="67" rx="77" ry="44" stroke-width="2" stroke="#E2E8F0" mask="url(#stroke1_0_202)"/>
+<g id="Huy hi&#225;&#187;&#135;u n&#225;&#187;&#129;n" filter="url(#filter0_d_0_202)">
+<circle cx="120" cy="67" r="42.5" fill="white" stroke="#E8F0FF"/>
+</g>
+<g id="Bi&#225;&#187;&#131;u t&#198;&#176;&#225;&#187;&#163;ng Mikasa trang tr&#195;&#173;" opacity="0.8">
+<path d="M120 85C129.941 85 138 76.9414 138 67V54.4C138 52.9678 137.431 51.5943 136.418 50.5816C135.406 49.5689 134.032 49 132.6 49H120.9V56.8966C120.9 58.6984 121.01 60.565 121.955 62.0986C122.631 63.1977 123.536 64.1384 124.608 64.8569C125.681 65.5754 126.895 66.0549 128.168 66.2629L128.513 66.3187C128.655 66.3673 128.779 66.4591 128.866 66.5812C128.953 66.7034 129 66.8498 129 67C129 67.1502 128.953 67.2966 128.866 67.4188C128.779 67.5409 128.655 67.6327 128.513 67.6813L128.168 67.7371C126.307 68.0411 124.589 68.922 123.255 70.2554C121.922 71.5888 121.041 73.3074 120.737 75.1684L120.681 75.5131C120.633 75.6552 120.541 75.7786 120.419 75.8659C120.297 75.9533 120.15 76.0002 120 76.0002C119.85 76.0002 119.703 75.9533 119.581 75.8659C119.459 75.7786 119.367 75.6552 119.319 75.5131L119.263 75.1684C119.055 73.8947 118.575 72.6806 117.857 71.6085C117.138 70.5364 116.198 69.6314 115.099 68.9548C113.565 68.0098 111.698 67.9 109.897 67.9H102.022C102.492 77.4229 110.361 85 120 85Z" fill="url(#paint0_linear_0_202)"/>
+<path d="M102 66.1001H109.897C111.698 66.1001 113.565 65.9903 115.099 65.0453C116.297 64.3067 117.307 63.2975 118.045 62.0987C118.99 60.5651 119.1 58.6985 119.1 56.8967V49.0001H107.4C105.968 49.0001 104.594 49.569 103.582 50.5817C102.569 51.5944 102 52.9679 102 54.4001V66.1001Z" fill="url(#paint1_linear_0_202)"/>
+</g>
+<circle id="N&#195;&#186;t k&#225;&#186;&#191;t n&#225;&#187;&#145;i xanh" opacity="0.5" cx="35.5" cy="34.5" r="4.5" fill="#195CFA"/>
+<circle id="N&#195;&#186;t k&#225;&#186;&#191;t n&#225;&#187;&#145;i nh&#225;&#186;&#161;t" cx="201" cy="97" r="6" fill="#E8F0FF"/>
+<circle id="N&#195;&#186;t k&#225;&#186;&#191;t n&#225;&#187;&#145;i nh&#225;&#187;&#143;" opacity="0.35" cx="207.5" cy="31.5" r="2.5" fill="#195CFA"/>
+<circle id="Ch&#225;&#186;&#165;m nh&#225;&#186;&#165;n ph&#225;&#187;&#165;" opacity="0.3" cx="57" cy="107" r="2" fill="#195CFA"/>
+</g>
+<defs>
+<filter id="filter0_d_0_202" x="63" y="15" width="114" height="114" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="5"/>
+<feGaussianBlur stdDeviation="7"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.1 0 0 0 0 0.36 0 0 0 0 0.98 0 0 0 0.1 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_202"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_202" result="shape"/>
+</filter>
+<linearGradient id="paint0_linear_0_202" x1="120" y1="49" x2="120" y2="85" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6E8AFC"/>
+<stop offset="1" stop-color="#375DFB"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_202" x1="120" y1="49" x2="120" y2="85" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6E8AFC"/>
+<stop offset="1" stop-color="#375DFB"/>
+</linearGradient>
+</defs>
+</svg>

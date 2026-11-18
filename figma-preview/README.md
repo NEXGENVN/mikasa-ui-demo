@@ -1,0 +1,30 @@
+# MIKASA · Figma Web & App Preview
+
+Preview tương tác theo Figma Mikasa, xuất bản ở https://nexgenvn.github.io/mikasa-ui-demo/figma-preview/.
+
+- Web: đăng nhập, tổng quan, tài khoản, OA/GIF, lịch sử/chi tiết, báo cáo CSV, bảo mật, vai trò và quyền, gửi ZNS mẫu.
+- App: đăng nhập, tổng quát, gửi tin qua 1–5 OA, xác nhận/hẹn giờ, xử lý/kết quả, lịch sử/lọc/chi tiết, tài khoản và tùy chỉnh.
+- Sáng/tối, bảng màu, kiểu chữ, khoảng cách, 11 trạng thái hệ thống. Các biến thể kết quả chọn ở thanh preview.
+- 7 SVG minh họa lấy từ Drive được cung cấp; icon và ảnh lấy từ Figma và lưu cục bộ. Không dùng URL tài nguyên tạm thời.
+
+Tất cả dữ liệu là mô phỏng trong bộ nhớ trình duyệt. Không kết nối backend, gửi ZNS, thay đổi mật khẩu hoặc tài khoản thật. Tải lại trang/Khôi phục mẫu để đưa dữ liệu về ban đầu. Chỉ theme được ghi nhớ cục bộ.
+
+## Nguồn
+
+- Figma: https://www.figma.com/design/2oHQaSkcqH2GoOidQMwrEs/Mikasa
+- SVG: https://drive.google.com/drive/folders/1hFvOE3yWOokpyOpSvXFh7JBtfJwNAjR3
+- Font Roboto qua Google Fonts; dự phòng Arial/system font khi offline.
+- Các địa chỉ IP minh họa dùng dải dành cho tài liệu `192.0.2.0/24` và `2001:db8::/32`.
+
+## Chạy và kiểm tra
+
+Phục vụ thư mục repository bằng HTTP server tĩnh, mở `/figma-preview/`.
+
+```sh
+node --test figma-preview/core.test.mjs
+node --check figma-preview/app.mjs
+node --check figma-preview/web.mjs
+node --check figma-preview/mobile.mjs
+```
+
+GitHub Pages phục vụ nhánh `main`, thư mục `/`. Các bản preview trước ở `/` và `/vuexy/`.
