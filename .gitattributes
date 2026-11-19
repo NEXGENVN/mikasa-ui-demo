@@ -1,0 +1,6 @@
+# Preserve the exact bytes used to name generated, content-hashed artifacts.
+figma-preview/source-frames/*.html -text
+figma-preview/release/* -text
+figma-preview/assets/fonts/native.*.css -text
+figma-preview/index.html -text
+figma-preview/assets/fonts/*-LICENSE.txt whitespace=-blank-at-eol

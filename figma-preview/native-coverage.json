@@ -1,0 +1,25 @@
+{
+  "total": 791,
+  "ready": 791,
+  "originalVectors": 791,
+  "equivalentVectors": 0,
+  "nativeCode": 0,
+  "pending": 0,
+  "platforms": {
+    "web": {
+      "total": 347,
+      "ready": 347,
+      "pending": 0
+    },
+    "web-portrait": {
+      "total": 221,
+      "ready": 221,
+      "pending": 0
+    },
+    "app": {
+      "total": 223,
+      "ready": 223,
+      "pending": 0
+    }
+  }
+}

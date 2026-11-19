@@ -1,0 +1,106 @@
+[
+  {
+    "family": "Baumans",
+    "subset": "latin",
+    "filename": "-W_-XJj9QyTd3Qfpd_04aw.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/baumans/v18/-W_-XJj9QyTd3Qfpd_04aw.woff2",
+    "bytes": 18948,
+    "sha256": "39bfd3f648877823cb8ce9bf056a3a4480cc0c5e5d21b6cfce10e2bb28db21fb"
+  },
+  {
+    "family": "Inter",
+    "subset": "vietnamese",
+    "filename": "UcC53FwrK3iLTcvneQg7Ca725JhhKnNqk6L2UUMJng.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/inter/v20/UcC53FwrK3iLTcvneQg7Ca725JhhKnNqk6L2UUMJng.woff2",
+    "bytes": 10596,
+    "sha256": "1991ed5832eb07f7523f22a843ca9a8aa83c51c8e87062ce77794855d2f5dee8"
+  },
+  {
+    "family": "Inter",
+    "subset": "latin-ext",
+    "filename": "UcC53FwrK3iLTcvneQg7Ca725JhhKnNqk6L3UUMJng.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/inter/v20/UcC53FwrK3iLTcvneQg7Ca725JhhKnNqk6L3UUMJng.woff2",
+    "bytes": 91900,
+    "sha256": "71254244ccb1ec21e14db3480fef6f6826d1136dc4aca1c7d3ca7ce31294fcce"
+  },
+  {
+    "family": "Inter",
+    "subset": "latin",
+    "filename": "UcC53FwrK3iLTcvneQg7Ca725JhhKnNqk6L5UUM.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/inter/v20/UcC53FwrK3iLTcvneQg7Ca725JhhKnNqk6L5UUM.woff2",
+    "bytes": 51832,
+    "sha256": "7291b5970da2237441273c03b424a504b70b18f09791473fab99687dcc314720"
+  },
+  {
+    "family": "Inter",
+    "subset": "vietnamese",
+    "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2",
+    "bytes": 10252,
+    "sha256": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2"
+  },
+  {
+    "family": "Inter",
+    "subset": "latin-ext",
+    "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2",
+    "bytes": 85068,
+    "sha256": "34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956"
+  },
+  {
+    "family": "Inter",
+    "subset": "latin",
+    "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+    "bytes": 48256,
+    "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62"
+  },
+  {
+    "family": "Roboto",
+    "subset": "vietnamese",
+    "filename": "KFO5CnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmkCXkaWzU.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/roboto/v51/KFO5CnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmkCXkaWzU.woff2",
+    "bytes": 15344,
+    "sha256": "3e6b22d2171656f2f886c209e04c70555a6bdb4903c011811726830492cd6ba9"
+  },
+  {
+    "family": "Roboto",
+    "subset": "latin-ext",
+    "filename": "KFO5CnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmkCHkaWzU.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/roboto/v51/KFO5CnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmkCHkaWzU.woff2",
+    "bytes": 31820,
+    "sha256": "7f21d061a9de1ea78a858938ff3b8e677869656b10bad470fc6039f8f3daf329"
+  },
+  {
+    "family": "Roboto",
+    "subset": "latin",
+    "filename": "KFO5CnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmkBnka.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/roboto/v51/KFO5CnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmkBnka.woff2",
+    "bytes": 47208,
+    "sha256": "14f23757c6b41b4b6c0b967ca3fa74ff47a868728158373461c4e6e4b6368f19"
+  },
+  {
+    "family": "Roboto",
+    "subset": "vietnamese",
+    "filename": "KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3OUBGEe.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3OUBGEe.woff2",
+    "bytes": 14340,
+    "sha256": "0b60bbe04e9c479444b31270a72179f53e400beee57b7dd176c08e5e2e716831"
+  },
+  {
+    "family": "Roboto",
+    "subset": "latin-ext",
+    "filename": "KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3KUBGEe.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3KUBGEe.woff2",
+    "bytes": 29392,
+    "sha256": "cedb374b05a35034cf96db185db4eeb8f8ce49e1a56197673702ff11b5533d6e"
+  },
+  {
+    "family": "Roboto",
+    "subset": "latin",
+    "filename": "KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBA.woff2",
+    "sourceUrl": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBA.woff2",
+    "bytes": 43136,
+    "sha256": "1404ca348bd75ef836f4dd8b6f2cc719458642d1237c368296b2fc652dca47dc"
+  }
+]

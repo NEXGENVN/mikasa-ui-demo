@@ -1,0 +1,14 @@
+{
+  "name": "mikasa-figma-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-preview-release.mjs",
+    "verify:source": "node scripts/verify-source-preview.mjs",
+    "build:native": "node scripts/figma-native-build.mjs",
+    "test": "node --test scripts/*.test.mjs figma-preview/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
