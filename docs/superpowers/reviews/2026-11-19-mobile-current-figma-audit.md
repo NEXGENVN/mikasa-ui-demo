@@ -2,7 +2,7 @@
 
 Source: [Mikasa Mobile](https://www.figma.com/design/2oHQaSkcqH2GoOidQMwrEs?node-id=506-23873). Native design context and its screenshot were refreshed on 19 November 2026 with session `87ac9ceb-fa14-4ec7-ba37-c313587a48dc`.
 
-55 context/screenshot pairs were acquired: all 23 base routes, their 19 registered dark counterparts, both empty-phone Send variants, six data/schedule sheets, two biometric sheets, and three additional detail variants. Local evidence is in `.audit/contexts/mobile-current-<node>.txt` and `.audit/current-mobile-screenshots/<node>.png`.
+65 context/screenshot pairs were acquired: all 23 base routes, their 19 registered dark counterparts, both empty-phone Send variants, six data/schedule sheets, two biometric sheets, and thirteen additional detail variants. Local evidence is in `.audit/contexts/mobile-current-<node>.txt` and `.audit/current-mobile-screenshots/<node>.png`.
 
 ## Source mappings and corrections
 
@@ -25,14 +25,16 @@ The route registry remains in `figma-preview/mobile.mjs`. The App has only the s
 | Schedule `1279:8468` / `1430:87964` | Source header/calendar/time areas and footer; source underlay retains only the visible confirmation notice and steps. |
 | Biometrics `891:2144`, `916:2740` | Original sheets and their own underlying account layout/assets, fingerprint `a8c33.svg`, success `6046c.svg` in its source circle. |
 | Recovery `658:34375`, `658:34596`, `658:34855`, `658:35036` | Source phone-only request field, OTP shield `8b8b1.svg`, six input cells, source password eyes, typography and success layout; submitted recovery phone is masked in the OTP screen. |
-| Sent detail `784:48751` / `1430:86619`; completed detail `784:49355` | Current source info icons, code-copy asset, timeline assets, recorded-info visibility, map image/rings/pin and source map controls. Dynamic requests retain their own IDs and times. |
+| All fifteen registered detail frames | Frame-specific status, copy, clock, terminal, notice, recorded/eye, map/ring and back assets are recorded in `detailFrameAssets`. Failed/scheduled variants use their source terminal states, copy, row/card geometry and footer. Dark sent/failed info icons have transparent backgrounds and the source dark borders. Static detail metadata follows the current source; newly created requests retain their own IDs, times, templates and IP data. |
 
 Current-source assets were downloaded unmodified with `curl -L` from the context-provided URLs into `figma-preview/assets/figma/`. Runtime modules and CSS use local files. Source-only reference screenshots are not implementation assets.
 
 The light Home frame currently shows Account selected in the source navigation; that source state is preserved. Frames with no dark counterpart, including recovery and biometrics, retain their actual source theme.
 
-## Verification and limits
+## Verification
 
-`node --test figma-preview/mobile-fidelity.test.mjs` passes 9 tests. Coverage includes route/frame references, source Send/Confirm asset slots and copy, every rendered local image in both themes and sheets, request IDs/timestamps, source-only page structure, and recovery/privacy interactions. A source-context asset audit also found no rendered assets outside the refreshed base-route/sheet contexts and no missing local files. Browser comparison is coordinated by the parent task.
+`node --test figma-preview/mobile-fidelity.test.mjs` passes 10 tests. Coverage includes route/frame references, source Send/Confirm asset slots and copy, every rendered local image in both themes and sheets, request IDs/timestamps, source-only page structure, recovery/privacy interactions, and the ten additional detail variants. A source-context asset audit also checks frame-specific assets and missing local files. Browser comparison is coordinated by the parent task.
 
-Figma returned its plan tool-call limit on ten additional detail variants: `1086:73413`, `1308:6902`, `1308:7021`, `1308:7105`, `1309:7446`, `1430:87138`, `1444:95125`, `1450:9014`, `1450:9130`, `784:50672`. These routes remain mapped to previously verified source frames; a current-source pixel-match claim for those ten variants is not made. The paired fresh detail variants `1450:8895`, `1450:9522` and `784:49355` were acquired successfully.
+The final detail audit refreshed `1086:73413`, `1308:6902`, `1308:7021`, `1308:7105`, `1309:7446`, `1430:87138`, `1444:95125`, `1450:9014`, `1450:9130` and `784:50672`, completing source coverage. It corrected scheduled status/notice assets (`ce8d2.svg`, `1ee08.svg`), failed status/notice/terminal assets (`41c72.svg`, `81b8b.svg`, `2feb1.svg`), the dark single-completed map (`97b8d.png`), dark recorded/eye/clock assets, and each frame's original map ring assets. Twelve missing files were downloaded unchanged from those contexts. The scheduled actions now match the source's horizontal neutral and destructive outlines; the failure timeline uses its red terminal state and source error text.
+
+Native dimensions are respected per frame: dark failed details are 844 px high, dark multi-sent is 926 px, dark single-completed is 1190 px, and dark multi-completed is 1198 px. Their light counterparts retain their own 926/1164/1199 px source heights.

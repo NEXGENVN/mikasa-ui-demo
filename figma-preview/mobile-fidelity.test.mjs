@@ -84,3 +84,29 @@ test('source recovery phone and privacy controls keep working with sample data',
  let rendered=0;mobileChange({dataset:{mobilePreference:'hideNotifications'},type:'checkbox',checked:false},{state:s,render:()=>rendered++});
  assert.equal(s.mobile.hideNotifications,false);assert.equal(rendered,1);
 });
+
+test('refreshed detail variants retain their own source assets and scheduled actions',()=>{
+ const cases=[
+  ['light','scheduled',1,'1086:73413',['ce8d2.svg','1ee08.svg','ea78d.svg']],
+  ['light','sent',5,'1308:6902',['cd966.svg','67957.svg','32de8.svg']],
+  ['dark','sent',5,'1450:8895',['cd966.svg','77c2d.svg','fb81e.svg']],
+  ['light','failed',5,'1308:7021',['41c72.svg','81b8b.svg','2feb1.svg']],
+  ['light','success',5,'1308:7105',['0ab68.svg','7ed32.svg','18606.svg']],
+  ['light','partial',5,'1309:7446',['0ab68.svg','d1bb7.svg','44b97.svg']],
+  ['dark','success',1,'1430:87138',['77c2d.svg','bc2a6.svg','97b8d.png','1d81f.svg','ae6ba.svg']],
+  ['dark','failed',1,'1444:95125',['41c72.svg','81b8b.svg','2feb1.svg','7d026.svg']],
+  ['dark','failed',5,'1450:9014',['41c72.svg','81b8b.svg','2feb1.svg','7d026.svg']],
+  ['dark','success',5,'1450:9130',['af0c8.svg','01357.svg','d07ee.svg','e81f1.svg','c3641.svg','2f758.svg']],
+  ['light','failed',1,'784:50672',['41c72.svg','81b8b.svg','2feb1.svg']]
+ ];
+ for(const [theme,status,oaCount,node,assets] of cases){
+  const s=createDemoState();s.ui.theme=theme;s.mobile={fixtures:[{id:'figma-variant',phone:'0332225555',template:'Source row',time:'Now',status,oaCount}]};s.selectedId='figma-variant';
+  const html=renderMobile(s,'detail');assert.ok(html.includes('data-figma-node="'+node+'"'),node);
+  const heights={'1086:73413':844,'1308:6902':1164,'1450:8895':926,'1308:7021':926,'1308:7105':1199,'1309:7446':1199,'1430:87138':1190,'1444:95125':844,'1450:9014':844,'1450:9130':1198,'784:50672':926};
+  assert.ok(html.includes('--frame-height:'+heights[node]+'px'),node+' height');
+  for(const asset of assets)assert.ok(html.includes('assets/figma/'+asset),node+' / '+asset);
+  for(const [,asset] of html.matchAll(/src="assets\/figma\/([^\"]+)"/g))assert.ok(statSync(new URL('./assets/figma/'+asset,import.meta.url)).size>0,asset);
+  assert.ok(html.includes('Thông báo đơn hàng'));assert.equal(html.includes('Source row'),false);
+  if(status==='scheduled'){assert.ok(html.includes('f-detail-schedule-footer'));assert.ok(html.includes('f-outline-danger'));assert.equal(html.includes('f-primary'),false);}
+ }
+});

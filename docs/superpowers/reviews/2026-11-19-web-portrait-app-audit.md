@@ -28,13 +28,13 @@ Removed the invented Web send route, sidebar user/logout block, email recovery d
 
 Source-backed sample interactions include phone/OTP recovery, account creation/edit/deactivation, account/history/OA filtering and pagination, overview date/status filtering, report filters and CSV/Excel export, session policies, MFA, device decisions, role creation/status and permissions. The account recovery tab displays the source's backup rows rather than a fabricated password-reset queue. Restore and provider connection actions report sample outcomes without contacting services. Source-visible Map and unsupported settings tabs have no invented destination.
 
-App was refreshed from 55 current context/screenshot pairs. Its route and asset audit, source oddities and ten detail variants which could not be refreshed due to Figma's tool-call limit are documented in [the App audit](2026-11-19-mobile-current-figma-audit.md). This delivery does not claim a new pixel comparison of those ten variants, or implementation of every frame in the entire Figma file.
+App was refreshed from 65 current context/screenshot pairs, including all ten detail variants initially blocked by the agent's tool-call limit. Their failed/scheduled icons and timeline content, dark completed details, per-frame map assets and schedule actions were corrected from the refreshed native contexts. The route and asset audit and source oddities are documented in [the App audit](2026-11-19-mobile-current-figma-audit.md). This delivery implements the preview's registered routes and states rather than every frame in the entire Figma file.
 
 ## Verification
 
-- 42 Node tests pass, covering routing, escaped sample input, request snapshots, source structures/assets, source modal/state mappings, report reconciliation/export, account recovery, overview filtering and role status/search behavior.
+- 43 Node tests pass, covering routing, escaped sample input, request snapshots, source structures/assets, source modal/state mappings, report reconciliation/export, account recovery, overview filtering, role status/search behavior and all refreshed App detail variants.
 - Browser route sweep: all 32 Web entries and all 23 App entries in both themes loaded local images without failures; no JavaScript errors were captured.
-- Browser interaction checks: account creation, source backup tab, GIF tab, failed history detail, security tabs, role search/caret, inactive role creation, phone/OTP/password recovery and App send/processing/result.
+- Browser interaction checks: account creation, source backup tab, GIF tab, failed history detail, security tabs, role search/caret, inactive role creation, phone/OTP/password recovery, App send/processing/result, scheduled creation/detail and failed App details in both themes (including the 844 px dark source frame).
 - Visual inspection at the source comparison viewport and a 390 px viewport confirmed separate portrait layout, retained source canvases and no document horizontal overflow. App light/dark and Web overview, roles, backups and GIF were inspected visually.
 - Five final review findings were corrected: backup destination, account empty/reset state, overview date filtering, inactive role status, and role search focus preservation.
 
