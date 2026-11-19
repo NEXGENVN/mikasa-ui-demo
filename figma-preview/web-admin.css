@@ -1,0 +1,277 @@
+.figma-web .wa-admin{box-sizing:border-box;width:100%;font-family:Roboto,Arial,sans-serif;color:var(--w-text,#142138);font-size:14px;line-height:normal}
+.figma-web .wa-admin *{box-sizing:border-box}
+.figma-web .wa-admin h2,.figma-web .wa-admin h3,.figma-web .wa-admin p,.figma-web .wa-admin ul{margin:0}
+.figma-web .wa-admin h3{font-size:16px;font-weight:700;line-height:22px;color:#142138}
+.figma-web .wa-admin p{color:#63738c}
+.figma-web .wa-asset{display:block;flex:none;max-width:none;object-fit:contain}
+.figma-web .wa-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#142138;font:500 12px/normal Roboto,Arial,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:none;min-width:0}
+.figma-web .wa-button.wa-primary{background:var(--w-primary,#0f4d88);color:white;border-color:var(--w-primary,#0f4d88)}
+.figma-web .wa-button.wa-danger{border-color:#e84552;color:#e84552;background:#fff}
+.figma-web .wa-admin button:focus-visible,.figma-web .wa-admin input:focus-visible,.figma-web .wa-admin select:focus-visible,.figma-web .wa-admin textarea:focus-visible{outline:2px solid #195cfa;outline-offset:2px}
+.figma-web .wa-panel{border:1px solid #dae3ee;border-radius:12px;background:#fff}
+.figma-web .wa-admin input,.figma-web .wa-admin select,.figma-web .wa-admin textarea{font-family:Roboto,Arial,sans-serif;box-shadow:none;margin:0;color:#141f33}
+.figma-web .wa-admin input[type=checkbox]{appearance:none;flex:none;display:inline-block;width:20px;height:20px;min-height:0;padding:0;border:1px solid #c9c9c9;border-radius:4px;background:#fff;vertical-align:middle;cursor:pointer}
+.figma-web .wa-admin input[type=checkbox]:checked{border:0;background:url('assets/figma/73a7f.svg') center/20px 20px no-repeat}
+.figma-web .wa-select{position:relative;display:block}
+.figma-web .wa-select select{appearance:none;width:100%;height:40px;min-height:0;padding:0 36px 0 12px;border:1px solid #dee5f0;border-radius:8px;background:#fff;font-size:13px;cursor:pointer}
+.figma-web .wa-select>.wa-asset{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none}
+.figma-web .wa-tabs{display:flex;align-items:stretch;gap:40px;height:44px;width:100%;padding-left:15px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;flex:none;overflow:hidden}
+.figma-web .wa-tabs>button{position:relative;flex:0 0 116px;height:43px;padding:0 0 1px;border:0;background:transparent;color:#64748b;font:400 13px/normal Roboto,Arial,sans-serif;cursor:pointer;box-shadow:none;border-radius:0}
+.figma-web .wa-tabs>button[aria-selected=true]{color:var(--w-primary,#0f4d88)}
+.figma-web .wa-tabs>button[aria-selected=true]::after{content:'';position:absolute;left:0;right:0;bottom:0;border-bottom:3px solid var(--w-primary,#0f4d88);border-radius:2px}
+.figma-web .wa-tabs>button[aria-disabled=true]{cursor:default}
+
+.figma-web .wa-reports{display:flex;flex-direction:column;gap:12px;height:860px;overflow:hidden;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}
+.figma-web .wa-reports>h2{font-size:15px;font-weight:700;line-height:18px}
+.figma-web .wa-report-filters{display:flex;align-items:center;gap:16px;flex:none;width:100%;height:74px;padding:0 17px;border:1px solid #d8e2f0;border-radius:10px}
+.figma-web .wa-date{position:relative;display:flex;align-items:center;width:300px;height:30px}
+.figma-web .wa-date input{height:30px;width:100%;min-height:0;padding:0 35px 0 12px;background:#fff;border:1px solid #dee5f0;border-radius:8px;font-size:13px}
+.figma-web .wa-date input::-webkit-calendar-picker-indicator{opacity:0;position:absolute;inset:0;width:auto;height:auto;cursor:pointer}
+.figma-web .wa-date-empty input{color:transparent}
+.figma-web .wa-date-placeholder{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#64748b;font-size:13px;pointer-events:none}
+.figma-web .wa-date>.wa-asset{position:absolute;right:12px;pointer-events:none}
+.figma-web .wa-report-filters .wa-select{width:130px;flex:none}
+.figma-web .wa-report-filters select{height:30px;min-height:0;padding:0 25px 0 15px;border-radius:10px;font-size:12px;color:#64748b}
+.figma-web .wa-report-filters .wa-select>.wa-asset{right:8px}
+.figma-web .wa-report-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;flex:none;width:100%}
+.figma-web .wa-kpi{display:flex;flex-direction:column;gap:8px;height:104px;padding:14px 16px 12px;border:1px solid #e2e8f0;border-radius:10px;background:#fff}
+.figma-web .wa-kpi>span{font-size:12px;color:#63738c}
+.figma-web .wa-kpi>strong{font-size:21px;line-height:25px;color:#142138}
+.figma-web .wa-kpi>small{font-size:11px;color:#149e6e;white-space:nowrap}
+.figma-web .wa-report-visualizations{display:grid;grid-template-columns:610px 1fr;gap:16px;flex:none;width:100%;height:350px}
+.figma-web .wa-report-chart{position:relative;width:100%;height:350px;overflow:hidden;background:#fff;border:1px solid #e2e8f0;border-radius:8px}
+.figma-web .wa-report-chart>h3{position:absolute;top:15px;left:15px}
+.figma-web .wa-chart-subtitle{position:absolute;top:39px;left:15px;font-size:11px}
+.figma-web .wa-y-axis{position:absolute;left:13px;top:66px;display:flex;flex-direction:column;gap:27px;width:40px;text-align:right;font-size:10px;color:#63738c}
+.figma-web .wa-y-axis>span{height:15px}
+.figma-web .wa-chart-grid{position:absolute;left:59px;top:70px;right:20px;display:flex;flex-direction:column;gap:41px}
+.figma-web .wa-chart-grid>i{height:1px;width:100%;background:#e0e8f2}
+.figma-web .wa-chart-bars{position:absolute;left:94px;top:70px;height:235px;display:flex;align-items:flex-end;gap:26px}
+.figma-web .wa-chart-column{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;flex:none;width:38px}
+.figma-web .wa-chart-column>span{height:16px;font-size:10px;color:#63738c;text-align:center}
+.figma-web .wa-chart-bar{width:18px;flex:none;border-radius:4px;background:#99bfff}
+.figma-web .wa-chart-column:nth-child(6) .wa-chart-bar{width:20px}
+.figma-web .wa-chart-selected{width:57px;gap:8px}
+.figma-web .wa-chart-selected .wa-chart-bar{width:20px;background:#195cfa}
+.figma-web .wa-chart-tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#0f4d88;color:#fff;border-radius:4px;padding:8px;font:600 14px/16px Inter,Arial,sans-serif;white-space:nowrap;box-shadow:0 1px 2px #19213d14}
+.figma-web .wa-chart-tooltip>span{display:block;position:absolute;top:100%;left:50%;transform:translateX(-50%);height:8px}
+.figma-web .wa-pricing-summary{position:absolute;top:312px;left:33px;display:flex;align-items:center;gap:46px;white-space:nowrap;color:#64748b;font-size:10px}
+.figma-web .wa-pricing-summary>div{display:flex;flex-direction:column;gap:4px}
+.figma-web .wa-pricing-summary small{font-size:8px}
+.figma-web .wa-report-reconciliation{height:350px;min-width:0;padding:15px 11px 12px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;overflow:hidden}
+.figma-web .wa-report-reconciliation h3{margin-left:4px}
+.figma-web .wa-report-reconciliation p{margin:2px 4px 15px;font-size:11px;line-height:17px}
+.figma-web .wa-admin table{width:100%;border-collapse:collapse;text-align:left;table-layout:fixed;font-size:11px}
+.figma-web .wa-admin table th,.figma-web .wa-admin table td{padding:0;font-weight:400;border:0;background:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#63738c;line-height:normal}
+.figma-web .wa-report-reconciliation thead{height:32px;background:#f5f7fa;border-radius:4px}
+.figma-web .wa-report-reconciliation th:first-child{width:48%;padding-left:8px}
+.figma-web .wa-report-reconciliation th:nth-child(2){width:23%}
+.figma-web .wa-report-reconciliation tbody tr{height:52px;border-bottom:1px solid #edf1f6}
+.figma-web .wa-report-reconciliation tbody th,.figma-web .wa-report-reconciliation tbody td:last-child{font-weight:500;color:#142138}
+.figma-web .wa-report-reconciliation tfoot tr{height:80px}
+.figma-web .wa-report-reconciliation tfoot th,.figma-web .wa-report-reconciliation tfoot td{font-weight:700;font-size:12px;color:#142138;vertical-align:bottom;padding-bottom:5px}
+.figma-web .wa-report-reconciliation tfoot td{color:#0f4d88}
+.figma-web .wa-report-export{position:relative;display:flex;align-items:flex-start;gap:0;width:100%;min-height:88px;flex:none;padding:16px;border:1px solid #e2e8f0;border-radius:8px;background:#fff}
+.figma-web .wa-report-export>div:first-child{flex:1;min-width:0}
+.figma-web .wa-report-export h3{font-size:14px;line-height:20px;margin-bottom:8px}
+.figma-web .wa-report-export p{font-size:12px;line-height:14px}
+.figma-web .wa-export-actions{display:flex;align-items:center;gap:8px;padding:4px 0 0 8px}
+.figma-web .wa-export-actions .wa-button:first-child{width:106px}
+.figma-web .wa-export-actions .wa-button:last-child{width:102px;border:1px solid #195cfa;border-radius:6px}
+.figma-web .wa-report-empty{display:flex;align-items:center;justify-content:center;min-height:250px;color:#64748b}
+.figma-web .wa-portrait.wa-reports{height:1264px;padding:15px;background:white;border-color:#e0e8f5;border-radius:12px;gap:14px}
+.figma-web .wa-portrait .wa-report-filters{height:55px;padding:0 25px;gap:12px;margin-top:-2px;width:681px;max-width:100%;border-color:#e2e8f0;border-radius:8px}
+.figma-web .wa-portrait .wa-date{width:250px;flex:none}
+.figma-web .wa-portrait .wa-report-filters .wa-select{width:125px}
+.figma-web .wa-portrait .wa-report-filters .wa-report-account{width:110px}
+.figma-web .wa-portrait .wa-report-filters .wa-select>.wa-asset{right:16px}
+.figma-web .wa-portrait .wa-report-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.figma-web .wa-portrait .wa-kpi{gap:12px}
+.figma-web .wa-portrait .wa-kpi:nth-child(n+3){gap:8px}
+.figma-web .wa-portrait .wa-kpi>small{color:#63738c}
+.figma-web .wa-portrait .wa-report-visualizations{display:flex;flex-direction:column;gap:12px;height:auto;width:682px;max-width:100%}
+.figma-web .wa-portrait .wa-report-chart{height:366px;flex:none;background:#f9fafb;border-radius:8px}
+.figma-web .wa-portrait .wa-chart-grid{right:23px}
+.figma-web .wa-portrait .wa-chart-bars{left:97px;gap:40px;top:70px;height:234px}
+.figma-web .wa-portrait .wa-chart-bar,.figma-web .wa-portrait .wa-chart-column:nth-child(6) .wa-chart-bar,.figma-web .wa-portrait .wa-chart-selected .wa-chart-bar{width:28px}
+.figma-web .wa-portrait .wa-report-reconciliation{height:303px;flex:none;background:#f9fafb;padding:16px 12px}
+.figma-web .wa-portrait .wa-report-reconciliation p{margin-bottom:15px}
+.figma-web .wa-portrait .wa-report-reconciliation th:first-child{width:27%}
+.figma-web .wa-portrait .wa-report-reconciliation th:nth-child(2){width:27%}
+.figma-web .wa-portrait .wa-report-reconciliation tbody tr{height:52px}
+.figma-web .wa-portrait .wa-report-reconciliation tfoot tr{height:37px}
+.figma-web .wa-portrait .wa-report-reconciliation tfoot td{text-align:right}
+.figma-web .wa-portrait .wa-report-export{width:682px;max-width:100%;height:118px;padding:16px 8px;background:#f9fafb;margin-top:-2px}
+.figma-web .wa-portrait .wa-report-export h3{font-size:14px;line-height:28px;margin-bottom:16px}
+.figma-web .wa-portrait .wa-report-export p{font-size:12px;line-height:14px}
+.figma-web .wa-portrait .wa-export-actions{position:absolute;right:8px;top:12px;padding:4px 0 0}
+.figma-web .wa-portrait .wa-export-actions .wa-button{height:30px;width:94px;font-size:12px}
+
+.figma-web .wa-security{display:flex;flex-direction:column;gap:12px;min-height:860px;border:1px solid #f8fafc;padding-top:8px;padding-bottom:16px}
+.figma-web .wa-security-body{display:flex;flex-direction:column;gap:12px;width:100%}
+.figma-web .wa-policy{display:flex;flex-direction:column;gap:8px;padding:18px 20px;border-color:#dee5f0;border-radius:10px}
+.figma-web .wa-policy h3{color:#141f33}
+.figma-web .wa-policy p{font-size:12px;line-height:14px;max-width:732px;margin-top:-4px}
+.figma-web .wa-portrait-break{display:none}
+.figma-web .wa-policy-fields{display:flex;gap:9px;width:474px}
+.figma-web .wa-policy-fields>label{display:flex;flex-direction:column;gap:5px;width:225px;flex:none}
+.figma-web .wa-policy-fields>label>span:first-child{font-size:12px;height:18px;font-weight:500;color:#121212}
+.figma-web .wa-policy-fields>label+label>span:first-child{color:#63738a}
+.figma-web .wa-device-limit{padding:16px;width:calc(100% - 5px)}
+.figma-web .wa-device-limit h3{margin-bottom:6px}
+.figma-web .wa-device-limit p{font-size:12px}
+.figma-web .wa-security-status{display:flex;gap:14px;align-items:center;height:76px;padding:16px;flex:none}
+.figma-web .wa-status-icon{display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;border-radius:12px;background:#e8f2ff}
+.figma-web .wa-security-status>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;height:40px;justify-content:center}
+.figma-web .wa-security-status strong{font-size:14px;color:#142138}
+.figma-web .wa-security-status p{font-size:11px}
+.figma-web .wa-activation-badge{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:6px 10px;border-radius:999px;background:#fff5de;color:#f59e0b;white-space:nowrap;font-size:12px;font-weight:700;flex:none}
+.figma-web .wa-mfa-form{display:grid;grid-template-columns:652px 369px;justify-content:space-between;gap:0;margin:0}
+.figma-web .wa-password-panel{display:flex;flex-direction:column;justify-content:center;gap:20px;height:464px;padding:20px;border-radius:14px}
+.figma-web .wa-password-panel h3{font-size:17px}
+.figma-web .wa-password-panel p{font-size:12px;line-height:14px}
+.figma-web .wa-password-panel>label{display:flex;flex-direction:column;gap:20px;width:100%}
+.figma-web .wa-password-panel label>strong{font-size:12px;font-weight:700;color:#142138}
+.figma-web .wa-password-field{display:flex;align-items:center;justify-content:space-between;width:100%;height:42px;min-height:42px;padding:0 12px;border:1px solid #dae3ee;border-radius:8px;background:white}
+.figma-web .wa-password-field>input{font-size:13px;min-width:0;width:100%;height:40px;min-height:0;padding:0;border:0;background:transparent}
+.figma-web .wa-eye{width:24px;height:24px;padding:0;flex:none;border:0;background:none}
+.figma-web .wa-password-strength{display:flex;gap:7px;width:100%;height:7px;flex:none}
+.figma-web .wa-password-strength>i{display:block;flex:1;border-radius:99px;background:#e2e8f0}
+.figma-web .wa-password-strength>i:nth-child(-n+2){background:#149466}
+.figma-web .wa-green{font-size:11px;font-weight:700;color:#149466;line-height:15px}
+.figma-web .wa-password-guidance{display:flex;align-items:center;background:#eef4ff;padding:12px;border-radius:8px;width:100%;height:42px;flex:none;font-size:10px;line-height:15px;color:#344054}
+.figma-web .wa-security-information{display:flex;flex-direction:column;gap:14px}
+.figma-web .wa-impact-panel{height:208px;padding:18px;border-radius:14px}
+.figma-web .wa-impact-panel h3,.figma-web .wa-policy-confirm h3{font-size:14px;line-height:18px}
+.figma-web .wa-impact-panel p{font-size:10px;line-height:14px;margin-top:12px}
+.figma-web .wa-impact-panel ul{display:flex;flex-direction:column;gap:12px;list-style:none;padding:0;margin-top:24px}
+.figma-web .wa-impact-panel li{display:flex;align-items:flex-start;gap:8px;min-height:18px;font-size:11px;line-height:15px;color:#142138}
+.figma-web .wa-impact-panel li::before{content:'';flex:none;display:block;width:8px;height:8px;margin-top:4px;border-radius:50%;background:#195cfa}
+.figma-web .wa-policy-confirm{height:159px;padding:18px;display:flex;flex-direction:column;gap:12px;border-radius:14px}
+.figma-web .wa-confirm-message{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px;background:#e2f6ec;border-radius:8px;color:#05a16e;font-size:12px;white-space:nowrap;overflow:hidden}
+.figma-web .wa-confirm-message small{display:block;margin-top:4px;font-size:8px}
+.figma-web .wa-policy-confirm>label{display:flex;align-items:center;gap:8px;font-size:10px;line-height:14px;white-space:nowrap}
+.figma-web .wa-policy-confirm input[type=checkbox]{border-color:#d3dae5}
+.figma-web .wa-mfa-actions{height:70px;display:flex;align-items:center;justify-content:center;gap:12px;padding:14px}
+.figma-web .wa-mfa-actions .wa-button{height:38px;font-size:12px}
+.figma-web .wa-mfa-actions .wa-button:first-child{width:84px}
+.figma-web .wa-mfa-actions .wa-primary{flex:1;font-weight:700}
+.figma-web .wa-login-history{display:flex;flex-direction:column;gap:12px;height:354px;padding:16px;overflow:hidden}
+.figma-web .wa-login-history h3{font-size:16px}
+.figma-web .wa-login-table{padding:8px 0;overflow:auto}
+.figma-web .wa-login-table thead{height:26px;background:#e2e8f0}
+.figma-web .wa-login-table table{font-size:10px}
+.figma-web .wa-login-table th{font-weight:500;padding-left:36px}
+.figma-web .wa-login-table td{height:49px;color:#142138;padding-left:36px;border-bottom:1px solid #e8eef5}
+.figma-web .wa-login-table th:nth-child(1){width:21%}
+.figma-web .wa-login-table th:nth-child(2){width:20%}
+.figma-web .wa-login-table th:nth-child(3){width:20%}
+.figma-web .wa-login-table th:nth-child(4){width:22%}
+.figma-web .wa-login-table td:last-child{padding-left:0}
+.figma-web .wa-login-table .wa-button{width:143px;height:26px;font-size:10px;border-width:.5px;border-radius:6px}
+.figma-web .wa-device-requests{padding:12px 16px;border-color:#e0e8f5;display:flex;flex-direction:column;gap:18px}
+.figma-web .wa-device-requests>header{display:flex;align-items:center;gap:12px;height:67px;flex:none}
+.figma-web .wa-device-requests>header>span{display:flex;align-items:center;justify-content:center;flex:none;width:36px;height:34px;background:#fff5db;border-radius:10px}
+.figma-web .wa-device-requests h3{font-family:Inter,Arial,sans-serif;font-size:19px;line-height:23px;font-weight:600;color:#122445;margin-bottom:6px}
+.figma-web .wa-device-requests header p{font-family:Inter,Arial,sans-serif;font-size:12px;color:#637a9e}
+.figma-web .wa-request-list{display:flex;flex-direction:column;gap:16px}
+.figma-web .wa-request-row{display:flex;align-items:center;justify-content:space-between;gap:0;width:100%;height:44px;color:#64748b}
+.figma-web .wa-request-row>div:first-child{display:flex;flex-direction:column;gap:8px;width:200px;flex:none;height:44px}
+.figma-web .wa-request-row strong{font-size:13px;line-height:15px;font-weight:600}
+.figma-web .wa-request-row small{font-size:12px;line-height:14px}
+.figma-web .wa-request-time{font-size:12px;width:112px;flex:none;color:#637a9e}
+.figma-web .wa-request-status{display:flex;align-items:center;justify-content:center;width:100px;height:27px;border-radius:8px;background:#fff5de;color:#f59e0b;font-size:10px;font-weight:700;flex:none}
+.figma-web .wa-request-actions{display:flex;align-items:center;gap:8px;min-width:165px}
+.figma-web .wa-request-actions .wa-button{height:30px;font-size:11px;border-radius:8px;padding:8px}
+.figma-web .wa-request-actions .wa-danger{width:65px}
+.figma-web .wa-request-actions .wa-primary{width:92px}
+.figma-web .wa-portrait .wa-device-limit{width:100%}
+.figma-web .wa-portrait .wa-portrait-break{display:block}
+.figma-web .wa-portrait.wa-security-sessions{padding:0;border:0;gap:6px;margin-top:-14px}
+.figma-web .wa-portrait.wa-security-sessions .wa-security-body{gap:20px}
+.figma-web .wa-portrait .wa-mfa-form{grid-template-columns:392px 274px;justify-content:start;gap:22px}
+.figma-web .wa-portrait .wa-password-panel{padding:12px;width:392px}
+.figma-web .wa-portrait .wa-password-panel>label,.figma-web .wa-portrait .wa-password-strength,.figma-web .wa-portrait .wa-password-guidance{width:312px}
+.figma-web .wa-portrait .wa-password-panel>p{font-size:12px}
+.figma-web .wa-portrait .wa-password-panel>label{gap:20px}
+.figma-web .wa-portrait .wa-impact-panel{height:208px;padding:12px}
+.figma-web .wa-portrait .wa-impact-panel ul{margin-top:16px;gap:10px}
+.figma-web .wa-portrait .wa-impact-panel li{font-size:12px}
+.figma-web .wa-portrait .wa-impact-panel p{margin-top:14px}
+.figma-web .wa-portrait .wa-policy-confirm{padding:18px}
+.figma-web .wa-portrait .wa-confirm-message{padding:10px;gap:8px;overflow:hidden}
+.figma-web .wa-portrait .wa-confirm-message>div{font-size:12px}
+.figma-web .wa-portrait .wa-policy-confirm>label{font-size:10px}
+.figma-web .wa-portrait .wa-mfa-actions .wa-button:first-child{width:60px}
+.figma-web .wa-portrait .wa-login-table th,.figma-web .wa-portrait .wa-login-table td{padding-left:28px}
+.figma-web .wa-portrait .wa-login-table th:nth-child(1){width:25%}
+.figma-web .wa-portrait .wa-login-table th:nth-child(2){width:23%}
+.figma-web .wa-portrait .wa-login-table th:nth-child(3){width:17%}
+.figma-web .wa-portrait .wa-login-table th:nth-child(4){width:13%}
+.figma-web .wa-portrait .wa-login-table th:last-child{width:22%}
+.figma-web .wa-portrait .wa-login-table td:last-child{padding-left:0}
+.figma-web .wa-portrait .wa-login-table .wa-button{width:120px}
+.figma-web .wa-portrait.wa-security-sessions .wa-login-history{margin-top:-8px}
+.figma-web .wa-portrait .wa-request-row>div:first-child{width:200px}
+.figma-web .wa-portrait .wa-request-time{width:100px}
+
+.figma-web .wa-settings{display:flex;flex-direction:column;gap:16px}
+.figma-web .wa-settings-layout{display:grid;grid-template-columns:247px 1fr;gap:21px;width:100%;align-items:end}
+.figma-web .wa-roles{display:flex;flex-direction:column;gap:10px;align-items:center;height:711px;overflow:hidden;padding:10px;border-color:#e2e8f0;border-radius:8px}
+.figma-web .wa-roles>h3{width:100%;color:#17263d;line-height:22px}
+.figma-web .wa-role-search{display:flex;align-items:center;gap:12px;width:100%;height:34px;flex:none;padding:6px 12px;border:1px solid #dbe3f0;border-radius:6px;background:#f9fafb}
+.figma-web .wa-role-search>input{width:100%;min-width:0;height:20px;min-height:0;padding:0;border:0;background:transparent;font-size:11px;line-height:16px;color:#63758f}
+.figma-web .wa-role-search>input::placeholder{color:#63758f;opacity:1}
+.figma-web .wa-role-cards{display:flex;flex-direction:column;gap:10px;width:100%;overflow:auto}
+.figma-web .wa-role-card{position:relative;display:flex;flex-direction:column;gap:8px;flex:none;width:100%;height:93px;padding:16px;border:1px solid #e2e8f0;border-radius:8px;background:#f9fafb;text-align:left;font:400 14px/normal Roboto,Arial,sans-serif;cursor:pointer;box-shadow:none}
+.figma-web .wa-role-card.wa-role-selected{background:#e8f0ff}
+.figma-web .wa-role-name{color:#195cfa;font-size:16px;line-height:16px;white-space:nowrap}
+.figma-web .wa-role-description{color:#121212;font-size:14px;line-height:14px;white-space:nowrap}
+.figma-web .wa-role-meta{display:flex;align-items:center;gap:12px;margin-top:0;white-space:nowrap}
+.figma-web .wa-role-meta>small{display:flex;justify-content:center;align-items:center;width:75px;height:15px;background:#d5ffe0;border-radius:5px;color:#059669;font-size:8px}
+.figma-web .wa-role-meta>span{display:flex;align-items:center;gap:5px;font-size:8px;color:#94a3b8}
+.figma-web .wa-role-menu{position:absolute;right:14px;top:35px}
+.figma-web .wa-permissions{height:711px;padding:8px;border-color:#e8e9ea;border-radius:8px;overflow:hidden}
+.figma-web .wa-permissions-heading{display:flex;align-items:center;gap:25px;width:100%;height:48px;margin-bottom:14px}
+.figma-web .wa-permissions-heading>div{display:flex;align-items:center;gap:22px;flex:1;min-width:0;padding:12px 16px;white-space:nowrap;font-size:14px;color:#121212}
+.figma-web .wa-rights-count{display:flex;align-items:center;justify-content:center;width:100px;height:30px;padding:8px;border-radius:16px;background:#daf2ff;color:#0f50df;font-size:12px;font-weight:500;flex:none}
+.figma-web .wa-permissions-heading .wa-button{width:86px;height:32px;font-size:14px;font-weight:500}
+.figma-web .wa-permission-group{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;border-radius:8px;overflow:hidden}
+.figma-web .wa-permission-group>header{display:flex;align-items:center;justify-content:space-between;height:42px;padding:8px 16px;background:#f1f5f9}
+.figma-web .wa-permission-group>header>label{display:flex;gap:11px;align-items:center;font-size:14px;color:#121212}
+.figma-web .wa-permission-group>header>small{display:flex;align-items:center;justify-content:center;height:25px;min-width:62px;padding:8px;border-radius:99px;background:#fff;color:#121212;font-size:10px;white-space:nowrap}
+.figma-web .wa-permission-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:47px;gap:0 12px;padding:0 16px}
+.figma-web .wa-permission-grid>label{display:flex;align-items:center;gap:8px;padding:8px;white-space:nowrap;font-size:14px;line-height:1.4;color:#121212}
+.figma-web .wa-portrait .wa-settings-layout{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+.figma-web .wa-portrait .wa-roles{height:241px;padding:12px 0 12px;gap:10px;align-items:flex-start;border-color:#e0e8f5;border-radius:8px}
+.figma-web .wa-portrait .wa-roles>h3{padding-left:0}
+.figma-web .wa-portrait .wa-role-search{margin:0;width:700px;max-width:calc(100% - 14px);height:36px;padding:6px 12px;background:#fbfcff}
+.figma-web .wa-portrait .wa-role-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:700px;max-width:calc(100% - 14px);overflow:auto}
+.figma-web .wa-portrait .wa-role-card{height:62px;padding:8px;justify-content:center;gap:5px;background:white;border-color:#dee5f0}
+.figma-web .wa-portrait .wa-role-card.wa-role-selected{background:#ebf5ff;border-color:#1a5cfa}
+.figma-web .wa-portrait .wa-role-name{font-size:12px;font-weight:500;line-height:16px;color:#172438}
+.figma-web .wa-portrait .wa-role-description{font-size:10px;line-height:14px;color:#63738a}
+.figma-web .wa-portrait .wa-permissions{height:1100px;padding:8px;border-radius:0;border-left:0;border-right:0;border-bottom:0}
+.figma-web .wa-portrait .wa-permissions-heading{height:38px;margin-bottom:10px}
+.figma-web .wa-portrait .wa-permissions-heading>div{padding:12px 0;gap:22px}
+.figma-web .wa-portrait .wa-permission-grid{padding:0 8px;grid-auto-rows:47px}
+.figma-web:has(.wa-modal-backdrop){position:relative}
+.figma-web .wa-modal-backdrop{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(18,18,18,.3);font-family:Roboto,Arial,sans-serif}
+.figma-web .wa-role-dialog{width:537px;padding:28px 20px;border:1px solid #cfcfcf;border-radius:10px;background:#fff;color:#0f172a;box-sizing:border-box}
+.figma-web .wa-portrait .wa-role-dialog{position:absolute;left:348px;top:379px}
+.figma-web .wa-role-dialog h2{font-weight:500;font-size:20px;line-height:20px;margin:0 0 16px}
+.figma-web .wa-role-dialog form{display:flex;flex-direction:column;gap:16px;margin:0}
+.figma-web .wa-role-dialog label{display:block;font-size:14px;line-height:14px}
+.figma-web .wa-role-dialog em{font-style:normal;color:#d30808}
+.figma-web .wa-role-dialog input:not([type=checkbox]){display:block;width:100%;height:30px;min-height:0;margin-top:8px;padding:10px 12px;border:1px solid #d8e2f0;border-radius:5px;color:#64748b;background:#fff;font-size:10px}
+.figma-web .wa-role-dialog label:first-child{height:74px}
+.figma-web .wa-role-dialog textarea{display:block;width:100%;height:87px;min-height:87px;margin-top:10px;padding:12px;border:1px solid #d8e2f0;border-radius:5px;font-size:12px;resize:vertical;background:#fff}
+.figma-web .wa-role-dialog input::placeholder,.figma-web .wa-role-dialog textarea::placeholder{color:#64748bcc;opacity:1}
+.figma-web .wa-role-dialog .wa-role-status{display:flex;flex-direction:column;gap:8px}
+.figma-web .wa-role-dialog .wa-toggle{appearance:none;position:relative;display:block;width:53px;height:25px;border:0;border-radius:99px;background:#e2e8f0;margin:0;padding:0;cursor:pointer}
+.figma-web .wa-role-dialog .wa-toggle:checked{background:#d3fceb}
+.figma-web .wa-role-dialog .wa-toggle::after{content:'';position:absolute;left:2px;top:2px;width:21px;height:21px;border-radius:50%;background:#94a3b8}
+.figma-web .wa-role-dialog .wa-toggle:checked::after{left:30px;background:#00832b}
+.figma-web .wa-role-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;height:48px}
+.figma-web .wa-role-actions .wa-button{height:32px;padding:0 25px;font-size:14px}
+.figma-web .wa-role-actions .wa-primary{padding:0 40px}

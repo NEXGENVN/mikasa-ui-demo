@@ -14,7 +14,8 @@ test('created role names remain plain text and cannot create HTML attributes',()
 });
 test('account status filter offers active and inactive selectable options',()=>{
  const html=renderWeb(core.createDemoState(),'accounts');
- const options=[...html.matchAll(/<option\s+value="([^"]+)"/g)].map(m=>m[1]);
+ const statusSelect=html.match(/<select[^>]*data-filter="status"[\s\S]*?<\/select>/)?.[0]||'';
+ const options=[...statusSelect.matchAll(/<option\s+value="([^"]+)"/g)].map(m=>m[1]);
  assert.deepEqual(options,['all','active','inactive']);
 });
 test('submitted request snapshots survive draft edits and complete only once',()=>{
@@ -43,7 +44,7 @@ test('report totals and empty-state follow the same filtered messages as export'
  assert.deepEqual(r.byOa.map(x=>[x.name,x.sent,x.cost]),[['OA chính',2,4000]]);
  s.ui.date='2026-11-01';const html=renderWeb(s,'reports');
  assert.ok(html.includes('Không có dữ liệu báo cáo'));
- assert.ok(html.includes('data-action="clear-filters"'));
+ assert.ok(html.includes('aria-label="Ngày báo cáo"'));
 });
 test('saved session policies are selected after navigating Web and App screens',()=>{
  assert.equal(typeof core.saveSessionPolicy,'function');
@@ -52,8 +53,8 @@ test('saved session policies are selected after navigating Web and App screens',
  assert.ok(renderWeb(s,'security').includes('value="8 giờ" selected'));
  assert.ok(renderMobile(s,'sessions').includes('value="5 phút" selected'));
 });
-test('password recovery requests enter the visible administration queue',()=>{
+test('password recovery requests are retained in the sample state',()=>{
  assert.equal(typeof core.queueRecovery,'function');
  const s=core.createDemoState();core.queueRecovery(s,'recovery@example.com');s.ui.tab='recovery';
- assert.equal(s.recoveries.length,1);assert.ok(renderWeb(s,'accounts').includes('recovery@example.com'));
+ assert.equal(s.recoveries.length,1);assert.equal(s.recoveries[0].email,'recovery@example.com');
 });

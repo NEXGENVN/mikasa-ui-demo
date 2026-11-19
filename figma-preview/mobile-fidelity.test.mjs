@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createDemoState,beginSubmission,finishSubmission} from './core.mjs';
 import {renderMobile,mobileScreens,getMobileFrame} from './mobile.mjs';
+import {mobileAction,mobileChange,mobileSubmit} from './mobile-controller.mjs';
+import {readFileSync,statSync} from 'node:fs';
 
 test('App routes are linked to actual Figma frames, without fabricated help/logout screens',()=>{
  const s=createDemoState();
@@ -40,4 +42,45 @@ test('subscreens have no invented tab bar or data actions, processing has only t
  const d=renderMobile(s,'data');assert.ok(d.includes('Xóa dữ liệu'));assert.ok(d.includes('Xóa tài khoản'));assert.equal(d.includes('CSV'),false);assert.equal(d.includes('Khôi phục'),false);
  const p=renderMobile(s,'processing');for(const t of ['Hệ thống đang gửi tin','Mã tin','Gửi tới Zalo','Thời gian chờ','Về lịch sử'])assert.ok(p.includes(t));assert.equal(p.includes('finish-request'),false);
  const result=renderMobile(s,'result');assert.ok(result.includes('e1e15.png'));assert.equal(result.includes('Kết quả từng OA'),false);
+});
+
+test('current Send and Confirm keep source notices and action assets in their own slots',()=>{
+ const s=createDemoState(),send=renderMobile(s,'send'),confirm=renderMobile(s,'confirm');
+ assert.match(send,/f-send-note"><img[^>]+accc5\.svg/);
+ assert.ok(send.includes('Mỗi OA gửi 1 cặp , tương ứng 2 tin.'));
+ assert.equal(send.includes('1 tin thông báo + 1 tin theo dõi'),false);
+ assert.match(confirm,/f-notice"><img[^>]+497e2\.svg/);
+ assert.match(confirm,/data-action="schedule-later"[^>]*>[\s\S]*?0fb9a\.svg/);
+ assert.match(confirm,/data-action="submit-request"[^>]*><img[^>]+a9191\.svg/);
+ assert.match(confirm,/data-route="send"[^>]*><img[^>]+32de8\.svg/);
+ s.ui.theme='dark';
+ assert.match(renderMobile(s,'send'),/f-send-note"><img[^>]+38e9a\.svg/);
+ assert.match(renderMobile(s,'confirm'),/f-notice"><img[^>]+df652\.svg/);
+});
+
+test('rendered App routes and source sheets use nonempty local assets in both themes',()=>{
+ const assets=new Set();
+ const collect=html=>{assert.equal(html.includes('figma.com/api/mcp/asset'),false);for(const m of html.matchAll(/src="assets\/figma\/([^\"]+)"/g))assets.add(m[1]);};
+ for(const theme of ['light','dark']){
+  const s=createDemoState();s.ui.theme=theme;
+  for(const [route] of mobileScreens)collect(renderMobile(s,route));
+  for(const sheet of ['delete-data','delete-account','schedule','fingerprint','fingerprint-success']){s.ui.mobileSheet=sheet;collect(renderMobile(s,sheet==='schedule'?'confirm':sheet.startsWith('delete-')?'data':'account'));}
+  s.ui.mobileSheet='';s.mobile.fixtures[0].status='success';s.selectedId='figma-1';collect(renderMobile(s,'detail'));
+ }
+ const css=readFileSync(new URL('./mobile.css',import.meta.url),'utf8');for(const m of css.matchAll(/url\(['"]?assets\/figma\/([^'")]+)['"]?\)/g))assets.add(m[1]);
+ for(const asset of assets)assert.ok(statSync(new URL('./assets/figma/'+asset,import.meta.url)).size>0,asset);
+ assert.ok(assets.has('c8d96.svg'));assert.ok(assets.has('48784.svg'));assert.ok(assets.has('a3317.svg'));
+});
+
+test('source recovery phone and privacy controls keep working with sample data',()=>{
+ const s=createDemoState(),routes=[],context={state:s,navigate:r=>routes.push(r),toast:()=>{},render:()=>{}};
+ mobileSubmit({dataset:{form:'mobile-forgot'}},{phone:'0912345678'},context);
+ assert.equal(routes.at(-1),'otp');assert.ok(renderMobile(s,'otp').includes('0*******78'));
+ assert.equal(renderMobile(s,'forgot').includes('assets/figma/4d17a.svg'),false);
+ mobileAction('mobile-recorded-visibility',{},context);assert.equal(s.mobile.hideRecorded,true);
+ mobileAction('mobile-map-zoom',{dataset:{offset:'1'}},context);assert.equal(s.mobile.mapZoom,1.2);
+ for(let i=0;i<10;i++)mobileAction('mobile-map-zoom',{dataset:{offset:'1'}},context);
+ assert.equal(s.mobile.mapZoom,1.6);
+ let rendered=0;mobileChange({dataset:{mobilePreference:'hideNotifications'},type:'checkbox',checked:false},{state:s,render:()=>rendered++});
+ assert.equal(s.mobile.hideNotifications,false);assert.equal(rendered,1);
 });

@@ -15,7 +15,8 @@ test('a one-OA partial scenario reports the actual failed result',()=>{
 });
 test('profile input is rendered as text on Web and App',()=>{
  const s=createDemoState();s.profile.name='<img src=x onerror=alert(1)>';
- for(const html of [renderWeb(s,'overview'),renderMobile(s,'overview'),renderMobile(s,'profile')]){
+ s.accounts[0].name=s.profile.name;
+ for(const html of [renderWeb(s,'account-detail'),renderMobile(s,'overview'),renderMobile(s,'profile')]){
   assert.equal(html.includes('<img src=x onerror=alert(1)>'),false);
   assert.equal(html.includes('&lt;img src=x onerror=alert(1)&gt;'),true);
  }

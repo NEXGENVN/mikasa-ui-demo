@@ -20,12 +20,14 @@ export function mobileAction(action,el,c){const {state:s,navigate,render,toast,s
  case 'mobile-save-schedule':{if(new Date(s.mobile.scheduleDraft)<=new Date()){toast('Vui lòng chọn thời gian trong tương lai.');return true;}s.draft.schedule=s.mobile.scheduleDraft;s.draft.scheduled=true;s.ui.mobileSheet='';if(s.ui.route==='detail'){const m=mobileMessage(s);m.schedule=s.draft.schedule;}render();return true;}
  case 'mobile-cancel-schedule':{const m=mobileMessage(s);s.messages=s.messages.filter(v=>v.id!==m.id);navigate('history');toast('Đã hủy lịch gửi mẫu.');return true;}
  case 'mobile-camera':toast('Ảnh đại diện mẫu từ Figma.');return true;
+ case 'mobile-recorded-visibility':s.mobile.hideRecorded=!s.mobile.hideRecorded;render();return true;
+ case 'mobile-map-zoom':s.mobile.mapZoom=Math.max(1,Math.min(1.6,(s.mobile.mapZoom||1)+Number(el.dataset.offset)*.2));render();return true;
  case 'mobile-language':toast('Đã mô phỏng tải ngôn ngữ '+el.dataset.language+'.');return true;
  case 'mobile-resend':toast('Đã gửi lại OTP mẫu. Nhập 6 chữ số để tiếp tục.');return true;
  default:return false;
  }
 }
-export function mobileChange(el,{state:s,render}){s.mobile??={};if(el.name==='template'&&el.closest('[data-form="send"]')){s.draft.template=el.value;return true;}if(el.dataset.mobilePreference){s.mobile[el.dataset.mobilePreference]=el.type==='checkbox'?el.checked:el.value;return true;}if(el.dataset.schedulePart){const d=new Date(s.mobile.scheduleDraft);if(el.dataset.schedulePart==='hour')d.setHours(Number(el.value));else d.setMinutes(Number(el.value));s.mobile.scheduleDraft=localDate(d);return true;}return false;}
+export function mobileChange(el,{state:s,render}){s.mobile??={};if(el.name==='template'&&el.closest('[data-form="send"]')){s.draft.template=el.value;return true;}if(el.dataset.mobilePreference){s.mobile[el.dataset.mobilePreference]=el.type==='checkbox'?el.checked:el.value;if(el.type==='checkbox')render();return true;}if(el.dataset.schedulePart){const d=new Date(s.mobile.scheduleDraft);if(el.dataset.schedulePart==='hour')d.setHours(Number(el.value));else d.setMinutes(Number(el.value));s.mobile.scheduleDraft=localDate(d);return true;}return false;}
 export function mobileInput(el,c){const {state:s,navigate}=c;
  if(el.name==='phone'&&el.closest('[data-form="send"]')){const changed=validatePhone(s.draft.phone)!==validatePhone(el.value);s.draft.phone=el.value;if(changed){const pos=el.selectionStart;c.render();const input=document.querySelector('.f-send input[name="phone"]');input?.focus();input?.setSelectionRange(pos,pos);}return true;}
  if(el.closest('[data-form="mobile-otp"]')){el.value=el.value.replace(/\D/g,'').slice(0,1);if(el.value)el.nextElementSibling?.focus();const inputs=[...el.form.querySelectorAll('input')];if(inputs.every(i=>/^\d$/.test(i.value)))navigate('new-password');return true;}

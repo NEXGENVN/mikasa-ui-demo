@@ -1,0 +1,45 @@
+.figma-web .wb-backups{width:100%;display:flex;flex-direction:column;gap:16px;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:normal;color:#0f172a}
+.figma-web .wb-backups *{box-sizing:border-box}
+.figma-web .wb-landscape{width:1048px}
+.figma-web .wb-tabs{position:relative;width:100%;height:44px;flex:none;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.figma-web .wb-tabs>button{position:absolute;top:0;height:43px;padding:0 0 1px;border:0;border-radius:0;background:none;box-shadow:none;font:500 13px/normal Roboto,Arial,sans-serif;text-align:center;white-space:nowrap;color:#64748b;cursor:pointer}
+.figma-web .wb-tabs>button:first-child{left:15px;width:92px}
+.figma-web .wb-tabs>button:last-child{left:149px;font-weight:400;color:var(--w-primary,#0f4d88)}
+.figma-web .wb-tabs>button::after{content:'';position:absolute;bottom:0;left:0;right:0;border-bottom:3px solid var(--w-primary,#0f4d88);border-radius:2px}
+.figma-web .wb-card{display:flex;flex-direction:column;gap:18px;width:100%;height:573px;padding:15px;overflow:hidden;background:#fff;border:1px solid #e0e8f5;border-radius:12px}
+.figma-web .wb-card table{table-layout:fixed;width:1023px;flex:none;border-collapse:collapse;border-spacing:0;font:400 14px/normal Roboto,Arial,sans-serif;text-align:left;background:#fcfdfe}
+.figma-web .wb-col-number{width:95px}
+.figma-web .wb-col-name{width:227px}
+.figma-web .wb-col-type{width:180px}
+.figma-web .wb-col-size{width:145px}
+.figma-web .wb-col-status{width:171px}
+.figma-web .wb-col-actions{width:205px}
+.figma-web .wb-card th,.figma-web .wb-card td{height:43px;padding:0 24px;color:#64748b;border:0;border-bottom:.5px solid #d8e2f0;white-space:nowrap;vertical-align:middle;line-height:normal;background:#fcfdfe;font-weight:400}
+.figma-web .wb-card thead th{height:43px;border-bottom:0;background:#f5f5f5;color:#0f172a;font-weight:500;font-size:14px}
+.figma-web .wb-card thead th:first-child{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.figma-web .wb-card thead th:nth-child(4){border-top-right-radius:6px;border-bottom-right-radius:6px}
+.figma-web .wb-card th:first-child,.figma-web .wb-card td:first-child,.figma-web .wb-card th:nth-child(n+4),.figma-web .wb-card td:nth-child(n+4){text-align:center}
+.figma-web .wb-card tbody th{font-size:12px}
+.figma-web .wb-card tbody th strong{display:block;font-weight:500;font-size:12px;line-height:14px;color:#121212}
+.figma-web .wb-card tbody tr:nth-child(-n+2) th strong{font-size:13px;line-height:15px;color:#0f172a}
+.figma-web .wb-card tbody tr:nth-child(n+7) th strong{font-weight:400}
+.figma-web .wb-card tbody th small{display:block;margin-top:4px;color:#64748b;font-size:12px;line-height:14px}
+.figma-web .wb-card tbody td:nth-child(n+3){font-size:12px}
+.figma-web .wb-card tbody tr:nth-child(3) td:nth-child(4),.figma-web .wb-card tbody tr:nth-child(6) td:nth-child(4){font-size:13px}
+.figma-web .wb-card th:nth-last-child(-n+2),.figma-web .wb-card td:nth-last-child(-n+2){border:.5px solid #eaecf0}
+.figma-web .wb-status{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:81px;height:22px;padding:4px;overflow:hidden;border-radius:5px;background:#e3f7eb;color:#0a8c54;font-size:9px;font-weight:500;line-height:normal;white-space:nowrap}
+.figma-web .wb-status>img{display:block;flex:none;max-width:none}
+.figma-web .wb-status.wb-pending{width:auto;background:#fff5de;color:#ad6e0f}
+.figma-web .wb-restore{display:inline-flex;align-items:center;justify-content:center;height:22px;min-height:0;padding:0 10px;border:0;border-radius:8px;box-shadow:none;background:var(--w-primary,#0f4d88);color:#fff;white-space:nowrap;font:500 14px/20px Roboto,Arial,sans-serif;cursor:pointer}
+.figma-web .wb-card footer{display:flex;align-items:center;justify-content:space-between;flex:none;width:1029px;height:50px;padding:0 15px;color:#5a5a5c;font:400 14px/1 Roboto,Arial,sans-serif}
+.figma-web .wb-backups button:focus-visible{outline:2px solid #195cfa;outline-offset:2px}
+.figma-web .wb-portrait .wb-card{gap:16px;padding:12px}
+.figma-web .wb-portrait .wb-card table{width:100%}
+.figma-web .wb-portrait .wb-col-number{width:40px}
+.figma-web .wb-portrait .wb-col-name{width:auto}
+.figma-web .wb-portrait .wb-col-type{width:144px}
+.figma-web .wb-portrait .wb-col-size{width:90px}
+.figma-web .wb-portrait .wb-col-status{width:129px}
+.figma-web .wb-portrait .wb-col-actions{width:124px}
+.figma-web .wb-portrait .wb-card th:first-child,.figma-web .wb-portrait .wb-card td:first-child{padding-inline:0}
+.figma-web .wb-portrait .wb-card footer{width:100%}
