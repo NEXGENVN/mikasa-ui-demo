@@ -81,3 +81,12 @@ test('native abbreviated role filtering and collapsed create keep their intended
 test('portrait live search projects one native account row and hides nine rows without requesting a reload',()=>{
  const s={...session(),data:createDemoState()},frame=webInteractiveFrames['458:15284'];prepareWebFrame({frame,session:s});const input=frame.controls.find(c=>c.field==='web.filter.accounts.query');assert.equal(input.onInput,true);s.values[input.field]='minhanh';const result=handleWebInteraction({frame,control:input,session:s,value:'minhanh',eventType:'input'});assert.equal(result.repaint,false);prepareWebFrame({frame,session:s});assert.equal(s.context.filteredRows.length,1);assert.equal(s.context.filteredRows[0].username,'minhanh_01');assert.equal(frame.table.rows.filter(r=>s.values[r.visibilityField]===false).length,9);assert.match(s.values[frame.table.countField],/1 tài khoản/);assert.equal(s.values[frame.table.rows[1].slots[0].field],'');
 });
+
+test('opening the other Web orientation for the first time projects already changed shared sample records',()=>{
+ const data=createDemoState(),horizontal={...session(),data},portrait={...session(),data};
+ prepareWebFrame({frame:webInteractiveFrames['64:3513'],session:horizontal});
+ data.accounts.unshift({id:999,username:'cross_orientation',name:'New sample account',email:'sample@example.com',role:'Quản trị viên',active:true});
+ const frame=webInteractiveFrames['458:15284'];prepareWebFrame({frame,session:portrait});
+ assert.equal(portrait.values[frame.table.rows[0].slots.find(s=>s.column==='Tài khoản'&&s.part===1).field],'cross_orientation');
+ assert.match(portrait.values[frame.table.countField],/31 tài khoản/);
+});

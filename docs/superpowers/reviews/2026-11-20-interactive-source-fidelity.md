@@ -8,7 +8,7 @@ Sample flows cover authentication/recovery, account creation/editing, source sid
 
 ## Verification at release preparation
 
-- Full suite: 227 passing, zero failures.
+- Full suite: 228 passing, zero failures.
 - Source verification: all 791 documents and seven original raster assets retained; zero errors.
 - Interactive verification: 10,731 controls and 41 timers; all 10,772 action probes resolve without handler exceptions or invalid/cross-platform destinations. All 791 rendered interactive documents retain their original source-file identity. All 560 referenced component artifacts exist.
 - Glyph ownership: 11,608 source slots, comprising 11,471 matched, nine proven fully clipped and 128 empty. No unresolved/ambiguous slots or unsupported source paths. Duplicate original/component glyph copies are hidden together only after editing and restored together.
@@ -17,4 +17,6 @@ Sample flows cover authentication/recovery, account creation/editing, source sid
 
 The browser tool became unavailable during the final audit. Final public deployment verification therefore uses HTTP status and byte comparisons against the exact locally tested release; it does not constitute an additional public browser interaction run. Deployment evidence is recorded locally in `.audit/public-deployment-verification.json`.
 
-Release: `415707db9512`. GitHub Pages serves `main` at `/figma-preview/`; existing root and `/vuexy/` previews are preserved. All operations remain simulated in browser memory.
+Release: `5fbf01240f5a`. GitHub Pages serves `main` at `/figma-preview/`; existing root and `/vuexy/` previews are preserved. All operations remain simulated in browser memory.
+
+Shared sample edits also project correctly when the other Web orientation is opened for the first time; unchanged source visits and orientation-local filters remain intact.

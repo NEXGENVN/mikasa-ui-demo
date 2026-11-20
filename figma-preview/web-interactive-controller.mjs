@@ -57,8 +57,10 @@ function rememberRolePermissions(frame,session){
 
 /** Project changed sample data only. Untouched source states keep their original SVG text. */
 export function prepareWebFrame({frame,session}){
- const initialized=initializeWebSourceData(session.data);if(initialized.hadAppChanges)session.context.webChanged=true;
- const signature=JSON.stringify([(session.data.accounts||[]).map(a=>[a.id,a.username,a.email,a.role,a.active]),(session.data.messages||[]).map(m=>[m.id,m.status,m.phone]),(session.data.configurations||[]).map(c=>[c.id,c.status,c.name])]);
+ const initialized=initializeWebSourceData(session.data);if(initialized.hadAppChanges)session.data.__webSourceInitialHadAppChanges=true;
+ const signature=JSON.stringify([session.data.accounts||[],session.data.messages||[],session.data.configurations||[],session.data.roles||[],session.data.permissions||{},session.data.preferences||{}]);
+ session.data.__webSourceInitialSignature??=signature;
+ if(session.data.__webSourceInitialHadAppChanges||signature!==session.data.__webSourceInitialSignature)session.context.webChanged=true;
  if(session.context.webDataSignature&&session.context.webDataSignature!==signature)session.context.webChanged=true;session.context.webDataSignature=signature;
  session.context.webInitialData??=structuredClone({accounts:session.data.accounts||[],messages:session.data.messages||[],configurations:session.data.configurations||[]});
  if(frame.roleCards?.length){session.context.sourceRoles??=[];for(const card of frame.roleCards)if(!session.context.sourceRoles.includes(card.name))session.context.sourceRoles.push(card.name);}
