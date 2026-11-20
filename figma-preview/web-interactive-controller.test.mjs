@@ -105,3 +105,11 @@ test('all native Web history tables and both detail orientations project and cop
  }
  assert.equal(checked,52);
 });
+
+test('opening history details directly refreshes both IP fields before any filter or edit',()=>{
+ for(const [tableId,detailId]of [['557:49673','557:50194'],['31:5251','98:3079']]){
+  const s={...session(),data:createDemoState()},table=webInteractiveFrames[tableId],detail=webInteractiveFrames[detailId];prepareWebFrame({frame:table,session:s});assert.equal(s.context.webChanged,undefined);
+  handleWebInteraction({frame:table,control:{action:'web.history.open',recordIndex:1},session:s});prepareWebFrame({frame:detail,session:s});
+  for(const slot of detail.texts.filter(t=>['ipv4','ipv6'].includes(t.dataField)))assert.equal(s.values[slot.field],slot.dataField==='ipv4'?'14.238.43.142':'2401:d800:8d9:ad64:48f6:7357:a9f0:4ce6',tableId);
+ }
+});
