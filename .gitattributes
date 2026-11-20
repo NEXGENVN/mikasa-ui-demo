@@ -1,6 +1,9 @@
 # Preserve the exact bytes used to name generated, content-hashed artifacts.
 figma-preview/source-frames/*.html -text
-figma-preview/release/* -text
+# Minified strings retain original Figma text, including spaces before newlines.
+figma-preview/release/* -text whitespace=-blank-at-eol
 figma-preview/assets/fonts/native.*.css -text
+figma-preview/assets/interactive/*.svg -text
+figma-preview/assets/interactive-components/*.svg -text
 figma-preview/index.html -text
 figma-preview/assets/fonts/*-LICENSE.txt whitespace=-blank-at-eol

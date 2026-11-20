@@ -9,7 +9,7 @@ export async function buildPreviewRelease({root=defaultRoot}={}){
  const base=path.join(root,'figma-preview'),out=path.join(base,'release');await fs.mkdir(out,{recursive:true});
  const result=await build({entryPoints:[path.join(base,'app.mjs')],bundle:true,format:'esm',target:'es2022',write:false,minify:true,legalComments:'none'});
  const script=result.outputFiles[0].contents,scriptName='app.'+digest(script)+'.mjs';
- const styleFiles=['styles.css','mobile.css','web-fidelity.css','web-admin.css','web-backups.css','native-preview.css'];
+ const styleFiles=['styles.css','mobile.css','web-fidelity.css','web-admin.css','web-backups.css','native-preview.css','interactive-preview.css'];
  const styles=(await Promise.all(styleFiles.map(async file=>(await fs.readFile(path.join(base,file),'utf8')).replace(/\r\n/g,'\n').replace(/url\((['"]?)(?:\.\/)?assets\//g,'url($1../assets/')))).join('\n');
  const styleName='styles.'+digest(styles)+'.css';
  let fontCSS='';try{fontCSS=await fs.readFile(path.join(base,'assets/fonts/native.css'),'utf8');}catch{}

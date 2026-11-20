@@ -6,7 +6,7 @@ test('changed source receives new entry URLs and release CSS resolves original a
  await fs.writeFile(path.join(base,'app.mjs'),'export const current="first";');
  await fs.writeFile(path.join(base,'index.template.html'),'<html data-version="__BUILD_VERSION__"><link href="__FONT_URL__"><link href="__STYLE_URL__"><script src="__SCRIPT_URL__"></script>');
  await fs.mkdir(path.join(base,'assets/fonts'),{recursive:true});await fs.writeFile(path.join(base,'assets/fonts/native.css'),'@font-face{font-family:Demo;src:url(first.woff2)}');
- for(const name of ['styles','mobile','web-fidelity','web-admin','web-backups','native-preview'])await fs.writeFile(path.join(base,name+'.css'),name==='mobile'?".x{background:url('assets/figma/original.svg')}\r\n":'');
+ for(const name of ['styles','mobile','web-fidelity','web-admin','web-backups','native-preview','interactive-preview'])await fs.writeFile(path.join(base,name+'.css'),name==='mobile'?".x{background:url('assets/figma/original.svg')}\r\n":'');
  const first=await buildPreviewRelease({root});await fs.writeFile(path.join(base,'app.mjs'),'export const current="second";');const second=await buildPreviewRelease({root});
  assert.notEqual(first.version,second.version);assert.notEqual(first.script,second.script);assert.equal(first.style,second.style);
  assert.match(await fs.readFile(path.join(base,second.style),'utf8'),/\.\.\/assets\/figma\/original\.svg/);

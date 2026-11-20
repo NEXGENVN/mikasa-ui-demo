@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node scripts/build-preview-release.mjs",
     "verify:source": "node scripts/verify-source-preview.mjs",
+    "verify:interactive": "node scripts/verify-interactive-preview.mjs",
     "build:native": "node scripts/figma-native-build.mjs",
     "test": "node --test scripts/*.test.mjs figma-preview/*.test.mjs"
   },

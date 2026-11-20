@@ -8,39 +8,35 @@ import {webAction,webChange,webInput,webSubmit} from './web-controller.mjs';
 import {nativeFrames} from './native-frames.mjs';
 import {createCatalogue,nativeRoute,frameIdFromRoute,findNativeFrame,renderNativeFrame,renderNativeOptions,fitNativeFrames} from './native-preview.mjs';
 import {renderPreviewToolbar} from './native-toolbar.mjs';
+import {createInteractiveSession,seedInteractiveValues,navigateInteractiveSession} from './interactive-session.mjs';
+import {renderInteractiveFrame} from './interactive-preview.mjs';
+import {mountInteractiveFrame} from './interactive-runtime.mjs';
+import {appInteractiveFrames} from './app-interactive-controls.mjs';
+import {webInteractiveFrames} from './web-interactive-controls.mjs';
+import {handleAppInteraction,prepareAppFrame} from './app-interactive-controller.mjs';
+import {handleWebInteraction,prepareWebFrame} from './web-interactive-controller.mjs';
+import {composeSourceComponents} from './interactive-component-view.mjs';
+import {sourceComponentPopups,sourceComponentExtraArtwork} from './source-component-states.mjs';
 const catalogue=createCatalogue(nativeFrames);
 const sourceFrames=Object.fromEntries(platforms.map(p=>[p.id,catalogue.frames.filter(f=>f.platform===p.id)]));
 const nativeHistory=[];
 let state=createDemoState();let pendingTimer;let toastTimer;let filterTimer;
+let interactiveSessions=Object.fromEntries(platforms.map(p=>[p.id,createInteractiveSession(state)])),unmountInteractive=()=>{};
 const root=document.querySelector('#app');const dialog=document.querySelector('#dialog');
 try{state.ui.theme=localStorage.getItem('mikasa-preview-theme')==='dark'?'dark':'light';}catch{}
 const flowRoutes={web:webScreens,'web-portrait':webScreens,app:mobileScreens};const routes=Object.fromEntries(Object.entries(flowRoutes).map(([p,rows])=>[p,[...rows,...sourceFrames[p].map(f=>[nativeRoute(f.id),f.name])]]));const lastRoute={web:'overview','web-portrait':'overview',app:'overview'};
 const errors=[['403','Không có quyền','Bạn không có quyền truy cập nội dung này. Vui lòng liên hệ quản trị viên.','forbidden.svg'],['404','Không tìm thấy','Trang bạn tìm kiếm không tồn tại hoặc đã được di chuyển.','not-found.svg'],['408','Yêu cầu quá thời gian','Yêu cầu mất quá nhiều thời gian. Vui lòng thử lại.','timeout.svg'],['429','Quá nhiều yêu cầu','Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ một lát và thử lại.','rate-limit.svg'],['500','Lỗi hệ thống','Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.','server.svg'],['502','Lỗi máy chủ','Máy chủ đang gặp sự cố kết nối. Vui lòng thử lại.','server.svg'],['503','Dịch vụ không khả dụng','Hệ thống đang bảo trì. Chúng tôi sẽ sớm quay lại.','service.svg'],['504','Máy chủ quá thời gian','Máy chủ chưa phản hồi kịp thời. Vui lòng thử lại.','timeout.svg'],['offline','Mất kết nối mạng','Vui lòng kiểm tra kết nối Internet và thử lại.','offline.svg'],['empty','Chưa có dữ liệu','Danh sách hiện chưa có bản ghi.',''],['loading','Đang tải','Giao diện chờ tải dữ liệu.','']];
-function routeFromHash(){const [hash,query='']=location.hash.split('?');Object.assign(state.ui,parsePreviewHash(hash,routes));state.ui.previewMode=new URLSearchParams(query).get('mode')==='flow'&&!frameIdFromRoute(state.ui.route)?'flow':'source';}
+function routeFromHash(){const [hash,query='']=location.hash.split('?');Object.assign(state.ui,parsePreviewHash(hash,routes));state.ui.previewMode=new URLSearchParams(query).get('mode')==='flow'?'flow':'source';}
 routeFromHash();
 function captureDraft(){const f=document.querySelector('form[data-form="send"]');if(f){state.draft.phone=f.elements.phone.value;state.draft.template=f.elements.template.value;}const schedule=document.querySelector('#schedule-value');if(schedule)state.draft.schedule=schedule.value;}
 function toast(message){const t=document.querySelector('#toast');t.textContent=message;t.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('visible'),3500);}
 function setTheme(theme){captureDraft();state.ui.theme=theme;try{localStorage.setItem('mikasa-preview-theme',theme);}catch{}render();}
-function navigate(route,{platform=state.ui.platform,filters=true,mode=state.ui.previewMode||'source'}={}){captureDraft();state.ui.mobileSheet='';state.ui.webModal='';state.ui.adminRoleDialog=false;state.ui.platform=platform;state.ui.previewMode=frameIdFromRoute(route)?'source':mode;state.ui.nativeQuery='';state.ui.route=route;if(!['palette','states'].includes(route))lastRoute[platform]=route;if(filters){state.ui.query='';state.ui.status='all';state.ui.page=1;state.ui.tab='';state.ui.date='';state.ui.oa='all';state.ui.accountRole='all';state.ui.phone='all';state.ui.oaChannel='all';state.ui.oaStatus='all';}history.replaceState(null,'',`#${platform}/${route}${state.ui.previewMode==='flow'?'?mode=flow':''}`);render();window.scrollTo({top:0,behavior:'instant'});}
+function navigate(route,{platform=state.ui.platform,filters=true,mode=state.ui.previewMode||'source'}={}){captureDraft();state.ui.mobileSheet='';state.ui.webModal='';state.ui.adminRoleDialog=false;state.ui.platform=platform;state.ui.previewMode=mode==='flow'?'flow':'source';state.ui.nativeQuery='';state.ui.route=route;if(!['palette','states'].includes(route))lastRoute[platform]=route;if(filters){state.ui.query='';state.ui.status='all';state.ui.page=1;state.ui.tab='';state.ui.date='';state.ui.oa='all';state.ui.accountRole='all';state.ui.phone='all';state.ui.oaChannel='all';state.ui.oaStatus='all';}history.replaceState(null,'',`#${platform}/${route}${state.ui.previewMode==='flow'?'?mode=flow':''}`);render();window.scrollTo({top:0,behavior:'instant'});}
 function currentNativeFrame(){const fallback=state.ui.platform==='app'?getMobileFrame(state):getWebFrame(state);return findNativeFrame(catalogue,state.ui.platform,state.ui.route,fallback.id);}
 function header(){return renderPreviewToolbar({state,platforms,flowScreens:flowRoutes[state.ui.platform],frames:sourceFrames[state.ui.platform],currentFrame:currentNativeFrame()});}
 function changePreviewMode(mode){
- let route=state.ui.route,flowState=null;
- if(mode==='flow'&&frameIdFromRoute(route)){
-  const frame=currentNativeFrame(),families=state.ui.platform==='app'?{authentication:'login',auth:'login',history:'history',profile:'profile',password:'password',send:'send',fingerprint:'account','account-data':'data',appearance:'appearance',language:'language',devices:'devices',security:'sessions'}:{accounts:'accounts',authentication:'login',auth:'login',history:'history',reports:'reports',security:'security',settings:'settings',oa:'oa'};
-  route=frame?.flowRoute||families[frame?.family]||'overview';flowState=frame?.flowState;
-  if(!flowRoutes[state.ui.platform].some(([id])=>id===route))route='overview';
- }
- navigate(route,{mode});
- if(flowState){
-  if(flowState.theme)state.ui.theme=flowState.theme;
-  Object.assign(state.ui,flowState.ui||{});Object.assign(state.draft,flowState.draft||{});
-  if(flowState.detail){const d=flowState.detail;
-   if(state.ui.platform==='app'){mobileMessages(state);const id='figma-source-detail';state.mobile.fixtures=state.mobile.fixtures.filter(m=>m.id!==id);state.mobile.fixtures.push({id,phone:'033 222 5555',template:'Thông báo đơn hàng',time:'15/09/2025 10:00',status:d.status,oaCount:d.oaCount||1});state.selectedId=id;}
-   else{const message=state.messages.find(m=>m.status===d.status);if(message)state.selectedId=message.id;}
-  }
-  render();
- }
+ const special=['palette','states'].includes(state.ui.route),frame=currentNativeFrame();
+ navigate(special?state.ui.route:nativeRoute(frame.id),{mode,filters:false});
 }
 function stepNativeFrame(direction){const frames=sourceFrames[state.ui.platform],index=frames.findIndex(f=>f.id===currentNativeFrame()?.id),next=frames[index+direction];if(next)navigate(nativeRoute(next.id));}
 
@@ -49,8 +45,19 @@ function palette(){const dark=state.ui.theme==='dark';const tokens=[['primary','
 function states(){const code=state.ui.errorCode||'403';const item=errors.find(([id])=>id===code)||errors[0];return `<main class="states-page"><header class="special-heading"><span class="overline">SYSTEM STATES</span><h1>Luôn có lời giải thích rõ ràng.</h1><p>Các trạng thái hệ thống dùng hình SVG từ thư mục Drive của bạn.</p></header><div class="states-grid">${errors.map(([id,title])=>btn(`<strong>${id==='offline'?'Wi-Fi':id==='empty'?'∅':id==='loading'?'…':id}</strong><span>${title}</span>`,'error-state',id===code?'active':'',`data-error="${id}" aria-pressed="${id===code}"`)).join('')}</div><section class="error-preview">${code==='empty'?empty('Chưa có dữ liệu','Tạo yêu cầu gửi tin để bắt đầu theo dõi.'):code==='loading'?'<div class="skeleton-block" aria-label="Đang tải dữ liệu"><div></div><div></div><div></div></div>':`<div class="error-illustration"><img src="assets/illustrations/${item[3]}" alt="Minh họa ${item[1]}"></div><h2>${item[0]==='offline'?'':item[0]+' · '}${item[1]}</h2><p>${item[2]}</p>${btn('Thử lại','retry','primary')}`}</section></main>`;}
 function fitWebFrame(){const frame=document.querySelector('.figma-web'),host=frame?.parentElement;if(frame&&host)frame.style.zoom=Math.min(1,host.clientWidth/parseFloat(frame.style.getPropertyValue('--frame-width')));}
 window.addEventListener('resize',()=>{fitWebFrame();fitNativeFrames();});
-function render({restoreFilter,restoreRoleQuery,scroll=0}={}){document.documentElement.dataset.theme=state.ui.theme;const {platform,route}=state.ui;const special=['palette','states'].includes(route);root.innerHTML=header()+`<div id="preview" data-preview-platform="${platform}" class="preview-stage ${platform==='app'&&!special&&state.ui.previewMode==='flow'?'stage-app':''}">${special?(route==='palette'?palette():states()):state.ui.previewMode!=='flow'?renderNativeFrame(currentNativeFrame()):platform==='app'?appAside()+renderMobile(state,route):renderWeb(state,route,{orientation:platform==='web-portrait'?'portrait':'landscape'})}</div><footer class="preview-footer">MIKASA · Bản duyệt theo Figma · Mọi thao tác dùng dữ liệu mô phỏng &nbsp; <a href="https://github.com/NEXGENVN/mikasa-ui-demo/tree/main/figma-preview" target="_blank" rel="noopener">Source ↗</a></footer>`;
-fitWebFrame();fitNativeFrames();if(restoreRoleQuery){const input=document.querySelector('[data-admin-role-query]');if(input){input.focus();input.setSelectionRange(restoreRoleQuery.pos,restoreRoleQuery.pos);}}if(restoreFilter){const input=document.querySelector(`[data-filter="${restoreFilter.key}"]`);if(input){input.focus();if(input.type==='search')input.setSelectionRange(restoreFilter.pos,restoreFilter.pos);}}if(scroll)document.querySelector('[data-mobile-scroll]')?.scrollTo(0,scroll);}
+function render({restoreFilter,restoreRoleQuery,scroll=0}={}){unmountInteractive();document.documentElement.dataset.theme=state.ui.theme;const {platform,route}=state.ui;const special=['palette','states'].includes(route),frame=currentNativeFrame(),session=interactiveSessions[platform];let model;
+if(!special&&state.ui.previewMode==='flow'){const metadata=(platform==='app'?appInteractiveFrames:webInteractiveFrames)[frame.id];if(!metadata)throw Error('Missing original interactive frame '+frame.id);model=composeSourceComponents({...frame,...metadata,id:frame.id,width:frame.width,height:frame.height,file:frame.file,platform},session,{popups:sourceComponentPopups,extraArtwork:sourceComponentExtraArtwork[frame.id]||[]});seedInteractiveValues(session,model);(platform==='app'?prepareAppFrame:prepareWebFrame)({frame:model,session});navigateInteractiveSession(session,frame.id,{catalogue:catalogue.byId,replace:true});}
+root.innerHTML=header()+`<div id="preview" data-preview-platform="${platform}" class="preview-stage">${special?(route==='palette'?palette():states()):state.ui.previewMode!=='flow'?renderNativeFrame(frame):renderInteractiveFrame(model,session)}</div><footer class="preview-footer">MIKASA · Bản duyệt theo Figma · Mọi thao tác dùng dữ liệu mô phỏng &nbsp; <a href="https://github.com/NEXGENVN/mikasa-ui-demo/tree/main/figma-preview" target="_blank" rel="noopener">Source ↗</a></footer>`;
+fitWebFrame();fitNativeFrames();if(model)unmountInteractive=mountInteractiveFrame({root,frame:model,session,handleInteraction:platform==='app'?handleAppInteraction:handleWebInteraction,projectValues:platform==='app'?prepareAppFrame:prepareWebFrame,onResult:result=>applyInteractiveResult(result,model,session),onIssue:issue=>{const preview=root.querySelector('[data-native-frame]');if(preview){const count=Number(preview.dataset.interactiveIssueCount||0);preview.dataset.interactiveIssueCount=String(count+1);if(count<12)preview.dataset.interactiveIssues=JSON.stringify([...(JSON.parse(preview.dataset.interactiveIssues||'[]')),issue]);}}});if(restoreRoleQuery){const input=document.querySelector('[data-admin-role-query]');if(input){input.focus();input.setSelectionRange(restoreRoleQuery.pos,restoreRoleQuery.pos);}}if(restoreFilter){const input=document.querySelector(`[data-filter="${restoreFilter.key}"]`);if(input){input.focus();if(input.type==='search')input.setSelectionRange(restoreFilter.pos,restoreFilter.pos);}}if(scroll)document.querySelector('[data-mobile-scroll]')?.scrollTo(0,scroll);}
+function applyInteractiveResult(result,frame,session){
+ if(result.message)toast(result.message);
+ if(result.download){const {text,mime,filename}=result.download,url=URL.createObjectURL(new Blob([text],{type:mime})),link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ if(result.copy)navigator.clipboard.writeText(String(result.copy)).catch(()=>toast(String(result.copy)));
+ if(result.scrollToBox){const host=root.querySelector('.native-canvas-host');if(host){const scale=host.clientWidth/frame.width;window.scrollTo({top:Math.max(0,window.scrollY+host.getBoundingClientRect().top+result.scrollToBox[1]*scale-90),behavior:'smooth'});}}
+ if(result.focusField&&result.targetId)session.context.focusField=result.focusField;
+ if(result.targetId||result.back){const id=navigateInteractiveSession(session,result.targetId,{back:result.back,replace:result.replace,catalogue:catalogue.byId});if(id){navigate(nativeRoute(id),{platform:frame.platform,mode:'flow',filters:false});return;}}
+ if(result.repaint)render();
+}
 function openDialog(title,content){dialog.innerHTML=`<div class="dialog-heading"><h2 id="dialog-title">${title}</h2>${btn('×','close-dialog','icon-btn','aria-label="Đóng hộp thoại"')}</div>${content}`;if(!dialog.open)dialog.showModal();}
 function closeDialog(){dialog.close();}
 const cancelButton=()=>btn('Hủy','close-dialog','secondary','autofocus');
@@ -125,7 +132,7 @@ case 'export':exportCsv();break;
 case 'clear-history':confirmDialog('Xóa lịch sử mẫu?','Các tin nhắn mẫu hiện tại sẽ bị xóa. Có thể khôi phục bằng nút Khôi phục mẫu.','confirm-clear','Xóa lịch sử mẫu');break;
 case 'confirm-clear':state.messages=[];closeDialog();navigate('history');toast('Đã xóa lịch sử mẫu.');break;
 case 'reset':confirmDialog('Khôi phục dữ liệu mẫu?','Các thay đổi trong preview sẽ được đưa về trạng thái ban đầu.','confirm-reset','Khôi phục mẫu');break;
-case 'confirm-reset':{const ui={platform:state.ui.platform,theme:state.ui.theme,previewMode:state.ui.previewMode};state=createDemoState();Object.assign(state.ui,ui);clearTimeout(pendingTimer);closeDialog();navigate('overview');toast('Đã khôi phục dữ liệu mẫu.');break;}
+case 'confirm-reset':{const ui={platform:state.ui.platform,theme:state.ui.theme,previewMode:state.ui.previewMode};state=createDemoState();interactiveSessions=Object.fromEntries(platforms.map(p=>[p.id,createInteractiveSession(state)]));Object.assign(state.ui,ui);clearTimeout(pendingTimer);closeDialog();navigate('overview');toast('Đã khôi phục dữ liệu mẫu.');break;}
 case 'copy':try{await navigator.clipboard.writeText(el.dataset.copy);toast('Đã sao chép: '+el.dataset.copy);}catch{openDialog('Nội dung để sao chép',`<input readonly value="${e(el.dataset.copy)}" aria-label="Nội dung sao chép"><div class="dialog-actions">${btn('Đóng','close-dialog','secondary')}</div>`);}break;
 case 'error-state':state.ui.errorCode=el.dataset.error;render();break;
 case 'retry':toast('Đây là màn trạng thái mẫu. Bạn có thể chọn trạng thái khác.');break;
