@@ -125,7 +125,7 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
   if(!box)continue;
   const original=generateGlyphPaths(library,{...font,value:slot.text??'',x:box[0],baseline:box[1]+(font.baseline??font.size??14),width:box[2],height:box[3]});
   const match=matchSourceTextSlot({...slot,box,outline:slot.outline||(!original.missingGlyphs.length?original.d:undefined)},records);
-  if(['matched','empty','empty-clipped'].includes(match.status))ready.set(slot.id,{slot:{...slot,box},...match,parts:sourcePaintParts(slot,original,match,library),replacement:null,partLayers:[],changed:false,originalOpacity:match.paths.map(p=>p.element.getAttribute('opacity')),duplicateOpacity:(match.duplicatePaths||[]).map(p=>p.element.getAttribute('opacity'))});
+  if(['matched','empty','empty-clipped'].includes(match.status))ready.set(slot.id,{slot:{...slot,box},...match,paint:match.paths[0]?.element.getAttribute('fill')||sourceColor(font.color),parts:sourcePaintParts(slot,original,match,library),replacement:null,partLayers:[],changed:false,originalOpacity:match.paths.map(p=>p.element.getAttribute('opacity')),duplicateOpacity:(match.duplicatePaths||[]).map(p=>p.element.getAttribute('opacity'))});
   else unresolved.push({id:slot.id,status:match.status});
  }
  function restoreOpacity(record,i){const opacity=record.originalOpacity[i],element=record.paths[i].element;if(opacity==null){if(element.getAttribute('opacity')!=null)element.removeAttribute('opacity');}else if(element.getAttribute('opacity')!==opacity)element.setAttribute('opacity',opacity);}
@@ -144,6 +144,7 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
   const text=String(value??''),{slot}=record;
   if(text===String(slot.text??'')){if(record.changed)restoreRecord(record);return {ok:true,status:'original',missingGlyphs:[]};}
   const font={...slot.font,...fontOverride},box=slot.box,[dx,dy]=record.offset;
+  const resolvedPaint=fontOverride?.color!=null?sourceColor(fontOverride.color):record.paint;
   if(fontOverride&&!fontOverride.fontKey&&['family','style','weight'].some(k=>Object.hasOwn(fontOverride,k)))delete font.fontKey;
   if(record.parts){
    const lines=text.split('\n'),lineParts=new Map();for(const p of record.parts)lineParts.set(p.lineIndex,(lineParts.get(p.lineIndex)||0)+1);
@@ -170,7 +171,7 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
    hideRecord(record);clearLayers(record);
    if(nativeFallback){
     const node=document.createElementNS('http://www.w3.org/2000/svg','text'),last=record.paths.at(-1)?.element,parentMatrix=last?relativeMatrix(last.parentNode,svg):identity,local=multiply(inverse(parentMatrix),{...identity,e:origin[0],f:origin[1]});
-    node.setAttribute('transform',`matrix(${local.a} ${local.b} ${local.c} ${local.d} ${local.e} ${local.f})`);node.setAttribute('aria-hidden','true');node.setAttribute('pointer-events','none');node.setAttribute('fill',sourceColor(font.color));node.setAttribute('font-family',font.family||'Roboto');node.setAttribute('font-size',font.size||14);node.setAttribute('font-weight',font.weight||400);node.setAttribute('data-source-text-slot',slot.id);node.setAttribute('data-source-value',text);
+    node.setAttribute('transform',`matrix(${local.a} ${local.b} ${local.c} ${local.d} ${local.e} ${local.f})`);node.setAttribute('aria-hidden','true');node.setAttribute('pointer-events','none');node.setAttribute('fill',resolvedPaint);node.setAttribute('font-family',font.family||'Roboto');node.setAttribute('font-size',font.size||14);node.setAttribute('font-weight',font.weight||400);node.setAttribute('data-source-text-slot',slot.id);node.setAttribute('data-source-value',text);
     const align=String(font.align||'left').toLowerCase(),x=box[0]+dx+(align==='center'?box[2]/2:align==='right'?box[2]:0),baseline=box[1]+(font.baseline??font.size??14)+dy;
     node.setAttribute('text-anchor',align==='center'?'middle':align==='right'?'end':'start');node.setAttribute('font-style',/italic/i.test(font.style||'')?'italic':'normal');
     text.split('\n').forEach((line,i)=>{const span=document.createElementNS('http://www.w3.org/2000/svg','tspan');span.setAttribute('x',x);span.setAttribute('y',baseline+i*(font.lineHeight||font.size*1.2||17));span.textContent=line;node.append(span);});
@@ -182,7 +183,7 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
   if(record.nativeFallback){record.replacement?.remove();record.replacement=null;record.nativeFallback=false;}
   if(!record.replacement){
    const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('aria-hidden','true');path.setAttribute('pointer-events','none');
-   path.setAttribute('fill',sourceColor(font.color));
+   path.setAttribute('fill',resolvedPaint);
    const last=record.paths.at(-1)?.element;
    const parentMatrix=last?relativeMatrix(last.parentNode,svg):identity;
    const local=multiply(inverse(parentMatrix),{...identity,e:origin[0],f:origin[1]});
@@ -191,7 +192,7 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
    record.replacement=path;
    hideRecord(record);
   }
-  record.replacement.setAttribute('fill',sourceColor(font.color));
+  record.replacement.setAttribute('fill',resolvedPaint);
   record.replacement.setAttribute('data-source-text-slot',slot.id);record.replacement.setAttribute('data-source-value',text);
   record.replacement.setAttribute('d',generated.d);
   return {ok:true,status:'changed',missingGlyphs:[]};

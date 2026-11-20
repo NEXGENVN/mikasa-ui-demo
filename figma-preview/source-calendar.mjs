@@ -14,6 +14,9 @@ const same=(a,b)=>a.every((n,i)=>Math.abs(n-b[i])<.6);
 export function mountSourceCalendar({document,form,frame,session,library,assetBase,onIssue=()=>{}}){
  const metadata=frame.calendar,svg=document.querySelector('svg');
  if(!metadata||!svg)return {project:()=>null,restore(){}};
+ const dayPaints=bindSourceTextSlots(document,metadata.sourceDaySlots||[],{library});
+ const nativeFont=font=>{const slot=(metadata.sourceDaySlots||[]).find(s=>s.font?.size===font.size&&s.font?.weight===font.weight&&sourceColor(s.font?.color)===sourceColor(font.color));return {...font,color:dayPaints.ready.get(slot?.id)?.paint||font.color};};
+ const colors={normal:nativeFont(metadata.normalFont),selected:nativeFont(metadata.selectedFont),today:nativeFont(metadata.todayFont),muted:nativeFont(metadata.mutedFont)};
  const [gx,gy,gw,gh]=metadata.gridBox,origin=[svg.viewBox?.baseVal?.x||0,svg.viewBox?.baseVal?.y||0],regions=bindSourceDrawingRegions(document,[{id:'calendar-grid',box:metadata.gridBox}]);
  const selectedRecords=(regions.bound.get('calendar-grid')?.allRecords||[]).filter(r=>r.element.localName!=='g'&&metadata.selectedSourceBox&&same(r.box,metadata.selectedSourceBox));
  const selection=selectedRecords.map(r=>({node:r.element.cloneNode(true),transform:mul(inv(svg.getCTM()||I),r.element.getCTM()||I)}));
@@ -54,7 +57,7 @@ export function mountSourceCalendar({document,form,frame,session,library,assetBa
   rowgroup.style.height=projection.rows*metadata.rowPitch+'px';rows.forEach((row,i)=>row.hidden=i>=projection.rows);scroller.setAttribute('aria-label',projection.monthLabel);scroller.setAttribute('aria-rowcount',projection.rows);
   for(const cell of metadata.cells){const date=projection.cells[cell.calendarIndex],node=controls.get(cell.id);if(node){node.hidden=!date;if(date){node.setAttribute('aria-label',`Ngày ${date.day} tháng ${date.month} năm ${date.year}`);node.setAttribute('aria-selected',String(date.selected));node.setAttribute('tabindex',date.selected?'0':'-1');if(date.today)node.setAttribute('aria-current','date');else node.removeAttribute('aria-current');}}
    if(!date)continue;
-   const x=cell.box[0]-gx,y=cell.box[1]-gy,font=date.selected&&selection.length?metadata.selectedFont:date.today?metadata.todayFont:date.inMonth?metadata.normalFont:metadata.mutedFont;
+   const x=cell.box[0]-gx,y=cell.box[1]-gy,font=date.selected&&selection.length?colors.selected:date.today?colors.today:date.inMonth?colors.normal:colors.muted;
    if(date.selected)for(const source of selection){const g=document.createElementNS(NS,'g'),clone=source.node.cloneNode(true);g.setAttribute('transform',`translate(${x-metadata.selectedSourceBox[0]-origin[0]} ${y-metadata.selectedSourceBox[1]-origin[1]})`);clone.setAttribute('transform',matrix(source.transform));g.append(clone);content.append(g);}
    const generated=generateGlyphPaths(library,{...font,value:String(date.day),size:font.size,x,baseline:y+(font.baseline??font.size),width:cell.box[2],align:'center'}),path=document.createElementNS(NS,'path');path.setAttribute('d',generated.d);path.setAttribute('fill',sourceColor(font.color));content.append(path);
   }

@@ -2,6 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {sourceComponentPopups as popups,sourceComponentCounters as counters,sourceComponentExtraArtwork as extra,sourceComponentCards as cards} from './source-component-states.mjs';
+import {readSourceSvgPaths} from '../scripts/source-svg-paths.mjs';
+
+test('every OA state retains the supplied SVG button paint and light plus sign',async()=>{
+ for(const theme of Object.values(counters))for(const state of Object.values(theme.states)){
+  const plus=state.controls.find(c=>c.id==='plus');if(!plus)continue;
+  const svg=await fs.readFile(new URL(state.file,import.meta.url),'utf8');assert.match(svg,/fill="#0F4D88"/);assert.doesNotMatch(svg,/rgba\(25, 92, 250, 1\)/);
+  const paths=readSourceSvgPaths(svg).paths.filter(p=>p.bounds[0]>=plus.box[0]&&p.bounds[1]>=plus.box[1]&&p.bounds[0]+p.bounds[2]<=plus.box[0]+plus.box[2]&&p.bounds[1]+p.bounds[3]<=plus.box[1]+plus.box[3]);
+  assert.ok(paths.length);assert.ok(paths.every(p=>p.fill==='#F8FAFF'));
+ }
+});
 
 test('native gender, sort, role and preference popups retain their supplied option labels and hit areas',()=>{
  const gender=Object.entries(popups).find(([id,p])=>id.startsWith('843:50360;')&&p.masterId==='836:49232')?.[1];assert.ok(gender);assert.deepEqual(gender.options.map(o=>o.label),['Giới tính','Nam','Nữ','Khác']);

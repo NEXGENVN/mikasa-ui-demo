@@ -75,6 +75,14 @@ function svgFixture(){
  return {doc,svg,original,parent,attributes,mutations,library};
 }
 
+test('changed values retain the actual exported SVG paint instead of a stale native component color',()=>{
+ const f=svgFixture();f.original.setAttribute('fill','#0F4D88');
+ const slot={id:'hour',text:'A',box:[30,40,20,20],outline:'M31 42 L38 42 L38 50 Z',font:{family:'Roboto',style:'Regular',weight:400,size:1,baseline:2,color:'#195CFA'}};
+ const binding=bindSourceTextSlots(f.doc,[slot],{library:f.library});binding.setTextSlot('hour','AA');
+ assert.equal(f.parent.replacement.attrs.get('fill'),'#0F4D88');
+ binding.setTextSlot('hour','AAA',{font:{color:'#121212'}});assert.equal(f.parent.replacement.attrs.get('fill'),'#121212');
+});
+
 test('binding and unchanged values leave all source attributes untouched; restoring recovers them',()=>{
  const f=svgFixture(),slot={id:'name',text:'A',box:[30,40,20,20],outline:'M31 42 L38 42 L38 50 Z',font:{family:'Roboto',style:'Regular',weight:400,size:1,baseline:2}};
  const binding=bindSourceTextSlots(f.doc,[slot],{library:f.library});
