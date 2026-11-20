@@ -22,6 +22,13 @@ test('changed dark counter digits preserve the light ink of the exported dark co
  for(const [value,state]of Object.entries(generated.counters?.[5]?.states||sourceComponentCounters.dark.states))assert.deepEqual(glyphPaints(await read(state.file),value),['#F8FAFF']);
 });
 
+test('each enabled Dark decrement symbol stays visible on the dark surface after count changes',async()=>{
+ for(const counter of Object.values(generated.counters))for(const state of Object.values(counter.states)){
+  const control=state.controls.find(c=>c.action==='app.oa.minus');if(!control)continue;const svg=await read(state.file),[x,y,w,h]=control.box,minus=readSourceSvgPaths(svg).paths.filter(p=>p.bounds[0]>=x&&p.bounds[1]>=y&&p.bounds[0]+p.bounds[2]<=x+w&&p.bounds[1]+p.bounds[3]<=y+h);assert.equal(minus.length,1);
+  const tag=[...svg.matchAll(/<path\b[^>]*>/g)].map(m=>m[0]).find(t=>t.includes('d="'+minus[0].d+'"'));assert.ok(/(?:fill|stroke)="#F8FAFF"/.test(tag),'decrement must use the reference light paint');
+ }
+});
+
 test('permission cap artwork uses its actual exported digit and minus geometry without a plus',async()=>{
  for(const [cap,id]of [[2,'1432:10827'],[3,'1432:10696'],[4,'1432:10566'],[5,'1430:86331']]){
   const state=generated.counters?.[cap]?.states[String(cap)];assert.ok(state,'Missing exported permission cap '+cap);

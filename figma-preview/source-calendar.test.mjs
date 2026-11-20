@@ -142,3 +142,18 @@ test('a truncated source hour list still draws both lower neighbors and keeps th
  syncAppSchedule(f.session,'2026-11-21T23:00:00+07:00',{now});calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['21','22','23']);assert.equal(visible()[2].getAttribute('data-source-hour-row'),'2');
  calendar.restore();assert.equal(visible().length,0);assert.ok(originals.every(p=>p.getAttribute('opacity')===null));
 });
+
+test('minute 30 keeps 00 above the chosen center and minute 00 keeps 30 below with one native drawing owner',()=>{
+ const f=fixture(),host=new Element('span',f.doc,{},[224,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'minute'});host.append(select);f.form.append(host);
+ const active={...f.frame.calendar.normalFont,size:20,baseline:26.8359375,weight:500,style:'Medium',fontKey:'Roboto|Medium|500',align:'CENTER'},muted={...active,size:18,baseline:26.15234375,weight:400,style:'Regular',fontKey:'Roboto|Regular|400'},slots=[{id:'minute-active',text:'00',box:[224,647,126,40],font:active},{id:'minute-muted',text:'30',box:[224,687,126,40],font:muted}];
+ const originals=slots.map((slot,i)=>{const p=new Element('path',f.doc,{d:generateGlyphPaths(sourceGlyphLibrary,{...slot.font,value:slot.text,x:slot.box[0],baseline:slot.box[1]+slot.font.baseline,width:126}).d,fill:i?'#64748B':'#0F4D88'},slot.box);f.svg.append(p);return p;});
+ f.frame.controls=[{id:'minute',field:'app.schedule.minute',type:'select',textSlots:[slots[0]]}];f.frame.calendar.wheels=[{controlId:'minute',field:'app.schedule.minute',box:[224,567,126,200],selectedIndex:0,slots}];
+ syncAppSchedule(f.session,'2026-11-21T14:30:00+07:00',{now});select.addEventListener('change',()=>changeAppSchedule(f.session,{part:'minute',value:select.value},{now}));
+ const issues=[],calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now,onIssue:i=>issues.push(i)});calendar.project();
+ const visible=()=>f.svg.querySelectorAll('path').filter(p=>p.getAttribute('data-source-minute-row')!==null&&p.getAttribute('display')!=='none'),state=()=>visible().map(p=>[p.getAttribute('data-source-minute-row'),p.getAttribute('data-source-value'),p.getAttribute('fill')]);
+ assert.equal(calendar.ownsField('app.schedule.minute'),true);assert.deepEqual(state(),[['1','00','#64748B'],['2','30','#0F4D88']]);assert.ok(originals.every(p=>p.getAttribute('opacity')==='0'));
+ host.listeners.pointerdown({clientY:627,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'00');calendar.project();assert.deepEqual(state(),[['2','00','#0F4D88'],['3','30','#64748B']]);
+ host.listeners.pointerdown({clientY:587,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'00','blank rows cannot select a wrapped minute');
+ select.listeners.keydown({key:'End',preventDefault(){},stopPropagation(){}});calendar.project();assert.deepEqual(state(),[['1','00','#64748B'],['2','30','#0F4D88']]);assert.deepEqual(select.children.map(o=>o.value),['00','30']);assert.deepEqual(issues,[]);
+ calendar.restore();assert.equal(visible().length,0);assert.ok(originals.every(p=>p.getAttribute('opacity')===null));
+});

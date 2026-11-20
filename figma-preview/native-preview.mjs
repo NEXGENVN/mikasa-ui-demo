@@ -3,7 +3,11 @@ import {sourceHotspots} from './source-hotspots.mjs';
 import {restoreSourceWheelBackdrops} from './source-blend-backdrops.mjs';
 import {roundSourceAccountAvatars} from './source-account-avatar.mjs';
 import {restoreSourceBottomNavigation} from './source-bottom-navigation.mjs';
-import {mountAppPhoneViewport} from './app-phone-viewport.mjs';
+import {mountAppPhoneViewport,withAppPhoneViewport,appPhoneViewportControlBox} from './app-phone-viewport.mjs';
+import {withDarkReferenceLayout} from './dark-reference-layout.mjs';
+import {mountSourceDarkAccountReference} from './source-dark-account-reference.mjs';
+import {restoreSourceDarkMessageReference} from './source-dark-message-reference.mjs';
+import {mountSourceDarkFlowReference} from './source-dark-flow-reference.mjs';
 const blendDocuments=new WeakSet();
 
 const labels={accounts:'Tài khoản',account:'Tài khoản',authentication:'Đăng nhập & xác thực',auth:'Đăng nhập & xác thực',overview:'Tổng quan',history:'Lịch sử',reports:'Báo cáo',security:'Bảo mật',settings:'Cài đặt',oa:'OA / GIF / Tin nhắn',profile:'Hồ sơ',send:'Gửi tin',password:'Mật khẩu',fingerprint:'Vân tay',error:'Màn lỗi','account-data':'Tài khoản & dữ liệu',prototype:'Nguyên mẫu'};
@@ -35,12 +39,13 @@ export function renderNativeFrame(frame,{hotspots:includeHotspots=true}={}){
  const url='https://www.figma.com/design/2oHQaSkcqH2GoOidQMwrEs/Mikasa?node-id='+frame.id.replace(':','-');
  const meta='<div class="native-caption"><strong>'+e(frame.name)+'</strong><span>'+frame.width+' × '+frame.height+' · '+frame.id+'</span><a href="'+url+'" target="_blank" rel="noopener">Mở frame Figma ↗</a></div>';
  if(!frame.file)return '<section class="native-unavailable" data-missing-frame="'+frame.id+'"><h2>Chưa có bản preview của frame này</h2><p>'+e(frame.name)+' · '+frame.id+'</p><a href="'+url+'" target="_blank" rel="noopener">Xem frame nguồn trên Figma ↗</a></section>';
- const hotspots=(includeHotspots?sourceHotspots[frame.id]||[]:[]).map(h=>{const [x,y,w,height]=h.bbox;return '<button type="button" class="native-hotspot" data-action="'+(h.back?'native-back':'native-target')+'" '+(h.destinationId?'data-destination="'+h.destinationId+'"':'')+' data-source-node="'+e(h.id)+'" aria-label="'+e(h.label)+'" style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+height+'px"></button>';}).join('');
+ const hotspotFrame=includeHotspots?withAppPhoneViewport(withDarkReferenceLayout({...frame,controls:(sourceHotspots[frame.id]||[]).map(h=>({...h,box:h.bbox}))}),{source:true}):null;
+ const hotspots=(hotspotFrame?.controls||[]).map(h=>{const [x,y,w,height]=appPhoneViewportControlBox(h.box,hotspotFrame.appPhoneViewport);return '<button type="button" class="native-hotspot" data-action="'+(h.back?'native-back':'native-target')+'" '+(h.destinationId?'data-destination="'+h.destinationId+'"':'')+' data-source-node="'+e(h.id)+'" aria-label="'+e(h.label)+'" style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+height+'px"></button>';}).join('');
  return '<section class="native-preview" data-native-frame="'+frame.id+'" data-native-width="'+frame.width+'" data-native-height="'+frame.height+'">'+meta+'<div class="native-canvas-host" style="max-width:'+frame.width+'px"><iframe class="native-frame" src="'+e(frame.file)+'" title="'+e(frame.name)+' · '+frame.id+'" width="'+frame.width+'" height="'+frame.height+'" scrolling="no" sandbox="allow-same-origin" loading="eager"></iframe>'+(hotspots?'<div class="native-hotspots" style="width:'+frame.width+'px;height:'+frame.height+'px">'+hotspots+'</div>':'')+'</div></section>';
 }
 export function fitNativeFrames(root=document){
  for(const iframe of root.querySelectorAll('.native-frame')){const host=iframe.parentElement,scale=String(Math.min(1,host.clientWidth/Number(iframe.getAttribute('width'))));iframe.style.zoom=scale;for(const layer of host.querySelectorAll('.native-hotspots,.interactive-overlay'))layer.style.zoom=scale;
-  const restoreAppearance=()=>{const context={frameId:iframe.closest('[data-native-frame]')?.dataset.nativeFrame};restoreSourceWheelBackdrops(iframe.contentDocument);roundSourceAccountAvatars(iframe.contentDocument,context);restoreSourceBottomNavigation(iframe.contentDocument,context);mountAppPhoneViewport({iframe,frameId:context.frameId});};
+  const restoreAppearance=()=>{const context={frameId:iframe.closest('[data-native-frame]')?.dataset.nativeFrame};restoreSourceWheelBackdrops(iframe.contentDocument);roundSourceAccountAvatars(iframe.contentDocument,context);restoreSourceBottomNavigation(iframe.contentDocument,context);mountSourceDarkAccountReference(iframe.contentDocument,context);restoreSourceDarkMessageReference(iframe.contentDocument,context);mountSourceDarkFlowReference(iframe.contentDocument,context);mountAppPhoneViewport({iframe,frameId:context.frameId});};
   if(!blendDocuments.has(iframe)){blendDocuments.add(iframe);iframe.addEventListener('load',restoreAppearance);}restoreAppearance();
  }
 }

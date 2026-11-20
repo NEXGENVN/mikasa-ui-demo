@@ -58,6 +58,7 @@ function loadStylesheet(doc,href){
  * the iframe. Relative SVG image URLs keep their original source-document base.
  */
 export async function prepareSourceScrollCanvas({iframe,form,frame,stylesheets=[]}){
+ if(frame?.appPhoneViewport?.compact)return;
  if(!(Number(frame?.scrollHeight)>Number(frame?.height)))return;
  const doc=iframe?.contentDocument,svg=doc?.querySelector('svg');if(!svg||!form)return;
  const previous=prepared.get(form);if(previous?.doc===doc)return previous.promise;

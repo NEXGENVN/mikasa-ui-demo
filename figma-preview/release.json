@@ -1,6 +1,6 @@
 {
-  "version": "131a3e722b9c",
-  "script": "release/app.cf9dd1fbf7bb.mjs",
+  "version": "0805df9d9ea6",
+  "script": "release/app.eae02f605fd4.mjs",
   "style": "release/styles.874b3aa273e2.css",
   "font": "assets/fonts/native.920d05a03f19.css"
 }

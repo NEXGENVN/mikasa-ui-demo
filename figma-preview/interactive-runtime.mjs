@@ -18,7 +18,8 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
  const form=root.querySelector('[data-interactive-frame]'),iframe=root.querySelector('.native-frame');
  if(!form||!iframe)return ()=>{};
  let active=true,binder=null,drawingRegions=null,prepared=false,closePopup=null,removeExtras=null,calendar=null,cards=null,messages=null,sendMode=null,undockPhone=null;const timers=new Set(),controls=new Map(frame.controls.map(control=>[control.id,control]));
- const slots=new Map();for(const control of controls.values())if(control.field&&!['checkbox','radio','button','file'].includes(control.type))for(const slot of control.textSlots||[])slots.set(slot.id,slot);for(const slot of frame.texts||[])slots.set(slot.id,slot);
+ const timeWheels=(frame.calendar?.wheels||[]).filter(w=>/\.(?:hour|minute)$/.test(w.field)),calendarFields=new Set(timeWheels.map(w=>w.field)),calendarSlotIds=new Set(timeWheels.flatMap(w=>w.slots.map(s=>s.id)));
+ const slots=new Map();for(const control of controls.values())if(control.field&&!calendarFields.has(control.field)&&!['checkbox','radio','button','file'].includes(control.type))for(const slot of control.textSlots||[])slots.set(slot.id,slot);for(const slot of frame.texts||[])if(!calendarSlotIds.has(slot.id))slots.set(slot.id,slot);
  const elements=new Map([...form.querySelectorAll('[data-interactive-control]')].map(element=>[element.dataset.interactiveControl,element]));
  for(const img of form.querySelectorAll('img'))if(img.tagName==='IMG')img.src=new URL(img.getAttribute('src'),document.baseURI).href;
  // Fields can retain focus while the cached vector document finishes loading.

@@ -54,7 +54,7 @@ export async function buildDarkAppArtwork({root=path.resolve(path.dirname(fileUR
  for(const [cap,sourceId]of Object.entries(counterSources)){
   const region=sourceRegion(await sourceSvg(sourceId),[244,406,130,50]);
   // Original cap screenshots have only a minus button and the current digit.
-  // The exported number is light; the supplied minus stroke remains dark.
+  // Retain native geometry; the user's ZIP reference corrects the dark minus paint below.
   const capPaths=readSourceSvgPaths(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 50">${region.body}</svg>`).paths;
   if(capPaths.length!==2||capPaths.filter(p=>p.fill==='#F8FAFF').length!==1||!region.body.includes('stroke="#121212"'))throw Error('Unexpected original dark cap artwork '+sourceId);
   const states={};
@@ -64,10 +64,15 @@ export async function buildDarkAppArtwork({root=path.resolve(path.dirname(fileUR
    else{
     // Unexported intermediate states retain the supplied native component
     // geometry and already source-aligned plus paints. Match the actual digit
-    // outline so the equally dark native minus is never recolored.
+    // outline independently from the decrement symbol.
     const font={family:'Roboto',style:'Medium',weight:500,size:16,lineHeight:24,baseline:17.46875,align:'CENTER',fontKey:'Roboto|Medium|500'},outline=generateGlyphPaths(sourceGlyphLibrary,{...font,value,x:0,baseline:font.baseline,width:130,height:50}),match=matchSourceTextSlot({box:[0,0,130,50],font,text:value,outline:outline.d},readSourceSvgPaths(svg).paths);
     if(match.status!=='matched'||match.paths.length!==1||match.paths[0].fill!=='rgba(18, 18, 18, 1)')throw Error('Missing native dark numeric glyph '+value);
     let changed=0;svg=svg.replace(/<path\b[^>]*>/g,tag=>{if(attrs(tag).d!==match.paths[0].d)return tag;changed++;return tag.replace(/fill="[^"]*"/,'fill="#F8FAFF"');});if(changed!==1)throw Error('Ambiguous native dark numeric glyph '+value);
+   }
+   const minus=controls.find(c=>c.action==='app.oa.minus');
+   if(minus){
+    const paths=readSourceSvgPaths(svg).paths.filter(p=>inside(p.bounds,minus.box));if(paths.length!==1)throw Error('Ambiguous dark decrement glyph '+cap+'/'+value);
+    let changed=0;svg=svg.replace(/<path\b[^>]*>/g,tag=>{if(attrs(tag).d!==paths[0].d)return tag;const a=attrs(tag),key=['fill','stroke'].find(k=>['#121212','rgba(18, 18, 18, 1)'].includes(a[k]));if(!key)return tag;changed++;return tag.replace(new RegExp(key+'="[^"]*"'),key+'="#F8FAFF"');});if(changed!==1)throw Error('Missing dark decrement reference paint '+cap+'/'+value);
    }
    states[value]={...state,...(value===cap?{width:130,height:50}:{}),file:await write(svg,`dark-counter-cap-${cap}-${value}`),controls};
   }
@@ -78,6 +83,6 @@ export async function buildDarkAppArtwork({root=path.resolve(path.dirname(fileUR
   popups[c.id]={...popup,file:await write(svg,'dark-gender-'+f.id.replace(':','-'))};
  }
  if(Object.keys(popups).length!==10)throw Error('Expected the ten supplied dark gender popups');
- const out={counters,popups};await fs.writeFile(path.join(root,'figma-preview/dark-app-artwork.mjs'),'// Exact exported dark counter/header geometry and paints; native intermediate states/menu rows remain intact.\nexport const darkAppArtwork='+JSON.stringify(out)+';\n');return out;
+ const out={counters,popups};await fs.writeFile(path.join(root,'figma-preview/dark-app-artwork.mjs'),'// Native dark counter/header geometry; light decrement paint follows the supplied ZIP reference.\nexport const darkAppArtwork='+JSON.stringify(out)+';\n');return out;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){const out=await buildDarkAppArtwork();console.log(JSON.stringify({counterCaps:Object.keys(out.counters),counterStates:Object.values(out.counters).reduce((n,c)=>n+Object.keys(c.states).length,0),popups:Object.keys(out.popups).length}));}

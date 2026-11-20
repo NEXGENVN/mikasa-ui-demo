@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCatalogue,nativeRoute,frameIdFromRoute,findNativeFrame,renderNativeFrame,renderNativeOptions} from './native-preview.mjs';
+import {nativeFrames} from './native-frames.mjs';
+import {withAppPhoneViewport} from './app-phone-viewport.mjs';
 const frames=[
  {id:'64:3513',platform:'web',name:'Tài khoản',width:1440,height:1024,family:'accounts',file:'native/64-3513.1234abcd.html'},
  {id:'458:15284',platform:'web-portrait',name:'Tài khoản dọc',width:1024,height:1440,family:'accounts',file:null},
@@ -23,4 +25,9 @@ test('source canvas keeps native dimensions and escapes source labels',()=>{
  const c=createCatalogue(frames),html=renderNativeFrame({...c.frames[0],name:'"<script>'});
  assert.match(html,/width="1440" height="1024"/);assert.match(html,/native\/64-3513.1234abcd.html/);assert.doesNotMatch(html,/<script>/);
  assert.throws(()=>createCatalogue([{...frames[0],file:'https://example.com/evil.html'}]),/file/);
+});
+
+test('source-view hotspots follow the corrected account rows and compact detail back button',()=>{
+ for(const[id,top]of [['1450:9130',762],['1450:9522',762],['1430:86619',770],['1450:8895',770]]){const frame=withAppPhoneViewport(nativeFrames.find(f=>f.id===id),{source:true}),html=renderNativeFrame(frame),back=html.match(/<button\b[^>]*>/g)?.find(b=>b.includes('data-destination="1430:85846"'));assert.ok(back,id+' back');assert.ok(back.includes('top:'+top+'px'),id+' visible back hotspot');}
+ const account=renderNativeFrame(nativeFrames.find(f=>f.id==='1450:9744')),appearance=account.match(/<button\b[^>]*>/g)?.find(b=>b.includes('data-destination="1450:10174"'));assert.ok(appearance?.includes('top:290px'));assert.ok(appearance.includes('height:42px'));
 });
