@@ -67,3 +67,16 @@ test('OA section detection prioritizes native page and list labels over copied t
  const cases=[['oa','OA / GIF & Lịch sử','Danh sách / cấu hình','Tạo cấu hình','Tab OA'],['gif','Quản lý GIF','Danh sách / cấu hình','Thêm GIF','Tab GIF'],['messages','Tin nhắn','Danh sách GIF','Tạo tin nhắn','Tab GIF'],['messages','OA / GIF & Lịch sử','Danh sách tin nhắn','Tạo tin nhắn','Tab GIF'],['gif','','','Thêm GIF','Tab GIF']];
  for(const [want,title,list,cta,activeTab]of cases){const nodes=[n('title','Page title','TEXT',[125,70,329,32],null,title),n('list','List title','TEXT',[150,330,420,21],null,list),n('search','Placeholder','TEXT',[200,250,100,20],null,'Tìm tên GIF'),n('tab',activeTab,'FRAME',[400,170,100,49]),n('indicator','Active tab indicator','FRAME',[400,210,100,5],'tab'),n('button','CTA button','FRAME',[1250,100,150,40]),n('label','Label','TEXT',[1260,110,125,20],'button',cta)];const frame=buildWebInteractiveFrames([{id:'copied-section',platform:'web',group:'Sider bar thu nhỏ kích thước các màn',family:'oa',width:1440,height:1024,nodes}])['copied-section'];assert.equal(frame.scene,want);assert.equal(frame.controls.find(c=>c.id==='button')?.action,'web.oa.add');}
 });
+
+test('combined source IP text produces one distinct IPv4 and IPv6 instead of repeating the whole cell',()=>{
+ const ipv4='14.238.43.142',ipv6='2401:d800:8d9:ad64:48f6:7357:a9f0:4ce6';
+ for(const text of [ipv4+'\n'+ipv6,ipv4+' '+ipv6,ipv4+'\r\n  '+ipv6]){
+  const records=buildWebSourceRecords({'557:49673':{table:{rows:[{slots:[{column:'ID',text:'MK002'},{column:'IPV4 / IPV6',text}]}]}}});
+  assert.equal(records.messages[0].ipv4,ipv4);assert.equal(records.messages[0].ipv6,ipv6);
+ }
+});
+test('source IP extraction preserves compressed and IPv4-mapped IPv6 without fabricating a missing address',()=>{
+ for(const [text,ipv4,ipv6]of [['192.0.2.17\n::ffff:192.0.2.18','192.0.2.17','::ffff:192.0.2.18'],['2001:db8::25','','2001:db8::25'],['192.0.2.17','192.0.2.17',''],['','','']]){
+  const records=buildWebSourceRecords({'557:49673':{table:{rows:[{slots:[{column:'IPV4 / IPV6',text}]}]}}});assert.equal(records.messages[0].ipv4,ipv4);assert.equal(records.messages[0].ipv6,ipv6);
+ }
+});

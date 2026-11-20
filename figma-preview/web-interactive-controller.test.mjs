@@ -90,3 +90,18 @@ test('opening the other Web orientation for the first time projects already chan
  assert.equal(portrait.values[frame.table.rows[0].slots.find(s=>s.column==='Tài khoản'&&s.part===1).field],'cross_orientation');
  assert.match(portrait.values[frame.table.countField],/31 tài khoản/);
 });
+
+test('all native Web history tables and both detail orientations project and copy each selected IP exactly once',()=>{
+ const expected4='14.238.43.142',expected6='2401:d800:8d9:ad64:48f6:7357:a9f0:4ce6';let checked=0;
+ for(const [id,frame]of Object.entries(webInteractiveFrames)){
+  const slots=frame.table?.rows?.[0]?.slots.filter(s=>/ipv/i.test(s.column));if(!slots?.length)continue;
+  const s={...session(),data:createDemoState()};initializeWebSourceData(s.data);s.context.webChanged=true;s.values['web.filter.history.query']='MK002';prepareWebFrame({frame,session:s});
+  for(const slot of slots)assert.equal(s.values[slot.field],expected4+'\n'+expected6,id);
+  handleWebInteraction({frame,control:{action:'web.history.open',recordIndex:0},session:s});assert.equal(s.context.messageId,'source-web-message-1');
+  const detail=webInteractiveFrames[frame.orientation==='portrait'?'98:3079':'557:50194'];prepareWebFrame({frame:detail,session:s});
+  for(const slot of detail.texts.filter(t=>['ipv4','ipv6'].includes(t.dataField)))assert.equal(s.values[slot.field],slot.dataField==='ipv4'?expected4:expected6,id);
+  for(const [copyField,expected]of [['ipv4',expected4],['ipv6',expected6]])assert.equal(handleWebInteraction({frame:detail,control:{action:'web.copy',copyField},session:s}).copy,expected,id);
+  checked++;
+ }
+ assert.equal(checked,52);
+});
