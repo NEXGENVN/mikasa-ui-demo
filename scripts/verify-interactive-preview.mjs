@@ -11,15 +11,16 @@ import {createInteractiveSession,seedInteractiveValues} from '../figma-preview/i
 import {composeSourceComponents} from '../figma-preview/interactive-component-view.mjs';
 import {renderInteractiveFrame} from '../figma-preview/interactive-preview.mjs';
 import {sourceComponentPopups,sourceComponentExtraArtwork} from '../figma-preview/source-component-states.mjs';
+import {withCalendarReferenceLayout} from '../figma-preview/calendar-reference-layout.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function verifyInteractivePreview(){
  const catalogue=new Map(nativeFrames.map(f=>[f.id,f])),report={format:'original-figma-interactive-v1',frames:0,platforms:{},controls:0,timers:0,checkedActions:0,sourceFilesRetained:0,sourceComponentAssets:0,errors:[]},assets=new Set();
  const collect=value=>{if(!value||typeof value!=='object')return;for(const [k,v]of Object.entries(value))if(typeof v==='string'&&/^(file|checkedAsset|uncheckedAsset)$/.test(k)&&v.startsWith('assets/'))assets.add(v);else if(v&&typeof v==='object')collect(v);};
  for(const original of nativeFrames){
   const metadata=(original.platform==='app'?appInteractiveFrames:webInteractiveFrames)[original.id];if(!metadata){report.errors.push({frameId:original.id,status:'missing-metadata'});continue;}
-  const session=createInteractiveSession(createDemoState()),frame=composeSourceComponents({...original,...metadata,id:original.id,width:original.width,height:original.height,file:original.file,platform:original.platform},session,{popups:sourceComponentPopups,extraArtwork:sourceComponentExtraArtwork[original.id]||[]});
+  const session=createInteractiveSession(createDemoState()),frame=composeSourceComponents(withCalendarReferenceLayout({...original,...metadata,id:original.id,width:original.width,height:original.height,file:original.file,platform:original.platform}),session,{popups:sourceComponentPopups,extraArtwork:sourceComponentExtraArtwork[original.id]||[]});
   seedInteractiveValues(session,frame);const prepare=frame.platform==='app'?prepareAppFrame:prepareWebFrame,handle=frame.platform==='app'?handleAppInteraction:handleWebInteraction;prepare({frame,session});session.currentFrameId=frame.id;
-  try{const html=renderInteractiveFrame(frame,session);if(!html.includes(original.file)||frame.file!==original.file)throw Error('Original frame identity changed');report.sourceFilesRetained++;}catch(error){report.errors.push({frameId:frame.id,status:'renderer',message:error.message});}
+  try{const html=renderInteractiveFrame(frame,session);if(!html.includes(frame.file)||frame.file!==withCalendarReferenceLayout(original).file||frame.id!==original.id||frame.width!==original.width||frame.height!==original.height)throw Error('Original frame identity changed');await fs.access(path.join(root,'figma-preview',original.file));await fs.access(path.join(root,'figma-preview',frame.file));report.sourceFilesRetained++;if(frame.calendarReference)report.updatedCalendarReferences=(report.updatedCalendarReferences||0)+1;}catch(error){report.errors.push({frameId:frame.id,status:'renderer',message:error.message});}
   collect(frame);report.frames++;report.platforms[frame.platform]=(report.platforms[frame.platform]||0)+1;report.controls+=frame.controls.length;report.timers+=frame.timers?.length||0;
   for(const control of [...frame.controls,...(frame.timers||[]).map(t=>t.control)]){
    const state=createInteractiveSession(createDemoState());seedInteractiveValues(state,frame);prepare({frame,session:state});state.currentFrameId=frame.id;

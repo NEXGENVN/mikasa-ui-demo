@@ -32,6 +32,17 @@ function fixture(){
  const session=createInteractiveSession(createDemoState());syncAppSchedule(session,scheduleISO({year:2026,month:8,day:31,hour:9,minute:15}));
  return{doc,svg,form,bg,glyph,cells,buttons,frame,session};
 }
+test('an edit calendar exported in disabled state restores its native button shape with enabled and disabled paints',()=>{
+ const f=fixture(),background=new Element('rect',f.doc,{fill:'#E8EBF0',rx:'12'},[140,799,230,40]),text=new Element('path',f.doc,{fill:'#C2C9D6',d:'M200 815 L210 815 L210 825 Z'},[200,815,10,10]);f.svg.append(background,text);
+ const button=new Element('button',f.doc,{'data-interactive-control':'save'});f.form.append(button);
+ f.frame.controls=[{id:'save',action:'app.schedule.save',box:[140,799,230,40]}];
+ f.frame.calendar.savePaint={enabled:{background:'#0F4D88',text:'#FFFFFF'},disabled:{background:'#E8EBF0',text:'#C2C9D6'}};
+ syncAppSchedule(f.session,'2026-11-21T02:00:00Z',{now});f.session.context.appScheduleOriginal=f.session.context.appScheduleDate;
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});calendar.project();assert.equal(button.disabled,true);assert.equal(background.getAttribute('fill'),'#E8EBF0');
+ syncAppSchedule(f.session,'2026-11-21T02:30:00Z',{now});calendar.project();assert.equal(button.disabled,false);assert.equal(background.getAttribute('fill'),'#0F4D88');assert.equal(text.getAttribute('fill'),'#FFFFFF');
+ syncAppSchedule(f.session,f.session.context.appScheduleOriginal,{now});calendar.project();assert.equal(button.disabled,true);assert.equal(background.getAttribute('fill'),'#E8EBF0');assert.equal(text.getAttribute('fill'),'#C2C9D6');
+ calendar.restore();assert.equal(background.getAttribute('fill'),'#E8EBF0');assert.equal(text.getAttribute('fill'),'#C2C9D6');
+});
 test('projects six-week months inside the original grid and preserves the native selection shape with the specified selected paint',()=>{
  const f=fixture(),calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:Date.parse('2026-08-18T03:00:00Z')});
  const p=calendar.project();assert.equal(p.rows,6);assert.equal(calendar.scroller.style.height,'125px');
@@ -39,6 +50,13 @@ test('projects six-week months inside the original grid and preserves the native
  assert.equal(f.bg.getAttribute('opacity'),'0');assert.ok(calendar.layer.querySelectorAll('rect').some(n=>n.getAttribute('fill')==='#14538E'&&n.getAttribute('rx')==='4'));
  assert.equal(f.buttons[0].getAttribute('aria-label'),'Ngày 26 tháng 7 năm 2026 (ngoài tháng đang xem)');
  calendar.restore();assert.equal(f.bg.getAttribute('opacity'),null);assert.equal(f.buttons[0].parentNode,f.form);assert.equal(f.buttons[0].getAttribute('style'),'original-day-0');
+});
+test('a three-row reference calendar opens at the selected week so its upcoming dates are visible',()=>{
+ const f=fixture();Object.assign(f.frame.calendar,{gridBox:[20,100,350,96],rowPitch:32,sourceRows:3,scrollSelectionToStart:true});
+ f.frame.calendar.cells=f.frame.calendar.cells.map(c=>({...c,box:[c.box[0],102+Math.floor(c.calendarIndex/7)*32,40,24]}));
+ syncAppSchedule(f.session,'2026-11-20T04:00:00Z',{now});
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});calendar.project();
+ assert.equal(calendar.scroller.scrollTop,64);assert.equal(f.buttons[0].style.top,'2px');calendar.restore();
 });
 test('five-week projection hides unused sixth-row controls without changing their identity or listeners',()=>{
  const f=fixture(),button=f.buttons[0];button.addEventListener('click',()=>{});
@@ -140,6 +158,7 @@ test('a truncated source hour list still draws both lower neighbors and keeps th
  host.listeners.pointerdown({clientY:747,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'16');calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['14','15','16','17','18']);
  syncAppSchedule(f.session,'2026-11-21T07:00:00+07:00',{now});calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['07','08','09']);assert.equal(visible()[0].getAttribute('data-source-hour-row'),'2');
  syncAppSchedule(f.session,'2026-11-21T23:00:00+07:00',{now});calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['21','22','23']);assert.equal(visible()[2].getAttribute('data-source-hour-row'),'2');
+ f.frame.calendar.wheels[0].activePaint='#14538E';calendar.project();assert.equal(visible().find(p=>p.getAttribute('data-source-hour-row')==='2').getAttribute('fill'),'#14538E');
  calendar.restore();assert.equal(visible().length,0);assert.ok(originals.every(p=>p.getAttribute('opacity')===null));
 });
 

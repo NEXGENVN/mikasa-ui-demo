@@ -5,6 +5,7 @@ import {roundSourceAccountAvatars} from './source-account-avatar.mjs';
 import {restoreSourceBottomNavigation} from './source-bottom-navigation.mjs';
 import {mountAppPhoneViewport,withAppPhoneViewport,appPhoneViewportControlBox} from './app-phone-viewport.mjs';
 import {withDarkReferenceLayout} from './dark-reference-layout.mjs';
+import {calendarReferenceFile} from './calendar-reference-layout.mjs';
 import {mountSourceDarkAccountReference} from './source-dark-account-reference.mjs';
 import {restoreSourceDarkMessageReference} from './source-dark-message-reference.mjs';
 import {mountSourceDarkFlowReference} from './source-dark-flow-reference.mjs';
@@ -36,6 +37,7 @@ export function renderNativeOptions(frames,selectedId,query=''){
 }
 export function renderNativeFrame(frame,{hotspots:includeHotspots=true}={}){
  if(!frame)return '<div class="native-unavailable"><h2>Chưa tìm thấy frame</h2></div>';
+ frame={...frame,file:calendarReferenceFile(frame)};
  const url='https://www.figma.com/design/2oHQaSkcqH2GoOidQMwrEs/Mikasa?node-id='+frame.id.replace(':','-');
  const meta='<div class="native-caption"><strong>'+e(frame.name)+'</strong><span>'+frame.width+' × '+frame.height+' · '+frame.id+'</span><a href="'+url+'" target="_blank" rel="noopener">Mở frame Figma ↗</a></div>';
  if(!frame.file)return '<section class="native-unavailable" data-missing-frame="'+frame.id+'"><h2>Chưa có bản preview của frame này</h2><p>'+e(frame.name)+' · '+frame.id+'</p><a href="'+url+'" target="_blank" rel="noopener">Xem frame nguồn trên Figma ↗</a></section>';

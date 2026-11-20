@@ -31,7 +31,7 @@ function mountSourceTimeWheel({document,wheel,library,kind,values,onIssue=()=>{}
    if(number===undefined){path.removeAttribute('data-source-value');return;}
    const middle=row.box[1]+pitch/2,record=i===2?active:(muted.length?muted:records).toSorted((a,b)=>distance(a,middle)-distance(b,middle))[0],font=record?.slot.font||wheel.slots[0]?.font||{},text=String(number).padStart(2,'0');
    const generated=generateGlyphPaths(library,{...font,value:text,x:row.box[0],baseline:row.box[1]+(font.baseline??font.size??18),width:row.box[2],height:row.box[3]});
-   path.setAttribute('d',generated.d);path.setAttribute('fill',record?.paint||(i===2?'#0F4D88':'#B0BAC9'));path.setAttribute('data-source-value',text);
+   path.setAttribute('d',generated.d);path.setAttribute('fill',i===2&&wheel.activePaint?wheel.activePaint:record?.paint||(i===2?'#0F4D88':'#B0BAC9'));path.setAttribute('data-source-value',text);
    if(generated.missingGlyphs.length)onIssue({status:kind+'-wheel-missing-glyphs',missingGlyphs:generated.missingGlyphs});
   });
  }

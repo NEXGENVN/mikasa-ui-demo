@@ -1,7 +1,9 @@
 import {darkAccountReferenceLayout} from './source-dark-account-reference.mjs';
+import {withCalendarReferenceLayout} from './calendar-reference-layout.mjs';
 const contains=(outer,box)=>Array.isArray(box)&&box[0]>=outer[0]-.1&&box[1]>=outer[1]-.1&&box[0]+box[2]<=outer[0]+outer[2]+.1&&box[1]+box[3]<=outer[1]+outer[3]+.1;
 /** Keep native click/field geometry aligned with the screenshot-backed SVG transforms. */
 export function withDarkReferenceLayout(frame){
+ frame=withCalendarReferenceLayout(frame);
  const regions=frame?.platform==='app'&&darkAccountReferenceLayout[frame.id],schedule=frame?.platform==='app'&&frame.id==='1444:94627'&&frame.calendar;if(!regions&&!schedule)return frame;
  const mapBox=box=>{const region=(regions||[]).find(r=>contains(r.box,box));if(!region)return box;const {box:b,targetBox:t}=region,sx=t[2]/b[2],sy=t[3]/b[3];return[t[0]+(box[0]-b[0])*sx,t[1]+(box[1]-b[1])*sy,box[2]*sx,box[3]*sy];};
  const slot=s=>({...s,box:mapBox(s.box),...(s.sourceClipBox?{sourceClipBox:mapBox(s.sourceClipBox)}:{})});
