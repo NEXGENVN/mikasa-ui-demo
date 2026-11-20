@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mountSourceCalendar,calendarDateAppearance} from './source-calendar.mjs';
 import {sourceGlyphLibrary} from './source-glyph-library.mjs';
+import {generateGlyphPaths} from './source-glyphs.mjs';
 import {createInteractiveSession} from './interactive-session.mjs';
 import {createDemoState} from './core.mjs';
 import {syncAppSchedule,scheduleISO,changeAppSchedule} from './app-calendar.mjs';
@@ -54,7 +55,7 @@ test('native wheel rows, scrolling and arrows change the existing select without
  let changed=0;select.addEventListener('change',()=>changed++);
  const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});
  const event=extra=>({prevented:false,preventDefault(){this.prevented=true;},stopPropagation(){},...extra});
- const pointer=event({clientY:668});host.listeners.pointerdown(pointer);assert.equal(select.value,'10');assert.equal(pointer.prevented,true);
+ const pointer=event({clientY:707});host.listeners.pointerdown(pointer);assert.equal(select.value,'10');assert.equal(pointer.prevented,true);
  const wheel=event({deltaY:100});host.listeners.wheel(wheel);assert.equal(select.value,'11');assert.equal(wheel.prevented,true);
  const space=event({key:' '});select.listeners.keydown(space);assert.equal(space.prevented,true);assert.equal(changed,2);
  const up=event({key:'ArrowUp'});select.listeners.keydown(up);assert.equal(select.value,'10');assert.equal(changed,3);
@@ -122,4 +123,22 @@ test('crossing midnight retains an enabled keyboard date target without changing
 test('one wheel step from an expired hour chooses the nearest valid next hour',()=>{
  const f=fixture(),host=new Element('span',f.doc,{},[40,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'hour'});select.value='10';host.append(select);f.form.append(host);f.frame.calendar.wheels=[{controlId:'hour',field:'app.schedule.hour',box:[40,567,126,200],selectedIndex:1,slots:[0,1,2].map(i=>({id:'hour-'+i,text:String(9+i),box:[40,568+i*40,126,40],font:f.frame.calendar.normalFont}))}];
  let clock=Date.parse('2026-11-13T10:10:00+07:00');syncAppSchedule(f.session,'2026-11-13T10:30:00+07:00',{now:clock});const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:()=>clock});calendar.project();clock=Date.parse('2026-11-13T10:31:00+07:00');calendar.project();host.listeners.wheel({deltaY:1,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'11');calendar.restore();
+});
+
+test('a truncated source hour list still draws both lower neighbors and keeps the chosen hour centered with native active paint',()=>{
+ const f=fixture(),host=new Element('span',f.doc,{},[40,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'hour'});host.append(select);f.form.append(host);
+ const font={...f.frame.calendar.normalFont,size:18,baseline:26.15234375,weight:400,style:'Regular',fontKey:'Roboto|Regular|400',align:'CENTER'},slots=[21,22,23].map((n,i)=>({id:'hour-'+i,text:String(n),box:[40,568+i*40,126,40],font:{...font,color:i===1?'#195CFA':'#B0BAC9'}}));
+ const originals=slots.map((slot,i)=>{const p=new Element('path',f.doc,{d:generateGlyphPaths(sourceGlyphLibrary,{...font,value:slot.text,x:slot.box[0],baseline:slot.box[1]+font.baseline,width:126}).d,fill:i===2?'#0F4D88':'#B0BAC9'},slot.box);f.svg.append(p);return p;});
+ f.frame.controls=[{id:'hour',field:'app.schedule.hour',type:'select',textSlots:[slots[1]]}];f.frame.calendar.wheels=[{controlId:'hour',field:'app.schedule.hour',box:[40,567,126,200],selectedIndex:1,slots}];
+ syncAppSchedule(f.session,'2026-11-21T14:00:00+07:00',{now});select.addEventListener('change',()=>changeAppSchedule(f.session,{part:'hour',value:select.value},{now}));
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});calendar.project();
+ const visible=()=>f.svg.querySelectorAll('path').filter(p=>p.getAttribute('data-source-hour-row')!==null&&p.getAttribute('display')!=='none');
+ assert.equal(calendar.ownsField('app.schedule.hour'),true);assert.equal(calendar.ownsField('app.schedule.minute'),false);
+ assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['12','13','14','15','16']);
+ assert.deepEqual(visible().map(p=>p.getAttribute('data-source-hour-row')),['0','1','2','3','4']);
+ assert.equal(visible()[2].getAttribute('fill'),'#0F4D88');assert.ok(originals.every(p=>p.getAttribute('opacity')==='0'));
+ host.listeners.pointerdown({clientY:747,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'16');calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['14','15','16','17','18']);
+ syncAppSchedule(f.session,'2026-11-21T07:00:00+07:00',{now});calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['07','08','09']);assert.equal(visible()[0].getAttribute('data-source-hour-row'),'2');
+ syncAppSchedule(f.session,'2026-11-21T23:00:00+07:00',{now});calendar.project();assert.deepEqual(visible().map(p=>p.getAttribute('data-source-value')),['21','22','23']);assert.equal(visible()[2].getAttribute('data-source-hour-row'),'2');
+ calendar.restore();assert.equal(visible().length,0);assert.ok(originals.every(p=>p.getAttribute('opacity')===null));
 });

@@ -35,6 +35,7 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
  }
  function patchControl(control,element){
   if(!control.field||!own(session.values,control.field))return;
+  if(calendar?.ownsField?.(control.field))return;
   const value=session.values[control.field];
   if(control.type==='checkbox'||control.type==='radio'){patchCheck(control,element,control.type==='radio'?String(value)===String(control.value):!!value);return;}
   const text=control.type==='select'?(control.options||[]).find(option=>String(option.value)===String(value))?.label??value:interactiveDisplayValue(control,value,{revealed:element?.type==='text'});
