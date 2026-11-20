@@ -118,11 +118,34 @@ export function buildAppInteractiveFrames(frames,{artwork={}}={}){
    if(route==='schedule'&&name==='day'&&/^\d{1,2}$/.test(t.text))add(ancestor(t,n=>n.bbox[2]>=24&&n.bbox[2]<=50&&n.bbox[3]<=32),{action:'app.schedule.day',value:t.text,label:'Ngày '+t.text});
    if(route==='schedule'&&name==='month')bind(t,'app.schedule.month');
    if(['confirm','send-choice','schedule','processing'].includes(route)&&name==='phone number'){const p=byId.get(t.parentId);bind(t,children(p||t).some(x=>norm(x.text)==='mau zns')?'app.send.template':'app.send.phone');}
+   if(['confirm','send-choice','schedule'].includes(route)){
+    const siblings=children(byId.get(t.parentId)||t).filter(n=>n.id!==t.id),context=norm(siblings.map(n=>n.text).join(' '));
+    if(/^\d+ oa$/.test(text)&&context.includes('so oa gui'))bind(t,'app.send.oaCountDisplay');
+    if(/^\d+ tin$/.test(text)&&context.includes('tong so tin'))bind(t,'app.send.totalMessages');
+    if(name==='secondary operator')bind(t,'app.send.extraOA');
+    if(name==='allocation details'&&siblings.some(n=>norm(n.name)==='secondary operator'))bind(t,'app.send.extraAllocation');
+    if(['gui ngay','hen gio gui'].includes(text)){
+     const row=ancestor(t,n=>n.type==='FRAME'&&n.bbox[3]<=30&&nodes.some(r=>/cham chon quyen/.test(norm(r.name))&&descendant(r,n.id)));
+     if(row.type==='FRAME')add(row,{action:text==='gui ngay'?'app.schedule.now':'app.schedule.open',label:t.text});
+    }
+   }
    if(route==='processing'&&name==='ma yeu cau')bind(t,'app.pending.id');
    if(route==='overview'&&text.startsWith('hello,'))bind(t,'app.overview.greeting');
    if(route==='account'&&/vinh|bizzy/.test(text)&&b[1]<210)bind(t,'app.account.name');
    if(route==='history'&&/\d+ tin nhan/.test(text))bind(t,'app.history.count');
-   if(route==='detail'){const context=norm(children(byId.get(t.parentId)||t).map(x=>x.text).join(' '));if(name==='phone number'||name==='recipient phone number')bind(t,context.includes('mau zns')?'app.detail.template':'app.detail.phone');if(name==='transaction id'||name==='message id'||name==='account name'&&(context.includes('ma tin')||context.includes('ma lich hen')))bind(t,'app.detail.id');if(name==='template name')bind(t,'app.detail.template');if(name==='account name'&&context.includes('thoi gian'))bind(t,'app.detail.time');if(name==='account name'){const key=context.includes('ipv 4')||context.includes('ipv4')?'ipv4':context.includes('ipv6')?'ipv6':context.includes('port')?'port':context.includes('nha mang')?'provider':null;if(key)bind(t,'app.recorded.'+key);}}
+   if(route==='detail'){
+    const owner=byId.get(t.parentId),context=norm(children(owner||t).filter(x=>x.id!==t.id).map(x=>x.text).join(' '));
+    // Component names are copied between unrelated rows. The owning label
+    // distinguishes recipient/template/IP values and send/open timestamps.
+    if(['phone number','recipient phone number','account name','transaction id','message id','template name'].includes(name)){
+     const key=/ipv\s*4/.test(context)?'app.recorded.ipv4':/ipv\s*6/.test(context)?'app.recorded.ipv6':/^(cong|port)$/.test(context)?'app.recorded.port':context.includes('nha mang')?'app.recorded.provider':context.includes('mau zns')||name==='template name'?'app.detail.template':context.includes('ma tin')||context.includes('ma lich hen')||['transaction id','message id'].includes(name)?'app.detail.id':context.includes('thoi gian doi tuong mo tin')?'app.detail.openTime':context.includes('thoi gian gui')?'app.detail.time':['phone number','recipient phone number'].includes(name)?'app.detail.phone':null;
+     if(key)bind(t,key);
+    }
+    if(name==='status title')bind(t,'app.detail.statusTitle');
+    if(name==='status detail')bind(t,'app.detail.statusDetail');
+    const countField={'completed count':'successCount','failed count':'failedCount','pending count':'pendingCount','status text':'pendingCount'}[name];
+    if(countField&&/^\d+\s/.test(t.text))bind(t,'app.detail.'+countField);
+   }
   }
   for(const n of nodes){
    if(n.type==='TEXT'||n.id===frame.id)continue;
@@ -236,7 +259,25 @@ export function buildAppInteractiveFrames(frames,{artwork={}}={}){
     }
    }
   }
-  const visibility=selected.filter(c=>c.action==='app.history.detail').map(c=>({id:c.id,box:c.box,field:`app.history.${c.rowIndex}.visible`}));
+  const historyRows=selected.filter(c=>c.action==='app.history.detail');
+  const visibility=historyRows.map(c=>({id:c.id,box:byId.get(c.id)?.bbox||c.box,field:`app.history.${c.rowIndex}.visible`}));
+  const messageDrawing={history:[],oaRows:[]};
+  for(const row of historyRows){
+   const status=texts.find(t=>descendant(t,row.id)&&/status|trang thai/.test(norm(t.name))),badge=status&&byId.get(status.parentId),icon=nodes.find(n=>descendant(n,row.id)&&n.bbox[2]===35&&n.bbox[3]===35);
+   if(badge&&icon)messageDrawing.history.push({id:row.id,rowIndex:row.rowIndex,box:row.box,iconBox:icon.bbox,badgeBox:badge.bbox});
+   const statusSlot=dynamicTexts.find(t=>t.id===status?.id);if(statusSlot)statusSlot.messageDrawing=true;
+  }
+  if(route==='detail'){
+   const oaNames=texts.filter(t=>/^OA \d+$/.test(t.text)).sort((a,b)=>a.bbox[1]-b.bbox[1]);
+   for(const [i,t]of oaNames.entries()){
+    const row=ancestor(t,n=>n.bbox[2]>=300&&n.bbox[3]<=28),status=texts.find(n=>descendant(n,row.id)&&norm(n.name)==='status'),badge=status&&byId.get(status.parentId);
+    bind(t,`app.detail.oa.${i}.name`);if(status){bind(status,`app.detail.oa.${i}.status`);dynamicTexts.at(-1).messageDrawing=true;}
+    visibility.push({id:row.id,box:row.bbox,field:`app.detail.oa.${i}.visible`});
+    if(badge)messageDrawing.oaRows.push({id:row.id,rowIndex:i,box:row.bbox,badgeBox:badge.bbox});
+   }
+   const progress=nodes.find(n=>norm(n.name)==='status progress bar');if(progress)messageDrawing.progress={id:progress.id,box:progress.bbox};
+   texts.filter(t=>/^chi tiet buoc \d+$/.test(norm(t.name))&&/\d{2}\/\d{2}\/\d{4}/.test(t.text)).sort((a,b)=>a.bbox[1]-b.bbox[1]).forEach((t,i)=>bind(t,`app.detail.timeline.${i}.time`));
+  }
   const mapNode=nodes.find(n=>norm(n.name)==='ban do'&&n.type==='FRAME'),mapFooter=nodes.find(n=>n.name==='Map'&&mapNode&&descendant(n,mapNode.id));
   const transforms=mapNode?[{id:mapNode.id,box:[mapNode.bbox[0],mapNode.bbox[1],mapNode.bbox[2],mapFooter?mapFooter.bbox[1]-mapNode.bbox[1]:mapNode.bbox[3]],field:'app.detail.mapZoom',mode:'map'}]:[];
   const timers=[];if(route==='processing')timers.push({delay:1200,control:{id:'app:finish',type:'button',action:'app.send.finish'}});
@@ -254,7 +295,8 @@ export function buildAppInteractiveFrames(frames,{artwork={}}={}){
   const calendar=route==='schedule'?buildCalendarMetadata(frame,selected):null;
   for(const summary of calendarSummarySlots(frame))if(!dynamicTexts.some(s=>s.id===summary.id))dynamicTexts.push(summary);
   const profileContact=route.startsWith('profile')?(texts.some(t=>/label/.test(norm(t.name))&&norm(t.text)==='so dien thoai')?'phone':texts.some(t=>/label/.test(norm(t.name))&&norm(t.text)==='email')?'email':undefined):undefined;
-  out[frame.id]={route,theme:frame.theme,group:frame.group,scheduleEdit:route==='schedule'&&/^l/i.test(frame.name),controls:selected,texts:dynamicTexts,visibility,transforms,timers,componentStates,...(codeCountdown?{codeCountdown:true}:{}),...(profileContact?{profileContact}:{}),...(route==='profile'?{readOnly:true}:{}),...(componentStates.length?{oaLimit}:{}),...(calendar?{calendar}:{})};
+  const historyStatus=route==='history'?({'1303:79880':'sent','1444:91774':'sent','1303:80128':'success','1444:92022':'success','1303:80614':'failed','1444:92328':'failed','1085:71117':'scheduled','1444:92629':'scheduled'}[frame.id]||'all'):undefined;
+  out[frame.id]={route,theme:frame.theme,group:frame.group,scheduleEdit:route==='schedule'&&/^l/i.test(frame.name),controls:selected,texts:dynamicTexts,visibility,transforms,timers,componentStates,...(historyStatus?{historyStatus}:{}),...(messageDrawing.history.length||messageDrawing.oaRows.length?{messageDrawing}:{}),...(codeCountdown?{codeCountdown:true}:{}),...(profileContact?{profileContact}:{}),...(route==='profile'?{readOnly:true}:{}),...(componentStates.length?{oaLimit}:{}),...(calendar?{calendar}:{})};
  }
  // Direct entry from the source picker still needs the record drawn by that
  // scheduled-detail frame, rather than a shared Web selection.

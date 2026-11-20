@@ -5,6 +5,83 @@ const module=await import('./app-interactive-source.mjs').catch(error=>{if(error
 const node=(id,type,name,bbox,extra={})=>({id,type,name,bbox,clippedBBox:bbox,visible:true,rendered:true,parentId:null,...extra});
 const sourceFixtures=JSON.parse(fs.readFileSync(new URL('./fixtures/app-profile-controls-source.json',import.meta.url))).frames;
 const sourceControls=()=>module.buildAppInteractiveFrames(sourceFixtures);
+const messageFixtures=JSON.parse(fs.readFileSync(new URL('./fixtures/app-message-controls-source.json',import.meta.url))).frames;
+const messageControls=()=>module.buildAppInteractiveFrames(messageFixtures);
+
+test('recorded IP values and send/open times follow their actual owning source labels',()=>{
+ const frames=messageControls();
+ for(const id of ['1308:7105','1309:7446','1430:87138','1450:9130']){
+  const frame=frames[id],fields=frame.texts;
+  assert.equal(fields.filter(s=>s.field==='app.detail.phone').length,1,id+' recipient is unique');
+  for(const key of ['ipv4','ipv6','port','provider'])assert.equal(fields.filter(s=>s.field==='app.recorded.'+key).length,1,id+' '+key);
+  assert.equal(fields.filter(s=>s.field==='app.detail.time').length,1,id+' send time');
+  assert.equal(fields.filter(s=>s.field==='app.detail.openTime').length,1,id+' open time');
+ }
+});
+
+test('native OA results expose five owned rows, separate counts, and exact source drawing rectangles',()=>{
+ const frames=messageControls();
+ for(const id of ['1308:6902','1308:7105','1309:7446','1450:9130']){
+  const frame=frames[id];
+  for(const key of ['successCount','failedCount','pendingCount'])assert.ok(frame.texts.some(s=>s.field==='app.detail.'+key),id+' '+key);
+  for(let i=0;i<5;i++){
+   assert.equal(frame.texts.filter(s=>s.field===`app.detail.oa.${i}.name`).length,1);
+   assert.equal(frame.texts.filter(s=>s.field===`app.detail.oa.${i}.status`).length,1);
+   assert.ok(frame.visibility.some(s=>s.field===`app.detail.oa.${i}.visible`));
+  }
+  assert.equal(frame.messageDrawing.oaRows.length,5);assert.equal(frame.messageDrawing.progress.box[2],328);assert.equal(frame.messageDrawing.progress.box[3],6);
+ }
+});
+
+test('scheduled subtitle and timeline timestamps have dedicated source slots',()=>{
+ const frame=messageControls()['1086:73413'];
+ assert.equal(frame.texts.find(s=>s.field==='app.detail.statusDetail')?.text,'Dự kiến gửi lúc 09:00, 14/11/2026');
+ assert.deepEqual(frame.texts.filter(s=>/^app\.detail\.timeline\./.test(s.field)).map(s=>s.field),['app.detail.timeline.0.time','app.detail.timeline.1.time']);
+});
+
+test('native history manifests preserve source status selection and individual icon/badge ownership',()=>{
+ const frames=messageControls();
+ for(const [id,status] of [['784:48201','all'],['1303:79880','sent'],['1303:80128','success'],['1303:80614','failed'],['1085:71117','scheduled']]){
+  const frame=frames[id];assert.equal(frame.historyStatus,status,id);
+  assert.ok(frame.messageDrawing.history.length>0);
+  for(const row of frame.messageDrawing.history){assert.deepEqual(row.iconBox.slice(2),[35,35]);assert.deepEqual(row.badgeBox.slice(2),[70,25]);}
+ }
+});
+
+test('history visibility owns the complete native row drawing even when its hit area is clipped at the bottom bar',()=>{
+ const frame=messageControls()['784:48201'],last=frame.controls.filter(c=>c.action==='app.history.detail').at(-1);
+ assert.equal(last.box[3],44,'interactive hit area remains clipped');
+ assert.deepEqual(frame.visibility.find(r=>r.id===last.id).box,[12,712,358,65],'drawing includes the full native card outline');
+});
+
+test('multi-OA confirmation binds native totals and only the secondary allocation row without moving text',()=>{
+ const frames=messageControls();
+ for(const id of ['1313:75767','1430:88099','1635:105774']){
+  const source=messageFixtures.find(f=>f.id===id),frame=frames[id],expected={oaCountDisplay:'2 OA',totalMessages:'4 tin',extraOA:'OA phụ 1 ',extraAllocation:'1 tin V4 + 1 tin V6'};
+  for(const [key,text]of Object.entries(expected)){
+   const slots=frame.texts.filter(s=>s.field==='app.send.'+key);assert.equal(slots.length,1,id+' '+key);
+   const slot=slots[0],node=source.nodes.find(n=>n.id===slot.id);assert.equal(slot.text,text);assert.deepEqual(slot.box,node.bbox);assert.deepEqual(slot.font,node.font);
+  }
+  const secondary=source.nodes.find(n=>n.name==='Secondary Operator'),allocation=frame.texts.find(s=>s.field==='app.send.extraAllocation');
+  assert.equal(source.nodes.find(n=>n.id===allocation.id).parentId,secondary.parentId,id+' secondary row owns its allocation');
+  const primary=source.nodes.find(n=>n.name==='Primary Operator'),primaryAllocation=source.nodes.find(n=>n.name==='Allocation Details'&&n.parentId===primary.parentId);
+  assert.ok(!frame.texts.some(s=>s.id===primaryAllocation.id),'primary one-OA allocation remains literal source');
+ }
+});
+
+test('both native send-mode rows own clickable labels and icons even without a prototype action',()=>{
+ const frames=messageControls();
+ for(const id of ['1279:8766','1430:88175','1635:109001','1313:75767','1430:88099','1635:105774']){
+  const source=messageFixtures.find(f=>f.id===id),frame=frames[id];
+  for(const [text,action]of [['Gửi ngay','app.schedule.now'],['Hẹn giờ gửi','app.schedule.open']]){
+   const label=source.nodes.find(n=>n.type==='TEXT'&&n.text===text),owner=source.nodes.find(n=>n.id===source.nodes.find(n=>n.id===label.parentId).parentId);
+   if(text==='Gửi ngay'&&['1279:8766','1430:88175','1635:109001'].includes(id))assert.equal((owner.prototypeInteractions||[]).length,0,'actual source has no immediate-row prototype');
+   const buttons=frame.controls.filter(c=>c.type==='button'&&c.action===action&&c.id===owner.id);assert.equal(buttons.length,1,id+' '+text);
+   assert.deepEqual(buttons[0].box,owner.bbox);assert.equal(buttons[0].label,text);
+   assert.ok(frame.controls.some(c=>c.type==='radio'&&c.action===action),'native circle remains independently interactive');
+  }
+ }
+});
 test('App controls preserve source rectangles and label based semantics for nested component inputs and login',()=>{
  assert.equal(typeof module.buildAppInteractiveFrames,'function','App source control builder is required');
  const f={id:'658:1036',name:'A1',platform:'app',theme:'light',group:'Light mode app',width:390,height:844,nodes:[

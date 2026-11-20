@@ -6,6 +6,9 @@ import {bindSourceDrawingRegions} from './source-drawing-slots.mjs';
 import {prepareSourceScrollCanvas} from './source-scroll-canvas.mjs';
 import {mountSourceExtraArtwork,mountSourcePopup,mountSourceCards,componentMembers} from './source-component-dom.mjs';
 import {mountSourceCalendar} from './source-calendar.mjs';
+import {mountAppMessageDrawing} from './app-message-drawing.mjs';
+import {mountSourceSendModeDrawing} from './source-send-mode.mjs';
+import {dockAppPhoneViewportControls} from './app-phone-viewport.mjs';
 
 const own=(object,key)=>Object.prototype.hasOwnProperty.call(object,key);
 const inputValue=element=>element.type==='checkbox'||element.type==='radio'?element.checked:element.value;
@@ -14,7 +17,7 @@ const inputValue=element=>element.type==='checkbox'||element.type==='radio'?elem
 export function mountInteractiveFrame({root,frame,session,handleInteraction,projectValues=()=>{},onResult,onIssue=()=>{}}){
  const form=root.querySelector('[data-interactive-frame]'),iframe=root.querySelector('.native-frame');
  if(!form||!iframe)return ()=>{};
- let active=true,binder=null,drawingRegions=null,prepared=false,closePopup=null,removeExtras=null,calendar=null,cards=null;const timers=new Set(),controls=new Map(frame.controls.map(control=>[control.id,control]));
+ let active=true,binder=null,drawingRegions=null,prepared=false,closePopup=null,removeExtras=null,calendar=null,cards=null,messages=null,sendMode=null,undockPhone=null;const timers=new Set(),controls=new Map(frame.controls.map(control=>[control.id,control]));
  const slots=new Map();for(const control of controls.values())if(control.field&&!['checkbox','radio','button','file'].includes(control.type))for(const slot of control.textSlots||[])slots.set(slot.id,slot);for(const slot of frame.texts||[])slots.set(slot.id,slot);
  const elements=new Map([...form.querySelectorAll('[data-interactive-control]')].map(element=>[element.dataset.interactiveControl,element]));
  for(const img of form.querySelectorAll('img'))if(img.tagName==='IMG')img.src=new URL(img.getAttribute('src'),document.baseURI).href;
@@ -58,7 +61,10 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   }
   for(const control of controls.values())if(control.field&&session.dirty.has(control.field)){const element=elements.get(control.id);if(element){if(control.type==='checkbox')element.checked=!!session.values[control.field];else if(control.type==='radio')element.checked=String(control.value)===String(session.values[control.field]);else if(control.type!=='file'&&element.value!==String(session.values[control.field]??''))element.value=String(session.values[control.field]??'');}}
   for(const control of controls.values())if(control.field&&session.dirty.has(control.field))patchControl(control,elements.get(control.id));
-  for(const slot of frame.texts||[])if(slot.field&&session.dirty.has(slot.field)&&own(session.values,slot.field))patchSlot(slot,session.values[slot.field]);
+  for(const slot of frame.texts||[])if(slot.field&&session.dirty.has(slot.field)&&own(session.values,slot.field)){
+   if(slot.messageDrawing){for(const output of form.querySelectorAll('[data-interactive-output]'))if(output.dataset.interactiveOutput===slot.id)output.textContent=String(session.values[slot.field]??'');}
+   else patchSlot(slot,session.values[slot.field]);
+  }
   const hiddenControls=new Set();
   for(const region of frame.visibility||[])if(session.dirty.has(region.field)){
    const visible=session.values[region.field]!==false;drawingRegions?.setVisible(region.id,visible);
@@ -68,6 +74,8 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   for(const region of frame.transforms||[])if(session.dirty.has(region.field))drawingRegions?.setMapZoom(region.id,session.values[region.field]);
   calendar?.project();
   cards?.project(session);
+  messages?.project(session);
+  sendMode?.project(session);
  }
  function dispatch(control,value,eventType='click'){
   if(!active||!control||control.disabled)return;
@@ -120,6 +128,7 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   prepared=true;
   try{await prepareSourceScrollCanvas({iframe,form,frame,stylesheets:[...document.querySelectorAll('link[rel="stylesheet"]')].map(link=>link.href)});}catch(error){onIssue({frameId:frame.id,status:'scroll-styles-failed',message:error.message});return;}
   if(!active)return;
+  undockPhone=dockAppPhoneViewportControls({form,frame});
   try{removeExtras=await mountSourceExtraArtwork({document:doc,frame,baseURI:document.baseURI});}catch(error){onIssue({frameId:frame.id,status:'native-component-failed',message:error.message});}
   if(!active){removeExtras?.();return;}
   // Native text is used only for a new glyph absent from the original font subset.
@@ -127,6 +136,8 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   binder=bindSourceTextSlots(doc,[...slots.values()],{library:sourceGlyphLibrary});
   drawingRegions=bindSourceDrawingRegions(doc,[...(frame.visibility||[]),...(frame.transforms||[]),...(frame.componentStates||[]).map(c=>({id:'component:'+c.id,box:c.box})),...[...controls.values()].filter(c=>['checkbox','radio'].includes(c.type)).map(c=>({id:'check:'+c.id,box:c.box}))]);
   cards=mountSourceCards({document:doc,frame,baseURI:document.baseURI});
+  messages=mountAppMessageDrawing({document:doc,frame,baseURI:document.baseURI});
+  sendMode=mountSourceSendModeDrawing({document:doc,frame});
   calendar=mountSourceCalendar({document:doc,form,frame,session,library:sourceGlyphLibrary,assetBase:document.baseURI,onIssue});
   form.dataset.ready='true';form.inert=false;
   form.dataset.slotCount=String(slots.size);form.dataset.matchedSlots=String(binder.ready.size);form.dataset.unresolvedSlots=String(binder.unresolved.length);
@@ -138,5 +149,5 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
  form.addEventListener('click',onClick);form.addEventListener('click',onFieldContainerClick);form.addEventListener('pointerdown',onPointerDown);form.addEventListener('keydown',onKeyDown);form.addEventListener('input',onInput);form.addEventListener('change',onChange);form.addEventListener('submit',onSubmit);form.addEventListener('keydown',onEscape);
  iframe.addEventListener('load',prepare);prepare();
  if(session.context.focusField){elementForField(session.context.focusField)?.focus();}
- return ()=>{active=false;closePopup?.(false);removeExtras?.();calendar?.restore();cards?.restore();for(const timer of timers){clearTimeout(timer);clearInterval(timer);}iframe.removeEventListener('load',prepare);form.removeEventListener('click',onClick);form.removeEventListener('click',onFieldContainerClick);form.removeEventListener('pointerdown',onPointerDown);form.removeEventListener('keydown',onKeyDown);form.removeEventListener('input',onInput);form.removeEventListener('change',onChange);form.removeEventListener('submit',onSubmit);form.removeEventListener('keydown',onEscape);};
+ return ()=>{active=false;closePopup?.(false);removeExtras?.();calendar?.restore();cards?.restore();messages?.restore();sendMode?.restore();undockPhone?.();for(const timer of timers){clearTimeout(timer);clearInterval(timer);}iframe.removeEventListener('load',prepare);form.removeEventListener('click',onClick);form.removeEventListener('click',onFieldContainerClick);form.removeEventListener('pointerdown',onPointerDown);form.removeEventListener('keydown',onKeyDown);form.removeEventListener('input',onInput);form.removeEventListener('change',onChange);form.removeEventListener('submit',onSubmit);form.removeEventListener('keydown',onEscape);};
 }

@@ -9,5 +9,6 @@ export function createAppSubmissionRunner({finish,setTimer=setTimeout,clearTimer
   onComplete(result,{session,frame,viewing});
  },delay);}
  function cancelAll(){for(const entry of entries){entry.active=false;clearTimer(entry.timer);}entries.clear();}
- return {schedule,cancelAll};
+ function cancelSession(session){for(const entry of entries)if(entry.session===session){entry.active=false;clearTimer(entry.timer);entries.delete(entry);}}
+ return {schedule,cancelAll,cancelSession};
 }

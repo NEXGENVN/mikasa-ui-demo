@@ -7,6 +7,11 @@ test('leaving processing still completes one background send without stealing th
 });
 test('a reset cancels pending sample callbacks',()=>{assert.equal(typeof module.createAppSubmissionRunner,'function');const timers=[],cleared=[];let calls=0;const s={data:{pendingSubmission:{id:7,row:null},ui:{}},context:{}};const runner=module.createAppSubmissionRunner({finish(){calls++;},setTimer(fn){timers.push(fn);return fn;},clearTimer:id=>cleared.push(id)});runner.schedule({session:s,frame:{id:'processing'},jobId:7});runner.cancelAll();timers[0]();assert.equal(calls,0);assert.equal(cleared.length,1);});
 
+test('resetting one App copy leaves another copy background request active',()=>{
+ const timers=[],finished=[],runner=module.createAppSubmissionRunner({finish:({session})=>{finished.push(session);return{};},setTimer(fn){timers.push(fn);return fn;},clearTimer(){},isViewing:()=>false});
+ assert.equal(typeof runner.cancelSession,'function');const session=()=>({data:{pendingSubmission:{id:1,row:null},ui:{}},context:{}}),full=session(),single=session();runner.schedule({session:full,frame:{id:'processing'},jobId:1});runner.schedule({session:single,frame:{id:'processing'},jobId:1});runner.cancelSession(full);timers.forEach(fn=>fn());assert.deepEqual(finished,[single]);runner.cancelAll();
+});
+
 test('deleting sample data or the account invalidates an unfinished background send',()=>{
  for(const kind of ['data','account']){const s=createInteractiveSession(createDemoState()),frame={id:'1635:109115',route:'processing',theme:'light'},timers=[];s.values['app.send.phone']='0901234567';s.values['app.send.oaCount']=1;handleAppInteraction({frame:{...frame,id:'1635:109001'},control:{action:'app.send.confirm'},session:s});const runner=module.createAppSubmissionRunner({finish:handleAppInteraction,setTimer(fn){timers.push(fn);return fn;},clearTimer(){},isViewing:()=>false});runner.schedule({session:s,frame,jobId:s.context.appPendingJob});handleAppInteraction({frame:{id:kind==='data'?'1635:110281':'1635:110341',theme:'light'},control:{action:'app.delete.confirm',value:kind},session:s});assert.equal(s.data.messages.length,0);timers[0]();assert.equal(s.data.messages.length,0,kind+' must not recreate a deleted message');assert.equal(s.data.pendingSubmission,undefined);assert.equal(s.context.appPendingJob,undefined);runner.cancelAll();}
 });
