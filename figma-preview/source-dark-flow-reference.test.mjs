@@ -20,9 +20,16 @@ test('Dark schedule edits use edit-specific source glyph labels and orange warni
 });
 test('Light and unrelated Dark screens retain their source paint',()=>{assert.equal(typeof m.mountSourceDarkFlowReference,'function');for(const id of ['1279:8468','1430:85846','557:49673']){const f=fixture(),p=new Element('path',{fill:'#0F4D88'},[40,110,20,20]);f.svg.append(p);assert.equal(m.mountSourceDarkFlowReference(f.doc,{frameId:id}).changed,0);assert.equal(p.getAttribute('fill'),'#0F4D88');}});
 
-test('Dark send form template icon matches the white native label without changing its blue notice icon',()=>{const f=fixture(),icon=new Element('path',{stroke:'#0F4D88'},[44,363,18,18]),notice=new Element('path',{stroke:'#0F4D88'},[36,544,20,20]);f.svg.append(icon);f.svg.append(notice);const h=m.mountSourceDarkFlowReference(f.doc,{frameId:'1432:10566',measure:n=>n.box});assert.equal(icon.getAttribute('stroke'),'#F8FAFF');assert.equal(notice.getAttribute('stroke'),'#0F4D88');h.restore();assert.equal(icon.getAttribute('stroke'),'#0F4D88');});
+test('Dark send form template icon matches the white native label without changing its blue notice icon',()=>{const f=fixture(),icon=new Element('path',{stroke:'#0F4D88'},[40,361.5,14,14]),notice=new Element('path',{stroke:'#0F4D88'},[36,544,20,20]);f.svg.append(icon);f.svg.append(notice);const h=m.mountSourceDarkFlowReference(f.doc,{frameId:'1432:10566',measure:n=>n.box});assert.equal(icon.getAttribute('stroke'),'#F8FAFF');assert.equal(notice.getAttribute('stroke'),'#0F4D88');h.restore();assert.equal(icon.getAttribute('stroke'),'#0F4D88');});
 
 test('the native Dark OA decrement uses the reference light stroke before any interaction',()=>{const f=fixture(),minus=new Element('path',{stroke:'#121212'},[269,430,7,0]);f.svg.append(minus);const h=m.mountSourceDarkFlowReference(f.doc,{frameId:'1432:10566',measure:n=>n.box});assert.equal(minus.getAttribute('stroke'),'#F8FAFF');h.restore();assert.equal(minus.getAttribute('stroke'),'#121212');});
+
+test('every part of the native template vector, including its left foot and filled dots, shares one Dark paint',()=>{
+ const ids=['1430:86270','1430:86331','1442:90757','1442:90887','1442:91017','1442:91147','1432:10566','1432:10696','1432:10827'];
+ for(const frameId of ids){const f=fixture(),parts=[['stroke',[40,361.5,14,4]],['stroke',[40,365.5,14,10]],['stroke',[38,375.5,18,6]],['fill',[45.542,378.8125,.5833,.5417]],['fill',[52.542,378.8125,.5833,.5417]],['fill',[38.542,378.8125,.5833,.5417]]].map(([key,box],i)=>{const p=new Element('path',{d:'native-template-part-'+i,[key]:'#0F4D88'},box);f.svg.append(p);return{p,key};});
+  const other=new Element('path',{stroke:'#0F4D88'},[28,544,20,20]);f.svg.append(other);const h=m.mountSourceDarkFlowReference(f.doc,{frameId,measure:n=>n.box});for(const{p,key}of parts)assert.equal(p.getAttribute(key),'#F8FAFF',frameId+' '+p.getAttribute('d'));assert.equal(other.getAttribute('stroke'),'#0F4D88');assert.equal(m.mountSourceDarkFlowReference(f.doc,{frameId}),h);h.restore();for(const{p,key}of parts)assert.equal(p.getAttribute(key),'#0F4D88');
+ }
+});
 
 test('the late Dark edit sample shows 00 above selected 30 and restores its literal source minute glyphs',()=>{
  const f=fixture(),fonts=[{fontKey:'Roboto|Medium|500',family:'Roboto',style:'Medium',size:20,weight:500,baseline:26.8359375,align:'CENTER'},{fontKey:'Roboto|Regular|400',family:'Roboto',style:'Regular',size:18,weight:400,baseline:26.15234375,align:'CENTER'}],slots=[['00',[224,644,126,40]],['30',[224,684,126,40]]];

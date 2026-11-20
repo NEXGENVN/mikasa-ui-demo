@@ -22,7 +22,8 @@ export function mountSourceDarkFlowReference(document,{frameId,measure=boxFromSv
   if(node.closest('defs,clipPath,mask,pattern,filter'))continue;let box;try{const b=measure(node,svg);box=[b[0]-ox,b[1]-oy,b[2],b[3]];}catch{continue;}
   if(frameId==='1444:94627'&&node.localName==='path'&&contains([224,644,126,80],box)&&['#0F4D88','#195CFA','#64748B'].includes(node.getAttribute('fill')))hasMinuteSource=true;
   if(sendFrames.has(frameId)&&contains([258,416,30,30],box))for(const key of ['fill','stroke'])if(node.getAttribute(key)==='#121212'){changes.push([node,key,'#121212']);node.setAttribute(key,'#F8FAFF');}
-  for(const key of ['fill','stroke']){const original=node.getAttribute(key),value=stepFrames.has(frameId)&&contains([16,99,358,62],box)&&['#0F4D88','#14538E'].includes(original)?'#F34B26':sendFrames.has(frameId)&&contains([40,349,28,44],box)&&['#0F4D88','#195CFA'].includes(original)?'#F8FAFF':frameId==='1444:94627'&&key==='fill'&&original==='#121212'&&contains([57.5,33,307,20],box)?'#F59E0B':null;if(value){changes.push([node,key,original]);node.setAttribute(key,value);}}
+  // Own the whole native 28×26 icon; its foot extends left of the upper body.
+  for(const key of ['fill','stroke']){const original=node.getAttribute(key),value=stepFrames.has(frameId)&&contains([16,99,358,62],box)&&['#0F4D88','#14538E'].includes(original)?'#F34B26':sendFrames.has(frameId)&&contains([33,358.5,28,26],box)&&['#0F4D88','#195CFA'].includes(original)?'#F8FAFF':frameId==='1444:94627'&&key==='fill'&&original==='#121212'&&contains([57.5,33,307,20],box)?'#F59E0B':null;if(value){changes.push([node,key,original]);node.setAttribute(key,value);}}
  }
  const binder=editFrames.has(frameId)?bindSourceTextSlots(document,editLabels,{library:sourceGlyphLibrary}):null;
  if(binder)for(const slot of editLabels){const result=binder.setTextSlot(slot,slot.value);if(!result.ok)issues.push({slotId:slot.id,...result});}
