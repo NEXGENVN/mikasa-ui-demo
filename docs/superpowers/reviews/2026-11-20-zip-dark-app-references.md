@@ -71,3 +71,10 @@ Tên rút gọn bên dưới là phần giờ của `Screenshot 2026-11-20 HHMMS
 Báo cáo máy/ảnh đối chiếu trong workspace: `.audit/zip-dark-reference-render/report.json`, `.audit/zip-dark-runtime-report.json`, `.audit/hour-wheel-live-runtime/report.json`, `.audit/dark-account-reference/report.json`, `.audit/dark-message-reference/proof.json` và log kiểm thử. Kết quả HTTP công khai được ghi sau triển khai trong `.audit/app-permission-public-verification.json`.
 
 Các phép kiểm tra dùng Node DOM, SVG DOM với hình học thực và render Resvg; không phải một lượt thao tác thủ công đầy đủ trong trình duyệt. Ảnh chụp có tỷ lệ/nén khác nhau, vì vậy không tuyên bố mọi pixel ở mọi trình duyệt giống tuyệt đối.
+
+## Bản công khai
+
+Release **0805df9d9ea6**, commit giao diện **8ace5a5**, đã lên GitHub Pages. Kiểm tra HTTP kết thúc mã 0: **69 tệp công khai trùng byte với bản build**, đủ **223 frame App** (81 frame tối), đủ 31 frame Flow gốc và 5 đường dẫn entry trả về đúng bản mới; 0 lỗi. Bộ đếm OA mới được kiểm tra cùng các tài nguyên SVG trong danh sách này.
+
+- [App Full quyền — màn tối](https://nexgenvn.github.io/mikasa-ui-demo/figma-preview/?v=0805df9d9ea6#app/figma-1430-85737?mode=flow&app=full)
+- [App 1 quyền — màn tối](https://nexgenvn.github.io/mikasa-ui-demo/figma-preview/?v=0805df9d9ea6#app/figma-1430-85737?mode=flow&app=single)

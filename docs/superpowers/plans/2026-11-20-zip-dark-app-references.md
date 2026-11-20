@@ -33,4 +33,4 @@
 - [x] TDD message icon/tile/separator corrections in `source-dark-message-reference.mjs` and tests (delegated).
 - [x] TDD root step/header/detail layout corrections, integrate helpers in native restoration and runtime as needed; correct native and dynamic decrement contrast and finite minute placement.
 - [x] Render all 26 targets, verify live drawing ownership, controls and permission flows; independent review findings corrected and rechecked.
-- [ ] Run full suite, source/action verification, build, diff check; commit/push and verify public release bytes before returning links.
+- [x] Run full suite (419), source/action verification (791/10,755), build and diff check; commit/push; verify release0805df9d9ea6,69 byte-identical public files and223 App frames before returning links.
