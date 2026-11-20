@@ -1,5 +1,7 @@
 import {escapeHtml as e} from './core.mjs';
 import {sourceHotspots} from './source-hotspots.mjs';
+import {restoreSourceWheelBackdrops} from './source-blend-backdrops.mjs';
+const blendDocuments=new WeakSet();
 
 const labels={accounts:'Tài khoản',account:'Tài khoản',authentication:'Đăng nhập & xác thực',auth:'Đăng nhập & xác thực',overview:'Tổng quan',history:'Lịch sử',reports:'Báo cáo',security:'Bảo mật',settings:'Cài đặt',oa:'OA / GIF / Tin nhắn',profile:'Hồ sơ',send:'Gửi tin',password:'Mật khẩu',fingerprint:'Vân tay',error:'Màn lỗi','account-data':'Tài khoản & dữ liệu',prototype:'Nguyên mẫu'};
 export const nativeRoute=id=>'figma-'+String(id).replace(':','-');
@@ -34,5 +36,7 @@ export function renderNativeFrame(frame,{hotspots:includeHotspots=true}={}){
  return '<section class="native-preview" data-native-frame="'+frame.id+'" data-native-width="'+frame.width+'" data-native-height="'+frame.height+'">'+meta+'<div class="native-canvas-host" style="max-width:'+frame.width+'px"><iframe class="native-frame" src="'+e(frame.file)+'" title="'+e(frame.name)+' · '+frame.id+'" width="'+frame.width+'" height="'+frame.height+'" scrolling="no" sandbox="allow-same-origin" loading="eager"></iframe>'+(hotspots?'<div class="native-hotspots" style="width:'+frame.width+'px;height:'+frame.height+'px">'+hotspots+'</div>':'')+'</div></section>';
 }
 export function fitNativeFrames(root=document){
- for(const iframe of root.querySelectorAll('.native-frame')){const host=iframe.parentElement,scale=String(Math.min(1,host.clientWidth/Number(iframe.getAttribute('width'))));iframe.style.zoom=scale;for(const layer of host.querySelectorAll('.native-hotspots,.interactive-overlay'))layer.style.zoom=scale;}
+ for(const iframe of root.querySelectorAll('.native-frame')){const host=iframe.parentElement,scale=String(Math.min(1,host.clientWidth/Number(iframe.getAttribute('width'))));iframe.style.zoom=scale;for(const layer of host.querySelectorAll('.native-hotspots,.interactive-overlay'))layer.style.zoom=scale;
+  if(!blendDocuments.has(iframe)){blendDocuments.add(iframe);iframe.addEventListener('load',()=>restoreSourceWheelBackdrops(iframe.contentDocument));}restoreSourceWheelBackdrops(iframe.contentDocument);
+ }
 }
