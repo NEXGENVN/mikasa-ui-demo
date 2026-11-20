@@ -1,6 +1,8 @@
 import {escapeHtml as e} from './core.mjs';
 import {sourceHotspots} from './source-hotspots.mjs';
 import {restoreSourceWheelBackdrops} from './source-blend-backdrops.mjs';
+import {roundSourceAccountAvatars} from './source-account-avatar.mjs';
+import {restoreSourceBottomNavigation} from './source-bottom-navigation.mjs';
 const blendDocuments=new WeakSet();
 
 const labels={accounts:'Tài khoản',account:'Tài khoản',authentication:'Đăng nhập & xác thực',auth:'Đăng nhập & xác thực',overview:'Tổng quan',history:'Lịch sử',reports:'Báo cáo',security:'Bảo mật',settings:'Cài đặt',oa:'OA / GIF / Tin nhắn',profile:'Hồ sơ',send:'Gửi tin',password:'Mật khẩu',fingerprint:'Vân tay',error:'Màn lỗi','account-data':'Tài khoản & dữ liệu',prototype:'Nguyên mẫu'};
@@ -37,6 +39,7 @@ export function renderNativeFrame(frame,{hotspots:includeHotspots=true}={}){
 }
 export function fitNativeFrames(root=document){
  for(const iframe of root.querySelectorAll('.native-frame')){const host=iframe.parentElement,scale=String(Math.min(1,host.clientWidth/Number(iframe.getAttribute('width'))));iframe.style.zoom=scale;for(const layer of host.querySelectorAll('.native-hotspots,.interactive-overlay'))layer.style.zoom=scale;
-  if(!blendDocuments.has(iframe)){blendDocuments.add(iframe);iframe.addEventListener('load',()=>restoreSourceWheelBackdrops(iframe.contentDocument));}restoreSourceWheelBackdrops(iframe.contentDocument);
+  const restoreAppearance=()=>{const context={frameId:iframe.closest('[data-native-frame]')?.dataset.nativeFrame};restoreSourceWheelBackdrops(iframe.contentDocument);roundSourceAccountAvatars(iframe.contentDocument,context);restoreSourceBottomNavigation(iframe.contentDocument,context);};
+  if(!blendDocuments.has(iframe)){blendDocuments.add(iframe);iframe.addEventListener('load',restoreAppearance);}restoreAppearance();
  }
 }

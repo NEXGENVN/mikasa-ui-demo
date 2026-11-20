@@ -5,6 +5,7 @@ import {templates} from '../figma-preview/core.mjs';
 import {appRouteFrameId} from '../figma-preview/app-interactive-controller.mjs';
 import {sourceComponentPopups,sourceComponentCounters} from '../figma-preview/source-component-states.mjs';
 import {appFlowArtwork} from '../figma-preview/app-flow-artwork.mjs';
+import {darkAppArtwork} from '../figma-preview/dark-app-artwork.mjs';
 import {buildCalendarMetadata,calendarSummarySlots} from './app-calendar-source.mjs';
 
 const norm=s=>String(s||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase().replaceAll('đ','d').replace(/\s+/g,' ').trim();
@@ -43,6 +44,8 @@ export function appFrameRoute(frame){
  if(n.startsWith('tk1'))return'account';
  if(n.startsWith('dn2.1'))return'fingerprint-success';
  if(n.startsWith('dn2'))return'fingerprint';
+ if(n.startsWith('dn')&&t.includes('xac thuc thanh cong'))return'fingerprint-success';
+ if(n.startsWith('dn')&&t.includes('xac thuc van tay'))return'fingerprint';
  if(n.startsWith('dn'))return'account';
  if(n.startsWith('h')&&(frame.nodes||[]).some(n=>n.rendered!==false&&n.visible!==false&&n.type==='INSTANCE'&&n.name==='Loading'))return'profile-loading';
  if(n.startsWith('h1.3'))return'profile-result';
@@ -139,7 +142,7 @@ export function buildAppInteractiveFrames(frames,{artwork={}}={}){
    if(/chevron right/.test(name)&&b[0]<60&&b[1]<110){add(n,{action:targetId?'app.navigate':'app.back',targetId,label:'Quay lại'});continue;}
    if(route==='send'&&b[1]>395&&b[1]<460&&b[2]<=30&&b[3]<=30&&n.type==='INSTANCE'&&actions.length){add(n,{action:b[0]<315?'app.oa.minus':'app.oa.plus',label:b[0]<315?'Giảm số OA':'Tăng số OA'});continue;}
    if(/icon/.test(name)&&['prototype','profile'].includes(route)&&b[0]>300&&actions.some(a=>a.navigationType==='SWAP_STATE')){add(n,{action:'app.back',label:'Đóng thông báo'});continue;}
-   if(/on off|toggle/.test(name)){const checkedMasterId=n.masterId?.startsWith('540:')?'540:24477':'557:34966',uncheckedMasterId=n.masterId?.startsWith('540:')?'540:24478':'557:34960',size='@'+b[2]+'x'+b[3],flow=/^(?:Mobile · )?Flow$/.test(frame.group||'')?appFlowArtwork:{},assets={checkedMasterId,uncheckedMasterId,checkedAsset:(flow[checkedMasterId+size]||artwork[checkedMasterId+size]||artwork[checkedMasterId])?.file,uncheckedAsset:(flow[uncheckedMasterId+size]||artwork[uncheckedMasterId+size]||artwork[uncheckedMasterId])?.file};if(route==='account'){add(n,{type:'checkbox',field:'app.preferences.fingerprint',action:'app.fingerprint',label:'Đăng nhập bằng vân tay',value:n.masterId===checkedMasterId,...assets});}else if(route==='sessions'){const field=b[1]<400?'app.preferences.hideNotifications':'app.preferences.hideScreenshots';add(n,{type:'checkbox',field,action:'app.preference',label:b[1]<400?'Ẩn nội dung thông báo':'Ẩn nội dung khi chụp màn hình',value:n.masterId===checkedMasterId,...assets});}continue;}
+   if(/on off|toggle/.test(name)){const checkedMasterId=n.masterId?.startsWith('540:')?'540:24477':'557:34966',uncheckedMasterId=n.masterId?.startsWith('540:')?'540:24478':'557:34960',size='@'+b[2]+'x'+b[3],flow=frame.theme==='dark'||/^(?:Mobile · )?Flow$/.test(frame.group||'')?appFlowArtwork:{},assets={checkedMasterId,uncheckedMasterId,checkedAsset:(flow[checkedMasterId+size]||artwork[checkedMasterId+size]||artwork[checkedMasterId])?.file,uncheckedAsset:(flow[uncheckedMasterId+size]||artwork[uncheckedMasterId+size]||artwork[uncheckedMasterId])?.file};if(route==='account'){add(n,{type:'checkbox',field:'app.preferences.fingerprint',action:'app.fingerprint',label:'Đăng nhập bằng vân tay',value:n.masterId===checkedMasterId,...assets});}else if(route==='sessions'){const field=b[1]<400?'app.preferences.hideNotifications':'app.preferences.hideScreenshots';add(n,{type:'checkbox',field,action:'app.preference',label:b[1]<400?'Ẩn nội dung thông báo':'Ẩn nội dung khi chụp màn hình',value:n.masterId===checkedMasterId,...assets});}continue;}
    if(/gioi tinh/.test(name)&&b[3]<=45){if(['profile','profile-edit','profile-loading'].includes(route))add(n,{type:'select',field:'app.profile.gender',action:'app.input',label:'Giới tính',value:/nam|nu/.test(l)?label(n):'',options:[{label:'Giới tính',value:''},{label:'Nam',value:'Nam'},{label:'Nữ',value:'Nữ'}]});else if(route==='sessions')add(n,{type:'select',field:'app.preferences.appLock',action:'app.preference',label:'Khóa ứng dụng',value:'30 phút',options:['Ngay lập tức','1 phút','5 phút','30 phút'].map(v=>({label:v,value:v}))});continue;}
    if(route==='schedule'&&/hour wheel|minute wheel/.test(name)){const hour=name==='hour wheel',selected=texts.filter(t=>descendant(t,n.id)&&t.bbox[1]>=b[1]+b[3]*.39&&t.bbox[1]<=b[1]+b[3]*.51)[0];add(n,{type:'select',field:hour?'app.schedule.hour':'app.schedule.minute',action:hour?'app.schedule.hour':'app.schedule.minute',label:hour?'Giờ gửi':'Phút gửi',value:selected?.text||'00',options:Array.from({length:hour?24:60},(_,i)=>({label:String(i).padStart(2,'0'),value:String(i).padStart(2,'0')})),textSlots:selected?[slot(selected)]:[]});continue;}
    if(route==='schedule'&&name==='icon'&&/month selector/.test(norm(byId.get(n.parentId)?.name))){add(n,{action:'app.schedule.month',value:b[0]<150?-1:1,label:b[0]<150?'Tháng trước':'Tháng sau'});continue;}
@@ -212,13 +215,14 @@ export function buildAppInteractiveFrames(frames,{artwork={}}={}){
   const selected=route==='profile-loading'?[]:controls.filter((c,i)=>(!modal||descendant(byId.get(c.id)||{},modal.id))&&!coversEditable(c)&&!controls.some((p,j)=>i!==j&&p.action===c.action&&p.field===c.field&&p.label===c.label&&descendant(byId.get(c.id)||{},p.id)&&p.box[2]>=c.box[2]&&p.box[3]>=c.box[3]));
   if(route==='profile')for(const c of selected.filter(c=>['input','select','file'].includes(c.type))){c.readOnly=true;if(c.type!=='input')c.disabled=true;}
   selected.filter(c=>c.action==='app.history.detail').sort((a,b)=>a.box[1]-b.box[1]).forEach((c,i)=>c.rowIndex=i);
-  for(const c of selected){const popup=sourceComponentPopups[c.id];if(popup){c.popup=popup;if(c.type==='select')c.options=[...new Map([...(c.options||[]),...popup.options].map(o=>[String(o.value),{label:o.label,value:o.value}])).values()];}}
+  for(const c of selected){const popup=(frame.theme==='dark'?darkAppArtwork.popups[c.id]:null)||sourceComponentPopups[c.id];if(popup){c.popup=popup;if(c.type==='select')c.options=[...new Map([...(c.options||[]),...popup.options].map(o=>[String(o.value),{label:o.label,value:o.value}])).values()];}}
   const componentStates=[];
   // The uploaded Flow.svg is authoritative here: its warning says MAX 2 OA,
   // while the later .fig instance still points to the full-permission master.
-  const oaLimit=frame.id==='1635:105527'?2:5;
+  const permission=frame.theme==='dark'?texts.map(t=>/Bạn chỉ được chọn tối đa ([2-5]) OA/i.exec(t.text)).find(Boolean):null;
+  const oaLimit=frame.id==='1635:105527'?2:permission?Number(permission[1]):5;
   if(route==='send'){
-   const counter=nodes.find(n=>n.type==='INSTANCE'&&/ch[oọ]n s[oố] tin full quy[eề]n/i.test(n.name)),count=selected.find(c=>c.field==='app.send.oaCount'),sourceStates=sourceComponentCounters[frame.theme==='dark'?'dark':'light']?.states;
+   const counter=nodes.find(n=>n.type==='INSTANCE'&&(frame.theme==='dark'?/chon so tin/.test(norm(n.name)):/ch[oọ]n s[oố] tin full quy[eề]n/i.test(n.name))),count=selected.find(c=>c.field==='app.send.oaCount'),sourceStates=frame.theme==='dark'?(darkAppArtwork.counters[oaLimit]?.states||sourceComponentCounters.dark?.states):sourceComponentCounters.light?.states;
    const states=sourceStates&&Object.fromEntries(Object.entries(sourceStates).filter(([value])=>Number(value)<=oaLimit).map(([value,state])=>[value,{...state,controls:state.controls.map(c=>({...c,...(c.action==='app.oa.plus'&&Number(value)===oaLimit?{disabled:true}:{})}))}]));
    if(counter&&count&&states){
     const initialValue=frame.id==='1635:105527'?'1':String(count.value||'5');componentStates.push({id:counter.id,box:counter.bbox,field:'app.send.oaCount',initialValue,states});

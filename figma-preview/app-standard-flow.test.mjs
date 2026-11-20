@@ -7,3 +7,11 @@ test('Flow picker follows all31 actual exported grid frames rather than old canv
 test('legacy empty send entry and semantic routes resolve to the source Flow chooser',()=>{
  assert.equal(typeof module.standardAppEntryFrameId,'function');for(const route of ['send','figma-734-77892','figma-773-88074'])assert.equal(module.standardAppEntryFrameId(route),'1635:105527');assert.equal(module.standardAppEntryFrameId('login'),'1635:105270');assert.equal(module.standardAppEntryFrameId('figma-1635-111726'),'1635:111726');assert.equal(module.standardAppEntryFrameId('figma-1450-10174'),'1450:10174');assert.equal(module.standardAppEntryFrameId('history'),'784:48201');
 });
+
+test('a dark App view exposes all81 supplied dark screens and restarts with its dark login original',()=>{
+ assert.equal(typeof module.standardAppStartFrameId,'function');
+ const current=nativeFrames.find(f=>f.id==='1450:9744'),frames=module.appStandardFlowFrames(nativeFrames.filter(f=>f.platform==='app'),current);
+ assert.equal(frames.length,81);assert.ok(frames.every(f=>f.theme==='dark'));assert.equal(new Set(frames.map(f=>f.id)).size,81);
+ assert.ok(frames.every(f=>f.file===nativeFrames.find(n=>n.id===f.id).file));assert.equal(module.standardAppStartFrameId(current),'1456:19654');
+ assert.equal(module.standardAppStartFrameId(nativeFrames.find(f=>f.id==='1635:110138')),'1635:105270');
+});

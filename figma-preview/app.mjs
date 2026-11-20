@@ -1,5 +1,5 @@
 import {createAppSubmissionRunner} from './app-flow-submission.mjs';
-import {standardAppEntryFrameId,appStandardFlowFrames} from './app-standard-flow.mjs';
+import {standardAppEntryFrameId,appStandardFlowFrames,standardAppStartFrameId} from './app-standard-flow.mjs';
 import {createDemoState,createRequest,validatePhone,filterMessages,escapeHtml as e,toCsv,STATUS,templates,money,beginSubmission,finishSubmission,addConfiguration,getReport,saveSessionPolicy,queueRecovery} from './core.mjs';
 import {renderWeb,webScreens,getWebFrame} from './web.mjs';
 import {renderMobile,mobileScreens,getMobileFrame,mobileMessages} from './mobile.mjs';
@@ -95,7 +95,7 @@ document.addEventListener('click',async event=>{const el=event.target.closest('[
 if(state.ui.platform==='app'&&mobileAction(action,el,mobileContext()))return;
 if(isWebPlatform(state.ui.platform)&&webAction(action,el,webContext()))return;
 switch(action){
-case 'app-flow-start':{appSubmissionRunner.cancelAll();if(state.pendingSubmission&&!state.pendingSubmission.row)delete state.pendingSubmission;Object.assign(state.draft,{phone:'033 222 5555',oaCount:1,schedule:'',scheduled:false,outcome:'sent'});state.ui.appOutcomeChosen=false;interactiveSessions.app=createInteractiveSession(state);navigate('figma-1635-105270',{platform:'app',mode:'flow',filters:false});break;}
+case 'app-flow-start':{const entry=standardAppStartFrameId(currentNativeFrame());appSubmissionRunner.cancelAll();if(state.pendingSubmission&&!state.pendingSubmission.row)delete state.pendingSubmission;Object.assign(state.draft,{phone:'033 222 5555',oaCount:1,schedule:'',scheduled:false,outcome:'sent'});state.ui.appOutcomeChosen=false;interactiveSessions.app=createInteractiveSession(state);navigate(nativeRoute(entry),{platform:'app',mode:'flow',filters:false});break;}
 case 'native-target':{const target=catalogue.byId.get(el.dataset.destination);if(target){const current=currentNativeFrame();if(current)nativeHistory.push(current.id);navigate(nativeRoute(target.id),{platform:target.platform,mode:'source'});}break;}
 case 'native-back':{const target=catalogue.byId.get(nativeHistory.pop());if(target)navigate(nativeRoute(target.id),{platform:target.platform,mode:'source'});break;}
 case 'native-prev':stepNativeFrame(-1);break;

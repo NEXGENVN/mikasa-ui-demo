@@ -108,7 +108,7 @@ test('finishing a valid recipient reveals the original OA-count state before con
  const s=session();s.values['app.send.phone']='0912345678';const result=module.handleAppInteraction({frame:nativeFrames.find(f=>f.id==='734:77892'),session:s,control:{action:'app.input',field:'app.send.phone'}});assert.equal(result.targetId,'773:88074');assert.equal(s.data.draft.phone,'0912345678');
 });
 test('contact switching uses existing dark and Flow source variants',()=>{
- for(const [id,expected]of [['1456:12749','1456:12284'],['1635:110900','1635:111726']]){const s=session(),frame=nativeFrames.find(f=>f.id===id);assert.equal(module.handleAppInteraction({frame,session:s,control:{action:'app.profile.contact-switch'}}).targetId,expected);}
+ for(const [id,expected]of [['1456:12749','1456:12566'],['1635:110900','1635:111726']]){const s=session(),frame=nativeFrames.find(f=>f.id===id);assert.equal(module.handleAppInteraction({frame,session:s,control:{action:'app.profile.contact-switch'}}).targetId,expected);}
 });
 test('OA stepper updates in place and rejects non-numeric counts before corrupting the draft',()=>{
  const s=session();s.values['app.send.oaCount']='5';assert.equal(run(s,'app.oa.minus').repaint,false);assert.equal(s.data.draft.oaCount,4);s.values['app.send.oaCount']='x';const invalid=run(s,'app.input','x',{field:'app.send.oaCount'});assert.equal(invalid.focusField,'app.send.oaCount');assert.match(invalid.message,/1.*5/);assert.equal(s.data.draft.oaCount,4);
