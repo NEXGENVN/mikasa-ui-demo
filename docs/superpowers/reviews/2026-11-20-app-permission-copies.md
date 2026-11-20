@@ -29,4 +29,9 @@ Giữ 791 frame gốc, App gốc, Web ngang/Web dọc và quy tắc lịch Asia/
 
 ## Xuất bản
 
-Release dự kiến: `a242fd364cff`. Kết quả kiểm tra bản công khai được ghi thêm sau khi GitHub Pages cập nhật.
+Release **a242fd364cff** đã lên GitHub Pages. Commit triển khai: `a6bff341009a55994530ccf4af3794c262ed6db4`. [Pages run 44703098305](https://github.com/NEXGENVN/mikasa-ui-demo/actions/runs/44703098305) hoàn thành thành công.
+
+`node .audit/verify-app-permission-deployment.mjs` kết thúc mã 0: **69 tệp công khai trùng byte** với bản build, gồm đủ **32 tài nguyên SVG mới**; **223/223 frame App** tải được, gồm **81 frame tối** và đủ **31 frame Flow gốc**. Ba URL App gốc/Full/Single trả về đúng entry mới. Kết quả máy: `.audit/app-permission-public-verification.json`, 0 lỗi.
+
+- [App Full quyền](https://nexgenvn.github.io/mikasa-ui-demo/figma-preview/?v=a242fd364cff#app/overview?mode=flow&app=full)
+- [App 1 quyền](https://nexgenvn.github.io/mikasa-ui-demo/figma-preview/?v=a242fd364cff#app/overview?mode=flow&app=single)

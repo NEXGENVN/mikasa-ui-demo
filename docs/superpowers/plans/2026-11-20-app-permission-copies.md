@@ -53,5 +53,5 @@
 
 - [x] Review độc lập, sửa lỗi quan trọng.
 - [x] Chạy test/source/interactive verification, build và diff check.
-- [ ] Commit/push khi kiểm tra đạt; chờ Pages nhận bản mới.
-- [ ] Kiểm tra tệp công khai và gửi link Full/Single cùng kết quả thật.
+- [x] Commit/push khi kiểm tra đạt; Pages run 44703098305 hoàn thành thành công.
+- [x] Kiểm tra 69 tệp trùng byte và 223 frame App công khai; link Full/Single kèm trong báo cáo rà soát.
