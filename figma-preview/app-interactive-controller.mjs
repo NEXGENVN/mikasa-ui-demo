@@ -1,6 +1,6 @@
 import {validatePhone,beginSubmission,finishSubmission,filterMessages,templates} from './core.mjs';
 import {mobileMessages} from './mobile.mjs';
-import {initializeAppSchedule,syncAppSchedule,changeAppSchedule,scheduleParts} from './app-calendar.mjs';
+import {initializeAppSchedule,syncAppSchedule,changeAppSchedule,scheduleParts,validateAppSchedule,openAppSchedule,scheduleSaveState} from './app-calendar.mjs';
 
 // Every destination is an existing original Figma frame. Flow has its own originals.
 const routes={
@@ -20,11 +20,11 @@ function set(s,key,value){s.values[key]=value;s.dirty.add(key);}
 function syncDraft(s){Object.assign(s.data.draft,{phone:get(s,'app.send.phone',s.data.draft.phone),template:get(s,'app.send.template',s.data.draft.template),oaCount:Number(get(s,'app.send.oaCount',s.data.draft.oaCount)),schedule:get(s,'app.send.schedule',s.data.draft.schedule),scheduled:Boolean(get(s,'app.send.scheduled',s.data.draft.scheduled))});return s.data.draft;}
 function passwordValid(v,min=8,max=20){return v.length>=min&&v.length<=max&&/[A-Z]/.test(v)&&/[a-z]/.test(v)&&/\d/.test(v)&&/[^A-Za-z0-9]/.test(v);}
 const appMessages=s=>mobileMessages(s.data);
-function beginScheduleEdit(s){s.context.appScheduleEdit??={messageId:s.data.selectedId,draft:{...s.data.draft}};s.context.appEditingSchedule=true;}
+function beginScheduleEdit(s){s.context.appScheduleEdit??={messageId:s.data.selectedId,draft:{...s.data.draft},schedule:get(s,'app.send.schedule',s.data.draft.schedule),scheduled:get(s,'app.send.scheduled',s.data.draft.scheduled),date:s.context.appScheduleDate};s.context.appEditingSchedule=true;}
 function endScheduleEdit(s){
  const edit=s.context.appScheduleEdit;
- if(edit){Object.assign(s.data.draft,edit.draft);set(s,'app.send.scheduled',Boolean(edit.draft.scheduled));set(s,'app.send.schedule',edit.draft.schedule||'');if(edit.draft.schedule&&Number.isFinite(new Date(edit.draft.schedule).getTime()))syncAppSchedule(s,edit.draft.schedule);else delete s.context.appScheduleDate;}
- delete s.context.appScheduleEdit;s.context.appEditingSchedule=false;
+ if(edit){Object.assign(s.data.draft,edit.draft);if(edit.date)syncAppSchedule(s,edit.date);else delete s.context.appScheduleDate;set(s,'app.send.scheduled',Boolean(edit.scheduled));set(s,'app.send.schedule',edit.schedule||'');}
+ delete s.context.appScheduleEdit;s.context.appEditingSchedule=false;s.context.appScheduleOpen=false;
 }
 function historyValues(s,project=true){const rows=filterMessages(appMessages(s),{query:get(s,'app.history.query'),status:get(s,'app.history.status','all')});if(get(s,'app.history.sort','newest')==='oldest')rows.reverse();s.context.appHistoryRows=rows.map(m=>m.id);if(!project)return rows;set(s,'app.history.count',rows.length+' tin nhắn');for(let i=0;i<7;i++){const m=rows[i];set(s,`app.history.${i}.visible`,Boolean(m));set(s,`app.history.${i}.phone`,m?.phone||'');set(s,`app.history.${i}.description`,m?m.template+'\n'+m.time:'');set(s,`app.history.${i}.status`,m?({success:'Hoàn thành',sent:'Đã gửi',failed:'Thất bại',pending:'Đang gửi',partial:'Một phần',scheduled:'Hẹn giờ'}[m.status]||m.status):'');}return rows;}
 function detailValues(s){
@@ -34,10 +34,10 @@ function detailValues(s){
  for(const key of ['phone','template','oaCount','id','time','schedule'])set(s,'app.detail.'+key,String((key==='time'?time:m[key])??''));
 }
 function recordedValues(frame,s){s.context.appRecordedOriginal??={};const visible=get(s,'app.preferences.recordedVisible',true);for(const t of frame.texts||[]){if(!t.field?.startsWith('app.recorded.'))continue;const fieldKey=frame.id+';'+t.field;s.context.appRecordedOriginal[fieldKey]??=t.text;if(s.dirty.has('app.preferences.recordedVisible'))set(s,t.field,visible?s.context.appRecordedOriginal[fieldKey]:'••••••');}}
-export function prepareAppFrame({frame,session:s}){s.context??={};if(frame.route!=='schedule'&&s.context.appEditingSchedule)endScheduleEdit(s);if(frame.scheduleEdit)beginScheduleEdit(s);if(frame.route==='schedule')initializeAppSchedule(s);if(['history','overview'].includes(frame.route))historyValues(s,Boolean(s.context.appMessagesChanged||s.dirty.has('app.history.query')||s.dirty.has('app.history.status')||s.dirty.has('app.history.sort')));if(frame.route==='detail'){if(s.context.appSelectedMessage)detailValues(s);recordedValues(frame,s);}}
+export function prepareAppFrame({frame,session:s,now=Date.now()}){s.context??={};if(frame.route!=='schedule'){if(s.context.appEditingSchedule)endScheduleEdit(s);s.context.appScheduleOpen=false;}if(frame.scheduleEdit&&!s.context.appEditingSchedule){beginScheduleEdit(s);openAppSchedule(s,{now,iso:appMessages(s).find(m=>m.id===s.data.selectedId)?.schedule??null});}if(frame.route==='schedule'){if(!s.context.appScheduleOpen)openAppSchedule(s,{now});else syncAppSchedule(s,s.context.appScheduleDate,{now});}if(['history','overview'].includes(frame.route))historyValues(s,Boolean(s.context.appMessagesChanged||s.dirty.has('app.history.query')||s.dirty.has('app.history.status')||s.dirty.has('app.history.sort')));if(frame.route==='detail'){if(s.context.appSelectedMessage)detailValues(s);recordedValues(frame,s);}}
 
 /** Pure sample-data actions. The shell owns rendering, timers, focus and navigation. */
-export function handleAppInteraction({frame,control,session:s,value}){
+export function handleAppInteraction({frame,control,session:s,value,now=Date.now()}){
  if(!control?.action?.startsWith('app.'))return null;
  s.context??={};s.data.mobile??={};
  const go=route=>{s.data.ui.route=route;const theme=frame.theme||s.data.ui.theme;let targetId=route==='detail'?appDetailFrameId(appMessages(s).find(m=>m.id===s.data.selectedId),frame):appRouteFrameId(route,frame,theme);if(route==='confirm'&&s.data.draft.scheduled){targetId=String(frame.id||'').startsWith('1635:')?appRouteFrameId('send-choice',frame,theme):Number(s.data.draft.oaCount)>1?(theme==='dark'?'1430:88099':'1313:75767'):appRouteFrameId('send-choice',frame,theme);}return{targetId};};
@@ -77,18 +77,19 @@ export function handleAppInteraction({frame,control,session:s,value}){
  case 'app.oa.minus':case 'app.oa.plus':{const current=Number(get(s,'app.send.oaCount',s.data.draft.oaCount)),base=Number.isInteger(current)&&current>=1&&current<=5?current:s.data.draft.oaCount||1,n=Math.max(1,Math.min(5,base+(control.action.endsWith('plus')?1:-1)));set(s,'app.send.oaCount',n);syncDraft(s);return{repaint:false};}
  case 'app.send.confirm':{
   if(s.context.appSendCompleted)return go(s.data.draft.scheduled?'scheduled-result':'result');
-  syncDraft(s);try{if(!s.context.appPendingJob||s.data.pendingSubmission?.row){const job=beginSubmission(s.data,s.data.draft);s.context.appPendingJob=job.id;}}catch(error){return invalid('app.send.phone',error.message);}
+  syncDraft(s);if(s.data.draft.scheduled){try{validateAppSchedule(s.data.draft.schedule,{now});}catch(error){return invalid('app.send.schedule',error.message);}}
+  try{if(!s.context.appPendingJob||s.data.pendingSubmission?.row){const job=beginSubmission(s.data,s.data.draft,{now});s.context.appPendingJob=job.id;}}catch(error){return invalid(error.field||'app.send.phone',error.message);}
   return go('processing');
  }
  case 'app.send.finish':{
-  const row=finishSubmission(s.data,s.context.appPendingJob);if(row){s.data.selectedId=row.id;s.context.appSendCompleted=true;s.context.appMessagesChanged=true;s.context.appSelectedMessage=true;detailValues(s);historyValues(s);}return go(row?.status==='scheduled'?'scheduled-result':'result');
+  let row;try{const job=s.data.pendingSubmission;if(job&&!job.row&&job.input.schedule)validateAppSchedule(job.input.schedule,{now});row=finishSubmission(s.data,s.context.appPendingJob,{now});}catch(error){if(s.data.pendingSubmission&&!s.data.pendingSubmission.row){delete s.data.pendingSubmission;delete s.context.appPendingJob;}return {...go('schedule'),...invalid(error.field||'app.send.schedule',error.message)};}if(row){s.data.selectedId=row.id;s.context.appSendCompleted=true;s.context.appMessagesChanged=true;s.context.appSelectedMessage=true;detailValues(s);historyValues(s);}return go(row?.status==='scheduled'?'scheduled-result':'result');
  }
- case 'app.schedule.open':if(s.context.appEditingSchedule)endScheduleEdit(s);syncDraft(s);initializeAppSchedule(s);return go('schedule');
- case 'app.schedule.day':case 'app.schedule.month':case 'app.schedule.hour':case 'app.schedule.minute':{try{changeAppSchedule(s,{part:control.action.split('.').at(-1),value:value??control.value,calendarIndex:control.calendarIndex});return{repaint:false,calendar:true};}catch{return invalid('app.send.schedule','Vui lòng chọn ngày và giờ hợp lệ.');}}
+ case 'app.schedule.open':if(s.context.appEditingSchedule)endScheduleEdit(s);syncDraft(s);openAppSchedule(s,{now});return go('schedule');
+ case 'app.schedule.day':case 'app.schedule.month':case 'app.schedule.hour':case 'app.schedule.minute':{try{changeAppSchedule(s,{part:control.action.split('.').at(-1),value:value??control.value,calendarIndex:control.calendarIndex},{now});return{repaint:false,calendar:true};}catch{return{...invalid('app.send.schedule','Chọn thời gian trong tương lai, từ 07 đến 23 giờ, phút 00 hoặc 30, trong hôm nay đến hôm nay + 14 ngày.'),calendar:true};}}
  case 'app.schedule.now':set(s,'app.send.scheduled',false);set(s,'app.send.schedule','');syncDraft(s);return{repaint:true};
- case 'app.schedule.save':{const schedule=get(s,'app.send.schedule');if(!schedule||!Number.isFinite(new Date(schedule).getTime())||new Date(schedule)<=new Date())return invalid('app.send.schedule','Vui lòng chọn thời gian trong tương lai.');syncAppSchedule(s,schedule);if(s.context.appEditingSchedule){const m=appMessages(s).find(m=>m.id===(s.context.appScheduleEdit?.messageId||s.data.selectedId));if(m){m.schedule=s.context.appScheduleDate;m.status='scheduled';s.data.selectedId=m.id;s.context.appSelectedMessage=true;s.context.appMessagesChanged=true;}endScheduleEdit(s);detailValues(s);return go('scheduled-detail');}set(s,'app.send.scheduled',true);syncDraft(s);return go('confirm');}
+ case 'app.schedule.save':{const save=scheduleSaveState(s,{now});if(!save.valid||!save.changed)return invalid('app.send.schedule',save.message||'Lịch gửi chưa có thay đổi.');let schedule;try{schedule=validateAppSchedule(get(s,'app.send.schedule'),{now});}catch(error){return invalid('app.send.schedule',error.message);}syncAppSchedule(s,schedule,{now});if(s.context.appEditingSchedule){const m=appMessages(s).find(m=>m.id===(s.context.appScheduleEdit?.messageId||s.data.selectedId));if(m){m.schedule=s.context.appScheduleDate;m.status='scheduled';s.data.selectedId=m.id;s.context.appSelectedMessage=true;s.context.appMessagesChanged=true;}endScheduleEdit(s);detailValues(s);return go('scheduled-detail');}set(s,'app.send.scheduled',true);syncDraft(s);return go('confirm');}
  case 'app.schedule.cancel':{const id=s.data.selectedId;appMessages(s);s.data.messages=s.data.messages.filter(m=>m.id!==id);s.data.mobile.fixtures=(s.data.mobile.fixtures||[]).filter(m=>m.id!==id);s.context.appMessagesChanged=true;historyValues(s);return go('history');}
- case 'app.schedule.edit':{beginScheduleEdit(s);const message=appMessages(s).find(m=>m.id===s.data.selectedId);initializeAppSchedule(s,{iso:message?.schedule});return go('schedule');}
+ case 'app.schedule.edit':{beginScheduleEdit(s);const message=appMessages(s).find(m=>m.id===s.data.selectedId);openAppSchedule(s,{now,iso:message?.schedule??null});return go('schedule');}
  case 'app.history.filter':set(s,'app.history.status',control.value||value||'all');historyValues(s);return control.targetId?{targetId:control.targetId}:{repaint:true};
  case 'app.history.sort':set(s,'app.history.sort',value||control.value||'newest');historyValues(s);return{repaint:true};
  case 'app.history.detail':{const rows=s.context.appHistoryRows||appMessages(s).map(m=>m.id);s.data.selectedId=rows[control.rowIndex??0]||s.data.selectedId;s.context.appSelectedMessage=true;detailValues(s);const m=appMessages(s).find(m=>m.id===s.data.selectedId);return{targetId:appDetailFrameId(m,frame)};}

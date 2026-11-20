@@ -1,6 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDemoState, validatePhone, createRequest, filterMessages, escapeHtml, toCsv} from './core.mjs';
+import {createDemoState, validatePhone, createRequest, beginSubmission, finishSubmission, filterMessages, escapeHtml, toCsv} from './core.mjs';
+
+test('request gateways reject schedules outside future half-hours and fourteen days without mutating data',()=>{
+ const now=Date.parse('2026-11-20T10:12:37+07:00'),input={phone:'0332225555',oaCount:1,scheduled:true},s=createDemoState(),before=s.messages.length;
+ for(const schedule of ['2026-11-20T10:00:00+07:00','2026-11-20T10:31:00+07:00','2026-11-20T10:30:01+07:00','2026-12-05T07:00:00+07:00','2030-01-01T10:00:00+07:00']){
+  assert.throws(()=>createRequest(s,{...input,schedule},{now}),/14 ngày/);
+  assert.throws(()=>beginSubmission(s,{...input,schedule},{now}),/14 ngày/);
+  assert.equal(s.messages.length,before);assert.equal(s.pendingSubmission,undefined);
+ }
+ const job=beginSubmission(s,{...input,schedule:'2026-12-04T10:00:00+07:00'},{now});
+ assert.equal(finishSubmission(s,job.id,{now}).schedule,'2026-12-04T03:00:00.000Z');
+ assert.equal(s.messages.length,before+1);assert.equal(finishSubmission(s,job.id,{now}).id,job.row.id);
+});
+test('queued schedules are revalidated when finishing and immediate sends ignore stale schedule values',()=>{
+ const now=Date.parse('2026-11-20T10:12:37+07:00'),s=createDemoState(),before=s.messages.length;
+ const job=beginSubmission(s,{phone:'0332225555',oaCount:1,scheduled:true,schedule:'2026-11-20T10:30:00+07:00'},{now});
+ assert.throws(()=>finishSubmission(s,job.id,{now:now+30*60*1000}),/14 ngày/);assert.equal(s.messages.length,before);assert.equal(job.row,null);
+ s.pendingSubmission=null;const immediate=beginSubmission(s,{phone:'0332225555',oaCount:1,scheduled:false,schedule:'2030-01-01T10:01:00Z'},{now});assert.equal(immediate.input.schedule,'');
+});
 
 test('accepts Vietnamese local and international phone formats', () => {
   assert.equal(validatePhone('033 222 5555'), '0332225555');

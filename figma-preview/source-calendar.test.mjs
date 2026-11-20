@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mountSourceCalendar} from './source-calendar.mjs';
+import {mountSourceCalendar,calendarDateAppearance} from './source-calendar.mjs';
 import {sourceGlyphLibrary} from './source-glyph-library.mjs';
 import {createInteractiveSession} from './interactive-session.mjs';
 import {createDemoState} from './core.mjs';
-import {syncAppSchedule,scheduleISO} from './app-calendar.mjs';
+import {syncAppSchedule,scheduleISO,changeAppSchedule} from './app-calendar.mjs';
 const I={a:1,b:0,c:0,d:1,e:0,f:0};
+const now=Date.parse('2026-11-20T03:12:37Z');
 class Element{
  constructor(name,doc,attrs={},box){this.localName=name;this.ownerDocument=doc;this.attrs=new Map(Object.entries(attrs));this.children=[];this.style={};this.dataset={};this.listeners={};this.box=box;this.hidden=false;for(const[k,v]of this.attrs)if(k.startsWith('data-'))this.dataset[k.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=v;}
  setAttribute(k,v){this.attrs.set(k,String(v));}getAttribute(k){return this.attrs.get(k)??null;}removeAttribute(k){this.attrs.delete(k);}
@@ -30,12 +31,12 @@ function fixture(){
  const session=createInteractiveSession(createDemoState());syncAppSchedule(session,scheduleISO({year:2026,month:8,day:31,hour:9,minute:15}));
  return{doc,svg,form,bg,glyph,cells,buttons,frame,session};
 }
-test('projects six-week months inside the original grid and clones the actual native selection artwork',()=>{
- const f=fixture(),calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary});
+test('projects six-week months inside the original grid and preserves the native selection shape with the specified selected paint',()=>{
+ const f=fixture(),calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:Date.parse('2026-08-18T03:00:00Z')});
  const p=calendar.project();assert.equal(p.rows,6);assert.equal(calendar.scroller.style.height,'125px');
  assert.equal(calendar.scroller.scrollTop,25);assert.equal(f.buttons[36].getAttribute('aria-selected'),'true');
- assert.equal(f.bg.getAttribute('opacity'),'0');assert.ok(calendar.layer.querySelectorAll('rect').some(n=>n.clonedFrom&&n.getAttribute('fill')===f.bg.getAttribute('fill')&&n.getAttribute('rx')==='4'));
- assert.equal(f.buttons[0].getAttribute('aria-label'),'Ngày 26 tháng 7 năm 2026');
+ assert.equal(f.bg.getAttribute('opacity'),'0');assert.ok(calendar.layer.querySelectorAll('rect').some(n=>n.getAttribute('fill')==='#14538E'&&n.getAttribute('rx')==='4'));
+ assert.equal(f.buttons[0].getAttribute('aria-label'),'Ngày 26 tháng 7 năm 2026 (ngoài tháng đang xem)');
  calendar.restore();assert.equal(f.bg.getAttribute('opacity'),null);assert.equal(f.buttons[0].parentNode,f.form);assert.equal(f.buttons[0].getAttribute('style'),'original-day-0');
 });
 test('five-week projection hides unused sixth-row controls without changing their identity or listeners',()=>{
@@ -49,12 +50,76 @@ test('native wheel rows, scrolling and arrows change the existing select without
  const f=fixture(),host=new Element('span',f.doc,{},[40,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'hour'});select.value='09';host.append(select);f.form.append(host);
  const font=f.frame.calendar.normalFont;
  f.frame.calendar.wheels=[{controlId:'hour',field:'app.schedule.hour',box:[40,567,126,200],limit:24,selectedIndex:1,slots:[0,1,2].map(i=>({id:'wheel-'+i,text:'',box:[40,568+i*40,126,40],font}))}];
+ syncAppSchedule(f.session,'2026-11-21T02:00:00Z',{now});
  let changed=0;select.addEventListener('change',()=>changed++);
- const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary});
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});
  const event=extra=>({prevented:false,preventDefault(){this.prevented=true;},stopPropagation(){},...extra});
  const pointer=event({clientY:668});host.listeners.pointerdown(pointer);assert.equal(select.value,'10');assert.equal(pointer.prevented,true);
  const wheel=event({deltaY:100});host.listeners.wheel(wheel);assert.equal(select.value,'11');assert.equal(wheel.prevented,true);
  const space=event({key:' '});select.listeners.keydown(space);assert.equal(space.prevented,true);assert.equal(changed,2);
  const up=event({key:'ArrowUp'});select.listeners.keydown(up);assert.equal(select.value,'10');assert.equal(changed,3);
  calendar.restore();assert.equal(host.listeners.pointerdown,undefined);assert.equal(select.listeners.keydown,undefined);
+});
+
+test('source calendar disables unavailable dates and month arrows and excludes disabled dates from keyboard focus',()=>{
+ const f=fixture(),previous=new Element('button',f.doc,{'data-interactive-control':'previous'}),next=new Element('button',f.doc,{'data-interactive-control':'next'});f.form.append(previous,next);
+ Object.assign(f.frame.calendar,{previousControlId:'previous',nextControlId:'next',arrows:[{controlId:'previous',sourceVectorId:'967:65123',graphicBox:[0,0,12,6]},{controlId:'next',sourceVectorId:'967:65123',graphicBox:[0,0,12,6]}]});
+ syncAppSchedule(f.session,'2026-11-20T03:30:00Z',{now});
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,assetBase:'http://localhost/',now});calendar.project();
+ assert.equal(f.buttons[18].disabled,true);assert.equal(f.buttons[18].getAttribute('aria-disabled'),'true');assert.equal(f.buttons[19].disabled,false);assert.equal(previous.disabled,true);assert.equal(next.disabled,false);
+ const images=f.svg.querySelectorAll('image');assert.equal(images[0].getAttribute('opacity'),'0.35');assert.equal(images[1].getAttribute('opacity'),'1');
+ const key={target:f.buttons[19],key:'ArrowLeft',preventDefault(){},altKey:false,ctrlKey:false,metaKey:false};calendar.scroller.listeners.keydown(key);assert.notEqual(f.doc.activeElement,f.buttons[18]);
+ syncAppSchedule(f.session,'2026-12-04T03:00:00Z',{now});calendar.project();assert.equal(previous.disabled,false);assert.equal(next.disabled,true);assert.equal(f.buttons[6].disabled,true);
+ calendar.restore();assert.equal(previous.disabled,false);assert.equal(f.buttons[18].getAttribute('aria-disabled'),null);
+});
+
+test('minute wheel pointer, scrolling and keys cycle only 00 and 30 and preserve the finite select options',()=>{
+ const f=fixture(),host=new Element('span',f.doc,{},[224,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'minute'});select.value='00';
+ for(let i=0;i<60;i++){const option=new Element('option',f.doc);option.value=String(i).padStart(2,'0');select.append(option);}host.append(select);f.form.append(host);
+ const font=f.frame.calendar.normalFont;f.frame.calendar.wheels=[{controlId:'minute',field:'app.schedule.minute',box:[224,567,126,200],limit:60,selectedIndex:0,slots:[0,1].map(i=>({id:'minute-'+i,text:i?'30':'00',box:[224,647+i*40,126,40],font}))}];
+ syncAppSchedule(f.session,'2026-11-21T03:00:00Z',{now});const values=[];select.addEventListener('change',()=>{values.push(select.value);changeAppSchedule(f.session,{part:'minute',value:select.value},{now});});
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});calendar.project();
+ assert.deepEqual(select.children.map(o=>o.value),['00','30']);
+ const event=extra=>({preventDefault(){},stopPropagation(){},...extra});
+ host.listeners.pointerdown(event({clientY:707}));host.listeners.wheel(event({deltaY:100}));select.listeners.keydown(event({key:'ArrowUp'}));select.listeners.keydown(event({key:'Home'}));select.listeners.keydown(event({key:'End'}));
+ assert.deepEqual(values,['30','00','30','00','30']);assert.equal(f.session.values['app.schedule.minute'],'30');
+});
+
+test('time options and wheel changes enforce the business hours and the inclusive final calendar date',()=>{
+ const f=fixture(),host=new Element('span',f.doc,{},[40,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'hour'});select.value='10';
+ for(let i=0;i<24;i++){const option=new Element('option',f.doc);option.value=String(i).padStart(2,'0');select.append(option);}host.append(select);f.form.append(host);
+ f.frame.calendar.wheels=[{controlId:'hour',field:'app.schedule.hour',box:[40,567,126,200],limit:24,selectedIndex:1,slots:[0,1,2].map(i=>({id:'hour-'+i,text:String(9+i),box:[40,568+i*40,126,40],font:f.frame.calendar.normalFont}))}];
+ syncAppSchedule(f.session,'2026-12-04T03:00:00Z',{now});const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now});calendar.project();
+ assert.equal(select.children.find(o=>o.value==='10').disabled,false);assert.equal(select.children.find(o=>o.value==='11').disabled,false);assert.equal(select.children.find(o=>o.value==='23').disabled,false);assert.equal(select.children.some(o=>Number(o.value)<7),false);
+ host.listeners.wheel({deltaY:1,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'11');
+ syncAppSchedule(f.session,'2026-11-20T03:30:00Z',{now});calendar.project();assert.equal(select.children.find(o=>o.value==='09').disabled,true);assert.equal(select.children.find(o=>o.value==='10').disabled,false);
+});
+
+test('specified date paints, selected/today priority and disabled hover are applied to actual SVG cells',()=>{
+ const f=fixture(),fixed=Date.parse('2026-11-13T10:10:00+07:00');syncAppSchedule(f.session,'2026-11-14T10:00:00+07:00',{now:fixed});const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:fixed});calendar.project();
+ const group=date=>calendar.layer.querySelectorAll('g').find(n=>n.getAttribute('data-calendar-date')===date),parts=date=>group(date).children;
+ assert.equal(parts('2026-11-12')[1].getAttribute('fill'),'#9CAAC1');assert.equal(parts('2026-11-12')[0].getAttribute('fill'),'none');assert.equal(f.buttons[11].disabled,true);
+ assert.equal(parts('2026-11-13')[1].getAttribute('fill'),'#14538E');assert.equal(parts('2026-11-13')[0].getAttribute('stroke-width'),'1.5');
+ assert.equal(parts('2026-11-14')[0].getAttribute('fill'),'#14538E');assert.equal(parts('2026-11-14')[1].getAttribute('fill'),'#FFFFFF');
+ assert.equal(parts('2026-11-27')[1].getAttribute('fill'),'#172033');f.buttons[26].listeners.pointerenter();assert.equal(parts('2026-11-27')[0].getAttribute('fill'),'#EDF4FB');assert.equal(parts('2026-11-27')[1].getAttribute('fill'),'#14538E');f.buttons[26].listeners.pointerleave();assert.equal(parts('2026-11-27')[0].getAttribute('fill'),'none');
+ f.buttons[27].listeners.pointerenter();assert.equal(parts('2026-11-28')[0].getAttribute('fill'),'none');assert.equal(parts('2026-11-28')[1].getAttribute('fill'),'#9CAAC1');
+ syncAppSchedule(f.session,'2026-11-13T11:00:00+07:00',{now:fixed});calendar.project();assert.equal(parts('2026-11-13')[0].getAttribute('fill'),'#14538E');assert.equal(parts('2026-11-13')[1].getAttribute('fill'),'#FFFFFF');assert.equal(parts('2026-11-13')[0].getAttribute('stroke'),'none');calendar.restore();
+});
+test('the native save button dims and disables for unchanged or expired schedules and enables only valid changes',()=>{
+ const f=fixture();let clock=Date.parse('2026-11-13T10:10:00+07:00');syncAppSchedule(f.session,'2026-11-13T10:30:00+07:00',{now:clock});f.session.context.appScheduleOriginal='2026-11-13T03:30:00Z';
+ const save=new Element('button',f.doc,{'data-interactive-control':'save'}),paint=new Element('rect',f.doc,{fill:'#0F4D88'},[20,300,200,40]);f.form.append(save);f.svg.append(paint);f.frame.controls=[{id:'save',action:'app.schedule.save',box:[20,300,200,40]}];
+ const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:()=>clock});calendar.project();assert.equal(save.disabled,true);assert.equal(paint.getAttribute('opacity'),'0.38');
+ syncAppSchedule(f.session,'2026-11-13T11:00:00+07:00',{now:clock});calendar.project();assert.equal(save.disabled,false);assert.equal(paint.getAttribute('opacity'),'1');
+ clock=Date.parse('2026-11-13T11:00:00+07:00');calendar.project();assert.equal(save.disabled,true);assert.equal(save.getAttribute('aria-disabled'),'true');calendar.restore();assert.equal(paint.getAttribute('opacity'),null);
+});
+
+test('available adjacent-month dates keep their exact colors and a visible outside-month marker',()=>{
+ const f=fixture(),clock=Date.parse('2026-11-25T10:10:00+07:00');syncAppSchedule(f.session,'2026-11-26T10:00:00+07:00',{now:clock});const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:clock});calendar.project();const g=calendar.layer.querySelectorAll('g').find(n=>n.getAttribute('data-calendar-date')==='2026-12-01');assert.equal(g.getAttribute('opacity'),'1');assert.equal(g.children[1].getAttribute('fill'),'#172033');assert.ok(g.children.some(n=>n.getAttribute('data-outside-month-marker')==='true'));calendar.restore();
+});
+test('crossing midnight retains an enabled keyboard date target without changing the expired selection',()=>{
+ const f=fixture();let clock=Date.parse('2026-11-13T10:10:00+07:00');syncAppSchedule(f.session,'2026-11-13T11:00:00+07:00',{now:clock});const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:()=>clock});calendar.project();clock=Date.parse('2026-11-14T00:01:00+07:00');calendar.project();const targets=f.buttons.filter(n=>!n.disabled&&n.getAttribute('tabindex')==='0');assert.equal(targets.length,1);assert.match(targets[0].getAttribute('aria-label'),/^Ngày 14 /);assert.equal(f.session.values['app.send.schedule'],'2026-11-13T04:00:00.000Z');calendar.restore();
+});
+test('one wheel step from an expired hour chooses the nearest valid next hour',()=>{
+ const f=fixture(),host=new Element('span',f.doc,{},[40,567,126,200]),select=new Element('select',f.doc,{'data-interactive-control':'hour'});select.value='10';host.append(select);f.form.append(host);f.frame.calendar.wheels=[{controlId:'hour',field:'app.schedule.hour',box:[40,567,126,200],selectedIndex:1,slots:[0,1,2].map(i=>({id:'hour-'+i,text:String(9+i),box:[40,568+i*40,126,40],font:f.frame.calendar.normalFont}))}];
+ let clock=Date.parse('2026-11-13T10:10:00+07:00');syncAppSchedule(f.session,'2026-11-13T10:30:00+07:00',{now:clock});const calendar=mountSourceCalendar({document:f.doc,form:f.form,frame:f.frame,session:f.session,library:sourceGlyphLibrary,now:()=>clock});calendar.project();clock=Date.parse('2026-11-13T10:31:00+07:00');calendar.project();host.listeners.wheel({deltaY:1,preventDefault(){},stopPropagation(){}});assert.equal(select.value,'11');calendar.restore();
 });

@@ -7,7 +7,8 @@ import {renderInteractiveFrame} from './interactive-preview.mjs';
 const module=await import('./app-interactive-controller.mjs').catch(error=>{if(error.code==='ERR_MODULE_NOT_FOUND')return{};throw error;});
 const session=()=>({data:createDemoState(),values:Object.create(null),dirty:new Set(),context:Object.create(null),history:[]});
 const frame={id:'658:1036',name:'A1',theme:'light',group:'Light mode app',platform:'app'};
-const run=(s,action,value,extra={})=>module.handleAppInteraction({frame,session:s,control:{id:action,action,...extra},value});
+const now=Date.parse('2026-11-20T03:12:37Z');
+const run=(s,action,value,extra={})=>module.handleAppInteraction({frame,session:s,control:{id:action,action,...extra},value,now});
 
 test('login validates native fields and follows the labeled login operation despite the erroneous source link',()=>{
  assert.equal(typeof module.handleAppInteraction,'function','App source interaction controller is required');
@@ -49,7 +50,7 @@ test('unknown controls return null for exact generic prototype fallback',()=>{
 test('canceling a schedule edit cannot redirect a later new-send schedule into the old message',()=>{
  const s=session(),scheduled={id:'MK1001',phone:'0901234567',template:'Mẫu gốc',status:'scheduled',oaCount:1,schedule:'2030-12-01T10:00:00.000Z'};s.data.messages.unshift(scheduled);s.data.selectedId=scheduled.id;s.history.push('1086:73413');
  const detail={...frame,id:'1086:73413',route:'detail'},calendar={...frame,id:'1279:8468',route:'schedule'};
- const action=(f,action,value)=>module.handleAppInteraction({frame:f,session:s,control:{action},value});
+ const action=(f,action,value)=>module.handleAppInteraction({frame:f,session:s,control:{action},value,now});
  action(detail,'app.schedule.edit');action(calendar,'app.schedule.hour','20');assert.deepEqual(action(calendar,'app.back'),{back:true});
  s.values['app.send.phone']='0987654321';s.values['app.send.oaCount']=1;action({...frame,route:'send-choice'},'app.schedule.open');
  const saved=action(calendar,'app.schedule.save');assert.equal(saved.targetId,'1279:8597');assert.equal(scheduled.schedule,'2030-12-01T10:00:00.000Z');
@@ -66,11 +67,11 @@ test('editing a mobile sample record persists and canceling it removes it from s
  run(s,'app.schedule.cancel');run(s,'app.history.filter',undefined,{value:'all'});assert.ok(!s.context.appHistoryRows.includes('figma-1'));
 });
 test('editing a scheduled fixture projects its new Bangkok send time into the actual detail source slot',()=>{
- const s=session();s.data.mobile={fixtures:[{id:'figma-1',phone:'0901234567',template:'Mẫu',status:'scheduled',oaCount:1,time:'14/11/2026 09:00',schedule:'2030-12-01T10:00:00.000Z'}]};s.data.selectedId='figma-1';
+ const s=session();s.data.mobile={fixtures:[{id:'figma-1',phone:'0901234567',template:'Mẫu',status:'scheduled',oaCount:1,time:'14/11/2026 09:00',schedule:'2026-11-21T10:00:00.000Z'}]};s.data.selectedId='figma-1';
  run(s,'app.schedule.edit');run(s,'app.schedule.hour','20');assert.equal(run(s,'app.schedule.save').targetId,'1086:73413');
  const detail={...nativeFrames.find(f=>f.id==='1086:73413'),...appInteractiveFrames['1086:73413']};module.prepareAppFrame({frame:detail,session:s});
- assert.equal(s.values['app.detail.time'],'01/12/2030 20:00');assert.equal(s.data.mobile.fixtures[0].time,'14/11/2026 09:00');
- assert.ok(detail.texts.some(slot=>slot.field==='app.detail.time'));assert.ok(renderInteractiveFrame(detail,s).includes('>01/12/2030 20:00</output>'));
+ assert.equal(s.values['app.detail.time'],'21/11/2026 20:00');assert.equal(s.data.mobile.fixtures[0].time,'14/11/2026 09:00');
+ assert.ok(detail.texts.some(slot=>slot.field==='app.detail.time'));assert.ok(renderInteractiveFrame(detail,s).includes('>21/11/2026 20:00</output>'));
 });
 test('completed message details retain their creation time even when a schedule is present',()=>{
  const s=session();s.data.messages.unshift({id:'MK1001',phone:'0901234567',template:'Mẫu',status:'success',oaCount:1,time:'14/11/2026 09:00',schedule:'2030-12-01T13:00:00.000Z'});s.data.selectedId='MK1001';
@@ -88,7 +89,7 @@ test('six-digit OTP, password confirmation and future scheduling use provided so
  const s=session();s.values['app.auth.recoveryPhone']='bad';assert.equal(run(s,'app.forgot.submit').focusField,'app.auth.recoveryPhone');s.values['app.auth.recoveryPhone']='0901234567';assert.equal(run(s,'app.forgot.submit').targetId,'658:34596');
  assert.equal(run(s,'app.otp','123456',{field:'app.auth.otp'}).targetId,'658:34855');
  Object.assign(s.values,{'app.reset.next':'ValidLong123!','app.reset.confirm':'different'});assert.equal(run(s,'app.reset.save').focusField,'app.reset.confirm');s.values['app.reset.confirm']='ValidLong123!';assert.equal(run(s,'app.reset.save').targetId,'658:35036');
- s.values['app.send.schedule']='2000-01-01T10:00';assert.equal(run(s,'app.schedule.save').focusField,'app.send.schedule');s.values['app.send.schedule']='2030-12-31T10:00';assert.equal(run(s,'app.schedule.save').targetId,'1279:8597');assert.equal(s.data.draft.scheduled,true);
+ s.values['app.send.schedule']='2000-01-01T10:00';assert.equal(run(s,'app.schedule.save').focusField,'app.send.schedule');s.values['app.send.schedule']='2026-11-21T10:00';assert.equal(run(s,'app.schedule.save').targetId,'1279:8597');assert.equal(s.data.draft.scheduled,true);
 });
 test('history input keeps focus and hides every unmatched original row; fingerprint waits for verification',()=>{
  const s=session();s.values['app.history.query']='there-is-no-such-recipient';const changed=run(s,'app.input',undefined,{field:'app.history.query'});assert.equal(changed.repaint,false);assert.equal(s.values['app.history.count'],'0 tin nhắn');for(let i=0;i<7;i++)assert.equal(s.values[`app.history.${i}.visible`],false);
@@ -114,4 +115,43 @@ test('OA stepper updates in place and rejects non-numeric counts before corrupti
 });
 test('scheduled confirmation uses native selected-radio states and its result opens the scheduled detail',()=>{
  const s=session();Object.assign(s.data.draft,{scheduled:true,oaCount:3});assert.equal(run(s,'app.navigate',undefined,{route:'confirm'}).targetId,'1313:75767');s.data.messages.unshift({id:'MK1001',status:'scheduled',oaCount:3,phone:'0901234567'});s.data.selectedId='MK1001';assert.equal(run(s,'app.navigate',undefined,{route:'detail',targetId:'506:23873'}).targetId,'1086:73413');
+});
+
+test('save and confirmation reject tampered minutes and times beyond the inclusive fourteen-calendar-day limit',()=>{
+ for(const iso of ['2026-11-21T04:09:00Z','2026-12-05T00:00:00Z','2026-11-20T03:00:00Z','2026-02-30T04:00:00Z']){
+  const s=session(),before=s.data.messages.length;Object.assign(s.values,{'app.send.schedule':iso,'app.send.scheduled':true});
+  assert.equal(run(s,'app.schedule.save').focusField,'app.send.schedule',iso);
+  assert.equal(run(s,'app.send.confirm').focusField,'app.send.schedule',iso);
+  assert.equal(s.data.pendingSubmission,undefined);assert.equal(s.data.messages.length,before);
+ }
+});
+
+test('completion refuses an expired schedule and cannot persist a tampered pending schedule',()=>{
+ const s=session(),before=s.data.messages.length;Object.assign(s.values,{'app.send.schedule':'2026-11-20T03:30:00Z','app.send.scheduled':true});
+ assert.equal(run(s,'app.send.confirm').targetId,'778:89003');
+ const expired=module.handleAppInteraction({frame,session:s,control:{action:'app.send.finish'},now:Date.parse('2026-11-20T03:30:00Z')});
+ assert.equal(expired.focusField,'app.send.schedule');assert.equal(expired.targetId,'1279:8468');assert.equal(s.data.messages.length,before);
+ const tampered=session();Object.assign(tampered.values,{'app.send.schedule':'2026-11-21T04:30:00Z','app.send.scheduled':true});run(tampered,'app.send.confirm');tampered.data.pendingSubmission.input={...tampered.data.pendingSubmission.input,schedule:'2026-11-21T04:59:00Z'};
+ assert.equal(run(tampered,'app.send.finish').focusField,'app.send.schedule');assert.equal(tampered.data.messages.length,before);
+});
+
+test('an expired processing job can be rescheduled and completed without reusing its rejected snapshot',()=>{
+ const s=session(),before=s.data.messages.length,later=Date.parse('2026-11-20T03:30:00Z');Object.assign(s.values,{'app.send.schedule':'2026-11-20T03:30:00Z','app.send.scheduled':true});run(s,'app.send.confirm');
+ const action=(action)=>module.handleAppInteraction({frame,session:s,control:{action},now:later});
+ assert.equal(action('app.send.finish').focusField,'app.send.schedule');assert.equal(s.data.pendingSubmission,undefined);assert.equal(s.context.appPendingJob,undefined);
+ s.values['app.send.schedule']='2026-11-20T04:00:00Z';assert.equal(action('app.send.confirm').targetId,'778:89003');assert.equal(action('app.send.finish').targetId,'1086:73093');assert.equal(s.data.messages.length,before+1);assert.equal(s.data.messages[0].schedule,'2026-11-20T04:00:00.000Z');
+});
+
+test('direct edit entry normalizes the selected fixture and restores an unrelated unsaved draft on back',()=>{
+ const s=session(),draft={...s.data.draft,schedule:'2026-11-23T04:00:00.000Z',scheduled:true};Object.assign(s.data.draft,draft);
+ Object.assign(s.values,{'app.send.schedule':'2026-11-24T04:30:00.000Z','app.send.scheduled':true});s.context.appScheduleDate='2026-11-24T04:30:00.000Z';
+ s.data.messages.unshift({id:'edit-me',status:'scheduled',phone:'0901234567',oaCount:1,schedule:'2020-01-01T04:09:00Z'});s.data.selectedId='edit-me';
+ module.prepareAppFrame({frame:{...frame,route:'schedule',scheduleEdit:true},session:s,now});
+ assert.equal(s.context.appScheduleDate,'2026-11-20T03:30:00.000Z');
+ module.handleAppInteraction({frame:{...frame,route:'schedule'},session:s,control:{action:'app.back'},now});assert.deepEqual(s.data.draft,draft);assert.equal(s.values['app.send.schedule'],'2026-11-24T04:30:00.000Z');assert.equal(s.context.appScheduleDate,'2026-11-24T04:30:00.000Z');
+});
+
+test('an edit without a schedule seeds a future slot rather than another drafts selected date',()=>{
+ const s=session();s.context.appScheduleDate='2026-11-24T04:30:00.000Z';s.data.messages.unshift({id:'no-date',status:'scheduled',phone:'0901234567',oaCount:1});s.data.selectedId='no-date';
+ run(s,'app.schedule.edit');assert.equal(s.context.appScheduleDate,'2026-11-20T03:30:00.000Z');
 });

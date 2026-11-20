@@ -3,6 +3,9 @@ import {generateGlyphPaths} from './source-glyphs.mjs';
 const tokens=/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g;
 const identity={a:1,b:0,c:0,d:1,e:0,f:0};
 let clipSequence=0;
+const hiddenSourceText=new WeakSet();
+/** Other source drawing owners must not reveal glyph ink that has a replacement. */
+export const isSourceTextHidden=element=>hiddenSourceText.has(element);
 const apply=(m,x,y)=>[m.a*x+m.c*y+m.e,m.b*x+m.d*y+m.f];
 const multiply=(a,b)=>({a:a.a*b.a+a.c*b.b,b:a.b*b.a+a.d*b.b,c:a.a*b.c+a.c*b.d,d:a.b*b.c+a.d*b.d,e:a.a*b.e+a.c*b.f+a.e,f:a.b*b.e+a.d*b.f+a.f});
 const inverse=m=>{const det=m.a*m.d-m.b*m.c;if(!det)throw new Error('Singular SVG transform');return {a:m.d/det,b:-m.b/det,c:-m.c/det,d:m.a/det,e:(m.c*m.f-m.d*m.e)/det,f:(m.b*m.e-m.a*m.f)/det};};
@@ -128,16 +131,16 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
   if(['matched','empty','empty-clipped'].includes(match.status))ready.set(slot.id,{slot:{...slot,box},...match,paint:match.paths[0]?.element.getAttribute('fill')||sourceColor(font.color),parts:sourcePaintParts(slot,original,match,library),replacement:null,partLayers:[],changed:false,originalOpacity:match.paths.map(p=>p.element.getAttribute('opacity')),duplicateOpacity:(match.duplicatePaths||[]).map(p=>p.element.getAttribute('opacity'))});
   else unresolved.push({id:slot.id,status:match.status});
  }
- function restoreOpacity(record,i){const opacity=record.originalOpacity[i],element=record.paths[i].element;if(opacity==null){if(element.getAttribute('opacity')!=null)element.removeAttribute('opacity');}else if(element.getAttribute('opacity')!==opacity)element.setAttribute('opacity',opacity);}
+ function restoreOpacity(record,i){const opacity=record.originalOpacity[i],element=record.paths[i].element;hiddenSourceText.delete(element);if(opacity==null){if(element.getAttribute('opacity')!=null)element.removeAttribute('opacity');}else if(element.getAttribute('opacity')!==opacity)element.setAttribute('opacity',opacity);}
  function clearLayers(record){record.replacement?.remove();for(const p of record.partLayers)p.remove();record.partLayers=[];record.replacement=null;record.clip?.remove();record.clip=null;}
  function applySourceClip(record,node){
   const box=record.slot.sourceClipBox;if(!box)return;
   if(!record.clip){const clip=document.createElementNS('http://www.w3.org/2000/svg','clipPath'),rect=document.createElementNS('http://www.w3.org/2000/svg','rect');clip.setAttribute('id','source-text-clip-'+(++clipSequence));clip.setAttribute('clipPathUnits','userSpaceOnUse');for(const [i,name]of ['x','y','width','height'].entries())rect.setAttribute(name,box[i]);clip.append(rect);svg.append(clip);record.clip=clip;}
   node.setAttribute('clip-path','url(#'+record.clip.getAttribute('id')+')');
  }
- function restoreRecord(record){record.paths.forEach((p,i)=>restoreOpacity(record,i));(record.duplicatePaths||[]).forEach((p,i)=>{const opacity=record.duplicateOpacity[i];if(opacity==null)p.element.removeAttribute('opacity');else p.element.setAttribute('opacity',opacity);});clearLayers(record);record.changed=false;record.nativeFallback=false;}
- function hideCopies(record){for(const p of record.duplicatePaths||[])p.element.setAttribute('opacity','0');}
- function hideRecord(record){if(!record.changed)for(const p of record.paths)p.element.setAttribute('opacity','0');hideCopies(record);record.changed=true;}
+ function restoreRecord(record){record.paths.forEach((p,i)=>restoreOpacity(record,i));(record.duplicatePaths||[]).forEach((p,i)=>{const opacity=record.duplicateOpacity[i];hiddenSourceText.delete(p.element);if(opacity==null)p.element.removeAttribute('opacity');else p.element.setAttribute('opacity',opacity);});clearLayers(record);record.changed=false;record.nativeFallback=false;}
+ function hideCopies(record){for(const p of record.duplicatePaths||[]){hiddenSourceText.add(p.element);p.element.setAttribute('opacity','0');}}
+ function hideRecord(record){for(const p of record.paths){hiddenSourceText.add(p.element);p.element.setAttribute('opacity','0');}hideCopies(record);record.changed=true;}
  function setTextSlot(slotOrId,value,{font:fontOverride,nativeFallback=false}={}){
   const id=typeof slotOrId==='string'?slotOrId:slotOrId?.id,record=ready.get(id);
   if(!record)return {ok:false,status:'unresolved',missingGlyphs:[]};
@@ -158,7 +161,7 @@ export function bindSourceTextSlots(document,slots,{library,sourceBounds}={}){
    hideCopies(record);clearLayers(record);record.changed=true;
    for(const {part,value,style,generated,original} of planned){
     if(original){restoreOpacity(record,part.pathIndex);continue;}
-    const source=record.paths[part.pathIndex].element;source.setAttribute('opacity','0');
+    const source=record.paths[part.pathIndex].element;hiddenSourceText.add(source);source.setAttribute('opacity','0');
     const native=generated.missingGlyphs.length>0,node=document.createElementNS('http://www.w3.org/2000/svg',native?'text':'path'),local=multiply(inverse(relativeMatrix(source.parentNode,svg)),{...identity,e:origin[0],f:origin[1]});
     node.setAttribute('transform',`matrix(${local.a} ${local.b} ${local.c} ${local.d} ${local.e} ${local.f})`);node.setAttribute('aria-hidden','true');node.setAttribute('pointer-events','none');node.setAttribute('fill',fontOverride?.color!=null?sourceColor(fontOverride.color):part.paint);node.setAttribute('data-source-text-slot',slot.id);node.setAttribute('data-source-value',text);
     if(native){node.setAttribute('x',part.x);node.setAttribute('y',part.baseline);node.setAttribute('font-family',style.family);node.setAttribute('font-size',style.size);node.setAttribute('font-weight',style.weight);node.setAttribute('font-style',/italic/i.test(style.style||'')?'italic':'normal');node.textContent=value;}else node.setAttribute('d',generated.d);

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {sourceGlyphLibrary} from './source-glyph-library.mjs';
 import {generateGlyphPaths} from './source-glyphs.mjs';
-import {canonicalPath,matchSourceTextSlot,boxFromSvgElement,bindSourceTextSlots,sourceColor} from './source-text-slots.mjs';
+import {canonicalPath,matchSourceTextSlot,boxFromSvgElement,bindSourceTextSlots,sourceColor,isSourceTextHidden} from './source-text-slots.mjs';
 
 test('canonicalizes source H/V and native quadratic outlines to the same cubic geometry',()=>{
  assert.deepEqual(canonicalPath('M1 2 H4 V5 L1 2 Z'),canonicalPath('M1 2 L4 2 L4 5 L1 2 Z'));
@@ -98,6 +98,18 @@ test('binding and unchanged values leave all source attributes untouched; restor
  assert.equal(f.parent.replacement.removed,true);
 });
 
+test('source text owns original opacity through repeated edits and releases it on restore',()=>{
+ const f=svgFixture(),slot={id:'name',text:'A',box:[30,40,20,20],outline:'M31 42 L38 42 L38 50 Z',font:{family:'Roboto',style:'Regular',weight:400,size:1,baseline:2}};
+ const hidden=()=>isSourceTextHidden(f.original);
+ const binding=bindSourceTextSlots(f.doc,[slot],{library:f.library});
+ assert.equal(hidden(),false);
+ binding.setTextSlot(slot,'AA');assert.equal(hidden(),true);
+ binding.setTextSlot(slot,'AAA');assert.equal(hidden(),true);
+ binding.setTextSlot(slot,'漢字',{nativeFallback:true});assert.equal(hidden(),true);
+ binding.setTextSlot(slot,'A');assert.equal(hidden(),false);
+ assert.equal(f.attributes.has('opacity'),false);
+});
+
 test('typing replaces all proven coincident source copies with one drawing and restores both',()=>{
  const f=svgFixture(),copyAttributes=new Map([['d','M1 2.1 L8 2.1 L8 10.1 Z'],['opacity','.7']]);
  const copy={...f.original,getBBox:()=>({x:1,y:2.1,width:7,height:8}),getAttribute:k=>copyAttributes.get(k)??null,setAttribute:(k,v)=>copyAttributes.set(k,v),removeAttribute:k=>copyAttributes.delete(k)};
@@ -110,10 +122,12 @@ test('typing replaces all proven coincident source copies with one drawing and r
  assert.equal(binding.setTextSlot('name','AA').ok,true);
  assert.equal(f.attributes.get('opacity'),'0');
  assert.equal(copyAttributes.get('opacity'),'0');
+ assert.equal(isSourceTextHidden(copy),true);
  assert.equal(f.mutations.filter(m=>m[0]==='insert').length,1);
  binding.restore('name');
  assert.equal(f.attributes.has('opacity'),false);
  assert.equal(copyAttributes.get('opacity'),'.7');
+ assert.equal(isSourceTextHidden(copy),false);
 });
 
 test('typing in a fully clipped source slot retains its exact native clip without changing initial art',()=>{
@@ -181,6 +195,8 @@ test('keeps the original black greeting prefix and replaces only the orange name
  assert.equal(binding.setTextSlot(slot,'Hello, Alice').ok,true);
  assert.equal(sources[0].attrs.has('opacity'),false);
  assert.equal(sources[1].attrs.get('opacity'),'0');
+ assert.equal(isSourceTextHidden(sources[0]),false);
+ assert.equal(isSourceTextHidden(sources[1]),true);
  assert.equal(layers.at(-1).node.attrs.get('fill'),'#F34B26');
  assert.equal(layers.at(-1).node.type,'path');
  binding.setTextSlot(slot,'Hello, 漢字',{nativeFallback:true});

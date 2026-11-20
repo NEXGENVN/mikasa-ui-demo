@@ -1,4 +1,4 @@
-import {boxFromSvgElement} from './source-text-slots.mjs';
+import {boxFromSvgElement,isSourceTextHidden} from './source-text-slots.mjs';
 const contains=(outer,inner,t=.8)=>inner[0]>=outer[0]-t&&inner[1]>=outer[1]-t&&inner[0]+inner[2]<=outer[0]+outer[2]+t&&inner[1]+inner[3]<=outer[1]+outer[3]+t;
 const pointIn=(box,x,y)=>x>=box[0]&&x<=box[0]+box[2]&&y>=box[1]&&y<=box[1]+box[3];
 
@@ -16,7 +16,7 @@ export function bindSourceDrawingRegions(document,regions=[]){
   const selected=candidates.filter(record=>!candidates.some(parent=>parent!==record&&parent.element.contains(record.element)));
   bound.set(region.id,{...region,records:selected,allRecords:candidates});
  }
- const opacity=(record,visible)=>{if(!visible)record.element.setAttribute('opacity','0');else if(record.opacity==null)record.element.removeAttribute('opacity');else record.element.setAttribute('opacity',record.opacity);};
+ const opacity=(record,visible)=>{if(!visible||isSourceTextHidden(record.element))record.element.setAttribute('opacity','0');else if(record.opacity==null)record.element.removeAttribute('opacity');else record.element.setAttribute('opacity',record.opacity);};
  function setVisible(id,visible){const region=bound.get(id);if(region)for(const record of region.records)opacity(record,visible);}
  function setMapZoom(id,value){
   const region=bound.get(id);if(!region)return;const zoom=Math.max(1,Math.min(1.6,Number(value)||1));

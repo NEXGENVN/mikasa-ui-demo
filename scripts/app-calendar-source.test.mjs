@@ -23,6 +23,8 @@ test('time selectors use the source highlighted value and expose neighbors for c
  assert.equal(hour.value,'22');assert.equal(hour.textSlots[0].text,'22');
  assert.equal(calendar.wheels.find(w=>w.field==='app.schedule.hour').slots.length,3);
  assert.equal(calendar.wheels.find(w=>w.field==='app.schedule.minute').selectedIndex,0);
+ const minute=controls.find(c=>c.field==='app.schedule.minute');assert.deepEqual(minute.options,[{label:'00',value:'00'},{label:'30',value:'30'}]);
+ assert.deepEqual(calendar.wheels.find(w=>w.field==='app.schedule.minute').values,[0,30]);
 });
 
 test('binds only native scheduled-result date/time values with their actual sending labels',()=>{

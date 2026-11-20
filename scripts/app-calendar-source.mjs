@@ -31,9 +31,10 @@ export function buildCalendarMetadata(frame,controls){
   const selected=values.find(blue)||values.find(n=>n.bbox[1]>=node.bbox[1]+node.bbox[3]*.39&&n.bbox[1]<=node.bbox[1]+node.bbox[3]*.51)||values[0];
   if(!selected)continue;
   const control=controls.find(c=>c.id===node.id);
-  if(control)Object.assign(control,{field,value:selected.text,textSlots:[slot(selected)],action:hour?'app.schedule.hour':'app.schedule.minute'});
-  wheels.push({controlId:control?.id||node.id,field,box:node.bbox,limit:hour?24:60,selectedIndex:values.indexOf(selected),slots:values.map(slot)});
+  const choices=hour?Array.from({length:17},(_,i)=>i+7):[0,30];
+  if(control)Object.assign(control,{field,value:selected.text,textSlots:[slot(selected)],action:hour?'app.schedule.hour':'app.schedule.minute',options:choices.map(value=>({label:String(value).padStart(2,'0'),value:String(value).padStart(2,'0')}))});
+  wheels.push({controlId:control?.id||node.id,field,box:node.bbox,limit:hour?24:60,values:choices,selectedIndex:values.indexOf(selected),slots:values.map(slot)});
  }
  const arrowGraphics=arrows.map(n=>{const vector=frame.nodes.find(v=>v.parentId===n.id&&v.type==='VECTOR');return {controlId:n.id,box:n.bbox,sourceVectorId:vector?.sourceId||vector?.id.split(';').at(-1),transform:vector?.globalTransform,graphicBox:vector?.bbox};});
- return {timeZone:'Asia/Bangkok',weekStartsOn:0,gridBox,cellSize,columnPitch,rowPitch,sourceRows:5,cells,sourceDaySlots:days.map(slot),selectedSourceBox:selected?.bbox,normalFont:normal.font,mutedFont:muted.font,todayFont:today.font,selectedFont:selected?.font||normal.font,wheels,arrows:arrowGraphics,previousControlId:arrows[0]?.id,nextControlId:arrows[1]?.id};
+ return {timeZone:'Asia/Ho_Chi_Minh',weekStartsOn:0,gridBox,cellSize,columnPitch,rowPitch,sourceRows:5,cells,sourceDaySlots:days.map(slot),selectedSourceBox:selected?.bbox,normalFont:normal.font,mutedFont:muted.font,todayFont:today.font,selectedFont:selected?.font||normal.font,wheels,arrows:arrowGraphics,previousControlId:arrows[0]?.id,nextControlId:arrows[1]?.id};
 }
