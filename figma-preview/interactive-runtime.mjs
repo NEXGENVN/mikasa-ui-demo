@@ -1,3 +1,4 @@
+import {sourceFieldFont} from './source-field-appearance.mjs';
 import {bindSourceTextSlots} from './source-text-slots.mjs';
 import {sourceGlyphLibrary} from './source-glyph-library.mjs';
 import {setInteractiveValue,interactiveDisplayValue} from './interactive-session.mjs';
@@ -34,7 +35,7 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   const value=session.values[control.field];
   if(control.type==='checkbox'||control.type==='radio'){patchCheck(control,element,control.type==='radio'?String(value)===String(control.value):!!value);return;}
   const text=control.type==='select'?(control.options||[]).find(option=>String(option.value)===String(value))?.label??value:interactiveDisplayValue(control,value,{revealed:element?.type==='text'});
-  for(const [index,slot] of (control.textSlots||[]).entries())patchSlot(slot,control.splitSlots?String(text??'')[index]||'':String(text??'')||(control.placeholder??''),element,String(text??'')?control.valueFont:undefined);
+  for(const [index,slot] of (control.textSlots||[]).entries())patchSlot(slot,control.splitSlots?String(text??'')[index]||'':String(text??'')||(control.placeholder??''),element,frame.platform==='app'?sourceFieldFont(control,slot,{entered:!!String(text??'')}):String(text??'')?control.valueFont:undefined);
  }
  function patchCheck(control,element,checked){
   const original=control.type==='radio'?control.checked===true:!!control.value;
@@ -53,7 +54,7 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
    const {value,state,members}=componentMembers(component,session),changed=session.dirty.has(component.field)&&value!==String(component.initialValue),host=[...form.querySelectorAll('[data-source-component]')].find(host=>host.dataset.sourceComponent===component.id);
    drawingRegions?.setVisible('component:'+component.id,!changed);
    if(host&&state){host.hidden=!changed;host.style.width=state.width+'px';host.style.height=state.height+'px';const img=host.querySelector('img');img.src=new URL(state.file,document.baseURI).href;img.width=state.width;img.height=state.height;}
-   for(const control of controls.values())if(control.componentStateId===component.id){const native=members.get(control.componentMemberKey),element=elements.get(control.id),outer=element?.closest('.interactive-control');control.hidden=!native;if(native){control.box=[component.box[0]+native.box[0],component.box[1]+native.box[1],native.box[2],native.box[3]];if(outer){const [x,y,w,h]=control.box;Object.assign(outer.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});}}}
+   for(const control of controls.values())if(control.componentStateId===component.id){const native=members.get(control.componentMemberKey),element=elements.get(control.id),outer=element?.closest('.interactive-control');control.hidden=!native;control.disabled=Boolean(native?.disabled);if(element)element.disabled=control.disabled;if(native){control.box=[component.box[0]+native.box[0],component.box[1]+native.box[1],native.box[2],native.box[3]];if(outer){const [x,y,w,h]=control.box;Object.assign(outer.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});}}}
   }
   for(const control of controls.values())if(control.field&&session.dirty.has(control.field)){const element=elements.get(control.id);if(element){if(control.type==='checkbox')element.checked=!!session.values[control.field];else if(control.type==='radio')element.checked=String(control.value)===String(session.values[control.field]);else if(control.type!=='file'&&element.value!==String(session.values[control.field]??''))element.value=String(session.values[control.field]??'');}}
   for(const control of controls.values())if(control.field&&session.dirty.has(control.field))patchControl(control,elements.get(control.id));
@@ -81,6 +82,7 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   const element=event.target.closest('[data-interactive-control]'),control=controlFor(element);
   if(!control)return;
   event.stopPropagation();
+  if(control.activateOnClick){event.preventDefault();dispatch(control,control.value,'click');return;}
   if(control.type==='select'&&control.popup){event.preventDefault();if(event.detail===0&&!closePopup)openPopup(control,element);return;}
   if(control.type==='button'){event.preventDefault();dispatch(control,undefined,control.submit?'submit':'click');}
  }
@@ -131,10 +133,10 @@ export function mountInteractiveFrame({root,frame,session,handleInteraction,proj
   for(const issue of binder.unresolved)onIssue({frameId:frame.id,slotId:issue.id,status:issue.status});
   patchValues();
   if(session.context.focusField){const element=elementForField(session.context.focusField);element?.focus();delete session.context.focusField;}
-  for(const timer of frame.timers||[]){const id=setTimeout(()=>{timers.delete(id);if(active)dispatch(timer.control,undefined,'timer');},Math.max(0,Number(timer.delay)||0));timers.add(id);}
+  for(const timer of frame.timers||[]){const run=()=>{if(!timer.repeat)timers.delete(id);if(active)dispatch(timer.control,undefined,'timer');},id=(timer.repeat?setInterval:setTimeout)(run,Math.max(timer.repeat?1000:0,Number(timer.delay)||0));timers.add(id);}
  }
  form.addEventListener('click',onClick);form.addEventListener('click',onFieldContainerClick);form.addEventListener('pointerdown',onPointerDown);form.addEventListener('keydown',onKeyDown);form.addEventListener('input',onInput);form.addEventListener('change',onChange);form.addEventListener('submit',onSubmit);form.addEventListener('keydown',onEscape);
  iframe.addEventListener('load',prepare);prepare();
  if(session.context.focusField){elementForField(session.context.focusField)?.focus();}
- return ()=>{active=false;closePopup?.(false);removeExtras?.();calendar?.restore();cards?.restore();for(const timer of timers)clearTimeout(timer);iframe.removeEventListener('load',prepare);form.removeEventListener('click',onClick);form.removeEventListener('click',onFieldContainerClick);form.removeEventListener('pointerdown',onPointerDown);form.removeEventListener('keydown',onKeyDown);form.removeEventListener('input',onInput);form.removeEventListener('change',onChange);form.removeEventListener('submit',onSubmit);form.removeEventListener('keydown',onEscape);};
+ return ()=>{active=false;closePopup?.(false);removeExtras?.();calendar?.restore();cards?.restore();for(const timer of timers){clearTimeout(timer);clearInterval(timer);}iframe.removeEventListener('load',prepare);form.removeEventListener('click',onClick);form.removeEventListener('click',onFieldContainerClick);form.removeEventListener('pointerdown',onPointerDown);form.removeEventListener('keydown',onKeyDown);form.removeEventListener('input',onInput);form.removeEventListener('change',onChange);form.removeEventListener('submit',onSubmit);form.removeEventListener('keydown',onEscape);};
 }
